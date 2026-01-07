@@ -32,12 +32,25 @@ export interface ProductFilters {
   brand?: string;
   min_price?: number;
   max_price?: number;
+  color?: string;
+  storage?: string;
+  ram?: string;
   search?: string;
   sort?: 'newest' | 'price_asc' | 'price_desc' | 'name_asc';
   page?: number;
   per_page?: number;
   lang?: string;
   is_featured?: number; // Filter by featured status (1 for featured, 0 for not featured)
+}
+
+export interface FilterOptions {
+  colors?: string[];
+  storage?: string[];
+  ram?: string[];
+  price_range?: {
+    min: number;
+    max: number;
+  };
 }
 
 export interface ProductListResponse {
@@ -48,5 +61,6 @@ export interface ProductListResponse {
     per_page: number;
     total: number;
   };
+  filters?: FilterOptions;
 }
 

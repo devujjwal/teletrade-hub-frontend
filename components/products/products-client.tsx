@@ -47,6 +47,9 @@ export default function ProductsClient({ initialProducts, initialMeta }: Product
         if (searchParams.get('brand')) filters.brand = searchParams.get('brand');
         if (searchParams.get('min_price')) filters.min_price = parseInt(searchParams.get('min_price')!, 10);
         if (searchParams.get('max_price')) filters.max_price = parseInt(searchParams.get('max_price')!, 10);
+        if (searchParams.get('color')) filters.color = searchParams.get('color');
+        if (searchParams.get('storage')) filters.storage = searchParams.get('storage');
+        if (searchParams.get('ram')) filters.ram = searchParams.get('ram');
         if (searchParams.get('search')) filters.search = searchParams.get('search');
         if (searchParams.get('sort')) filters.sort = searchParams.get('sort');
 

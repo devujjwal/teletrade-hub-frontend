@@ -1,5 +1,5 @@
 import apiClient from './client';
-import { Product, ProductFilters, ProductListResponse } from '@/types/product';
+import { Product, ProductFilters, ProductListResponse, FilterOptions } from '@/types/product';
 import { mapProduct } from '@/lib/utils/mappers';
 
 export const productsApi = {
@@ -42,10 +42,11 @@ export const productsApi = {
       params,
     });
     
-    // Backend returns: { success: true, data: { products: [...], pagination: {...} } }
+    // Backend returns: { success: true, data: { products: [...], pagination: {...}, filters: {...} } }
     if (response.data?.success && response.data?.data?.products) {
       const products = response.data.data.products;
       const pagination = response.data.data.pagination || {};
+      const filters: FilterOptions = response.data.data.filters || {};
       return {
         data: products.map(mapProduct),
         meta: {
@@ -54,6 +55,7 @@ export const productsApi = {
           per_page: pagination.limit || 20,
           total: pagination.total || products.length,
         },
+        filters,
       };
     }
     // Handle direct array response

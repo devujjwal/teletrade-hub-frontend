@@ -15,6 +15,9 @@ interface ProductsPageProps {
     brand?: string;
     min_price?: string;
     max_price?: string;
+    color?: string;
+    storage?: string;
+    ram?: string;
     search?: string;
     sort?: string;
     page?: string;
@@ -35,6 +38,9 @@ async function getProducts(searchParams: ProductsPageProps['searchParams']) {
   if (searchParams.brand) filters.brand = searchParams.brand;
   if (searchParams.min_price) filters.min_price = parseInt(searchParams.min_price, 10);
   if (searchParams.max_price) filters.max_price = parseInt(searchParams.max_price, 10);
+  if (searchParams.color) filters.color = searchParams.color;
+  if (searchParams.storage) filters.storage = searchParams.storage;
+  if (searchParams.ram) filters.ram = searchParams.ram;
   if (searchParams.search) filters.search = searchParams.search;
   if (searchParams.sort) filters.sort = searchParams.sort;
 
@@ -82,7 +88,11 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
         {/* Filters Sidebar */}
         <aside className="lg:w-64 flex-shrink-0">
           <Suspense fallback={<Skeleton className="h-96 w-full" />}>
-            <ProductFilters categories={categories} brands={brands} />
+            <ProductFilters 
+              categories={categories} 
+              brands={brands} 
+              filterOptions={productsData.filters}
+            />
           </Suspense>
         </aside>
 
