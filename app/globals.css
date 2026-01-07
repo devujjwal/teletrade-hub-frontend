@@ -1,0 +1,334 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* TeleTrade Hub Design System - Matching Reference Design */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap');
+
+@layer base {
+  :root {
+    /* Brand Colors */
+    --background: 0 0% 100%;
+    --foreground: 209 79% 7%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 209 79% 7%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 209 79% 7%;
+
+    /* Primary - Navy Blue #041e42 */
+    --primary: 214 89% 14%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Secondary - Gold #ffbd27 */
+    --secondary: 42 100% 58%;
+    --secondary-foreground: 209 79% 7%;
+
+    /* Muted - Light gray #f2f3f5 */
+    --muted: 220 14% 96%;
+    --muted-foreground: 215 17% 56%;
+
+    /* Accent - Link Blue #0070dc */
+    --accent: 209 100% 43%;
+    --accent-foreground: 0 0% 100%;
+
+    /* Destructive - Danger Red #ef262c */
+    --destructive: 358 86% 54%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Success - Shop Green #00a046 */
+    --success: 152 100% 31%;
+    --success-foreground: 0 0% 100%;
+
+    /* Warning - Orange #ff5c00 */
+    --warning: 22 100% 50%;
+    --warning-foreground: 0 0% 100%;
+
+    /* Info - Light Gray #e8e8e8 */
+    --info: 0 0% 91%;
+    --info-foreground: 209 79% 7%;
+
+    /* Borders */
+    --border: 214 18% 90%;
+    --input: 214 18% 87%;
+    --ring: 214 89% 14%;
+
+    --radius: 0.5rem;
+
+    /* Sidebar - Admin Panel Dark Theme */
+    --sidebar-background: 214 89% 14%;
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 42 100% 58%;
+    --sidebar-primary-foreground: 209 79% 7%;
+    --sidebar-accent: 214 89% 20%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 214 89% 25%;
+    --sidebar-ring: 42 100% 58%;
+
+    /* Shop Button Active */
+    --shop-button: 152 100% 31%;
+    --shop-button-active: 152 97% 22%;
+
+    /* Custom Design Tokens */
+    --gradient-primary: linear-gradient(135deg, hsl(214, 89%, 14%) 0%, hsl(214, 89%, 20%) 100%);
+    --gradient-hero: linear-gradient(180deg, hsl(220, 14%, 96%) 0%, hsl(220, 14%, 92%) 100%);
+    --gradient-secondary: linear-gradient(135deg, hsl(42, 100%, 58%) 0%, hsl(42, 100%, 48%) 100%);
+    
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+    --shadow-product: 0 2px 8px -2px rgb(0 0 0 / 0.08);
+    --shadow-hover: 0 8px 20px -4px rgb(0 0 0 / 0.12);
+  }
+
+  .dark {
+    --background: 214 89% 6%;
+    --foreground: 220 14% 96%;
+
+    --card: 214 89% 10%;
+    --card-foreground: 220 14% 96%;
+
+    --popover: 214 89% 10%;
+    --popover-foreground: 220 14% 96%;
+
+    --primary: 42 100% 58%;
+    --primary-foreground: 209 79% 7%;
+
+    --secondary: 214 89% 20%;
+    --secondary-foreground: 220 14% 96%;
+
+    --muted: 214 89% 14%;
+    --muted-foreground: 215 17% 65%;
+
+    --accent: 209 100% 60%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 358 86% 50%;
+    --destructive-foreground: 220 14% 96%;
+
+    --success: 152 100% 40%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 22 100% 60%;
+    --warning-foreground: 0 0% 100%;
+
+    --border: 214 89% 20%;
+    --input: 214 89% 20%;
+    --ring: 42 100% 58%;
+
+    --sidebar-background: 214 89% 6%;
+    --sidebar-foreground: 220 14% 96%;
+    --sidebar-primary: 42 100% 58%;
+    --sidebar-primary-foreground: 209 79% 7%;
+    --sidebar-accent: 214 89% 14%;
+    --sidebar-accent-foreground: 220 14% 96%;
+    --sidebar-border: 214 89% 20%;
+    --sidebar-ring: 42 100% 58%;
+
+    --gradient-hero: linear-gradient(180deg, hsl(214, 89%, 8%) 0%, hsl(214, 89%, 6%) 100%);
+    --gradient-primary: linear-gradient(135deg, hsl(42, 100%, 58%) 0%, hsl(42, 100%, 48%) 100%);
+
+    --shop-button: 152 100% 40%;
+    --shop-button-active: 152 100% 35%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+  }
+}
+
+@layer components {
+  /* Mobile Bottom Navigation */
+  .mobile-nav {
+    @apply fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-border;
+    @apply flex items-center justify-around py-2 px-4;
+    @apply md:hidden;
+    padding-bottom: calc(0.5rem + env(safe-area-inset-bottom));
+  }
+
+  .mobile-nav-item {
+    @apply flex flex-col items-center gap-1 py-2 px-3 rounded-lg;
+    @apply text-muted-foreground transition-colors;
+    @apply min-w-[64px];
+  }
+
+  .mobile-nav-item-active {
+    @apply text-primary;
+  }
+
+  .pb-mobile-nav {
+    @apply pb-20 md:pb-0;
+  }
+
+  /* Hero Button Variants */
+  .btn-hero {
+    @apply font-semibold px-8 py-3 rounded-lg;
+    @apply shadow-md hover:shadow-lg transition-all duration-300;
+    @apply hover:translate-y-[-2px];
+    background: hsl(var(--secondary));
+    color: hsl(var(--foreground));
+  }
+
+  .btn-hero:hover {
+    background: hsl(42, 100%, 52%);
+  }
+
+  .btn-hero-outline {
+    @apply border-2 font-semibold px-8 py-3 rounded-lg;
+    @apply transition-all duration-300;
+    border-color: hsl(var(--primary));
+    color: hsl(var(--primary));
+  }
+
+  .btn-hero-outline:hover {
+    background: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
+  }
+
+  /* Shop Button (Green) */
+  .btn-shop {
+    @apply font-semibold px-6 py-2.5 rounded-lg text-white;
+    @apply transition-all duration-200;
+    background: hsl(var(--shop-button));
+  }
+
+  .btn-shop:hover {
+    background: hsl(var(--shop-button-active));
+  }
+
+  /* Product Card Styles */
+  .product-card {
+    @apply bg-card rounded-xl overflow-hidden transition-all duration-300 border border-border;
+    box-shadow: var(--shadow-product);
+  }
+
+  .product-card:hover {
+    box-shadow: var(--shadow-hover);
+    @apply translate-y-[-4px] border-primary/20;
+  }
+
+  /* Badge Variants */
+  .badge-success {
+    @apply bg-success/10 text-success font-medium px-2.5 py-0.5 rounded-full text-xs;
+  }
+
+  .badge-warning {
+    @apply bg-warning/10 text-warning font-medium px-2.5 py-0.5 rounded-full text-xs;
+  }
+
+  .badge-destructive {
+    @apply bg-destructive/10 text-destructive font-medium px-2.5 py-0.5 rounded-full text-xs;
+  }
+
+  .badge-primary {
+    @apply bg-primary/10 text-primary font-medium px-2.5 py-0.5 rounded-full text-xs;
+  }
+
+  .badge-secondary {
+    @apply font-medium px-2.5 py-0.5 rounded-full text-xs;
+    background: hsl(var(--secondary) / 0.15);
+    color: hsl(42, 100%, 40%);
+  }
+
+  .badge-muted {
+    @apply bg-muted text-muted-foreground font-medium px-2.5 py-0.5 rounded-full text-xs;
+  }
+
+  /* Featured Product Badge - Gold */
+  .featured-badge {
+    @apply absolute top-3 left-3 text-xs font-bold px-2.5 py-1 rounded-full;
+    background: hsl(var(--secondary));
+    color: hsl(var(--foreground));
+  }
+
+  /* Discount Badge - Red */
+  .discount-badge {
+    @apply absolute top-3 right-3 bg-destructive text-destructive-foreground text-xs font-bold px-2.5 py-1 rounded-full;
+  }
+
+  /* Sticky Header */
+  .header-sticky {
+    @apply sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b border-border;
+  }
+
+  /* Navigation Link */
+  .nav-link {
+    @apply text-foreground/80 hover:text-primary font-medium transition-colors;
+  }
+
+  .nav-link-active {
+    @apply text-primary font-semibold;
+  }
+
+  /* Price Display */
+  .price-current {
+    @apply text-foreground font-bold text-xl;
+  }
+
+  .price-original {
+    @apply text-muted-foreground line-through text-sm;
+  }
+
+  .price-discount {
+    @apply text-success font-semibold text-sm;
+  }
+
+  /* Container Variants */
+  .container-narrow {
+    @apply max-w-4xl mx-auto px-4;
+  }
+
+  .container-wide {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+}
+
+@layer utilities {
+  /* Text Gradients */
+  .text-gradient {
+    @apply bg-clip-text text-transparent;
+    background-image: var(--gradient-primary);
+  }
+
+  /* Hide scrollbar */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Line Clamp */
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}
