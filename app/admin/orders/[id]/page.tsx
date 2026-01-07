@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import { adminApi } from '@/lib/api/admin';
 import { Order } from '@/types/order';
@@ -18,11 +18,7 @@ export default function AdminOrderDetailPage() {
   const [order, setOrder] = useState<Order | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    loadOrder();
-  }, [orderId]);
-
-  const loadOrder = async () => {
+  const loadOrder = useCallback(async () => {
     setIsLoading(true);
     try {
       const data = await adminApi.getOrder(orderId);
@@ -33,7 +29,11 @@ export default function AdminOrderDetailPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [orderId]);
+
+  useEffect(() => {
+    loadOrder();
+  }, [loadOrder]);
 
   const updateStatus = async (status: string) => {
     try {
