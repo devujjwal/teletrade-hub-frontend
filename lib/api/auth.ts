@@ -26,7 +26,7 @@ export const authApi = {
         token,
         user: {
           id: admin.id,
-          name: admin.username || admin.name || admin.email || 'Admin',
+          name: admin.full_name || admin.name || admin.username || admin.email || 'Admin',
           email: admin.email || admin.username || '',
           role: 'admin' as const,
         },
