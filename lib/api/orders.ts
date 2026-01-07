@@ -2,6 +2,11 @@ import apiClient from './client';
 import { Order, CreateOrderRequest, OrderListResponse } from '@/types/order';
 
 export const ordersApi = {
+  list: async (): Promise<OrderListResponse> => {
+    const response = await apiClient.get<OrderListResponse>('/orders');
+    return response.data;
+  },
+
   create: async (orderData: CreateOrderRequest): Promise<Order> => {
     const response = await apiClient.post<Order>('/orders', orderData);
     return response.data;
