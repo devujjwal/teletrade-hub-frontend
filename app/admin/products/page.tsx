@@ -65,15 +65,15 @@ export default function AdminProductsPage() {
         // Removed is_available filter as it's not useful - show all products regardless of availability
         product_source: sourceFilter !== 'all' ? sourceFilter : undefined,
       });
-      const data = response.data || response;
-      const productsData = data.products || data.data || [];
-      const paginationData = data.pagination || data.meta || {};
+      // API now returns { products: [...], pagination: {...} } directly
+      const productsData = response.products || [];
+      const paginationData = response.pagination || {};
       
       setProducts(productsData);
       setPagination({
-        current_page: paginationData.page || paginationData.current_page || page,
-        last_page: paginationData.pages || paginationData.last_page || 1,
-        per_page: paginationData.limit || paginationData.per_page || 50,
+        current_page: paginationData.page || page,
+        last_page: paginationData.pages || 1,
+        per_page: paginationData.limit || 50,
         total: paginationData.total || productsData.length,
       });
     } catch (error) {

@@ -49,9 +49,10 @@ export default function AdminSettingsPage() {
     setIsLoading(true);
     try {
       const response = await adminApi.getSettings();
-      if (response?.success && response?.data) {
+      // API now returns settings data directly
+      if (response) {
         // Map API response to settings state
-        const apiSettings = response.data;
+        const apiSettings = response;
         setSettings({
           site_name: apiSettings.site_name || 'TeleTrade Hub',
           site_email: apiSettings.site_email || 'info@teletrade-hub.com',

@@ -42,17 +42,15 @@ export default function AdminPricingPage() {
         categoriesApi.list('en'),
       ]);
       
-      // Handle different response structures
-      const pricing = pricingResponse?.success ? pricingResponse.data : pricingResponse;
-      
-      setPricingData(pricing);
+      // API now returns pricing data directly
+      setPricingData(pricingResponse);
       
       // Set global markup value
-      const globalMarkupValue = pricing?.global_markup?.value || pricing?.global_markup?.markup_value || 0;
+      const globalMarkupValue = pricingResponse?.global_markup?.value || pricingResponse?.global_markup?.markup_value || 0;
       setGlobalMarkup(globalMarkupValue.toString());
       
       // Initialize category markups from saved rules
-      const rules = pricing?.rules || pricing?.category_markups || [];
+      const rules = pricingResponse?.rules || pricingResponse?.category_markups || [];
       const initialCategoryMarkups: Record<number, string> = {};
       rules.forEach((rule: any) => {
         if (rule.rule_type === 'category' && rule.entity_id) {

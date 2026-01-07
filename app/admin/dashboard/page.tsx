@@ -41,7 +41,7 @@ interface DashboardStats {
     order_number: string;
     status: string;
     customer_name?: string;
-    guest_email?: string;
+    customer_email?: string;
     total_amount?: number;
     created_at: string;
   }>;
@@ -227,9 +227,10 @@ export default function AdminDashboardPage() {
           {recentOrders.length > 0 ? (
             <div className="space-y-4">
               {recentOrders.slice(0, 5).map((order) => (
-                <div
+                <Link
                   key={order.id}
-                  className="flex items-center justify-between p-4 rounded-lg border bg-card"
+                  href={`/admin/orders/${order.id}`}
+                  className="flex items-center justify-between p-4 rounded-lg border bg-card hover:bg-muted/50 transition-colors"
                 >
                   <div className="flex-1">
                     <div className="flex items-center gap-3">
@@ -237,7 +238,7 @@ export default function AdminDashboardPage() {
                       <Badge className={statusColors[order.status] || ''}>{order.status}</Badge>
                     </div>
                     <p className="text-sm text-muted-foreground mt-1">
-                      {order.customer_name || order.guest_email || 'Guest'}
+                      {order.customer_name || order.customer_email || 'Guest'}
                     </p>
                   </div>
                   <div className="text-right">
@@ -246,7 +247,7 @@ export default function AdminDashboardPage() {
                       {formatDistanceToNow(new Date(order.created_at), { addSuffix: true })}
                     </p>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           ) : (

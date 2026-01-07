@@ -75,9 +75,9 @@ export default function AdminOrdersPage() {
         search: search || undefined,
         status: statusFilter !== 'all' ? statusFilter : undefined,
       });
-      const data = response.data || response;
-      setOrders(data.orders || data.data || []);
-      setPagination((prev) => data.pagination || data.meta || prev);
+      // API now returns { orders: [...], pagination: {...} } directly
+      setOrders(response.orders || []);
+      setPagination((prev) => response.pagination || prev);
     } catch (error) {
       console.error('Error loading orders:', error);
       toast.error('Failed to load orders');

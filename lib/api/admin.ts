@@ -3,16 +3,32 @@ import apiClient from './client';
 export const adminApi = {
   getDashboardStats: async () => {
     const response = await apiClient.get('/admin/dashboard');
+    // Backend returns: { success: true, data: { order_stats, product_stats, recent_orders } }
+    if (response.data?.success && response.data?.data) {
+      return response.data.data;
+    }
     return response.data;
   },
 
   getOrders: async (filters?: any) => {
     const response = await apiClient.get('/admin/orders', { params: filters });
+    // Backend returns: { success: true, data: { orders: [...], pagination: {...} } }
+    if (response.data?.success && response.data?.data) {
+      return response.data.data;
+    }
     return response.data;
   },
 
   getOrder: async (id: string | number) => {
     const response = await apiClient.get(`/admin/orders/${id}`);
+    // Backend returns: { success: true, data: { order: {...} } }
+    if (response.data?.success && response.data?.data?.order) {
+      return response.data.data.order;
+    }
+    // Fallback for direct order response
+    if (response.data?.order) {
+      return response.data.order;
+    }
     return response.data;
   },
 
@@ -23,6 +39,10 @@ export const adminApi = {
 
   getProducts: async (filters?: any) => {
     const response = await apiClient.get('/admin/products', { params: filters });
+    // Backend returns: { success: true, data: { products: [...], pagination: {...} } }
+    if (response.data?.success && response.data?.data) {
+      return response.data.data;
+    }
     return response.data;
   },
 
@@ -33,6 +53,10 @@ export const adminApi = {
 
   getPricingConfig: async () => {
     const response = await apiClient.get('/admin/pricing');
+    // Backend returns: { success: true, data: {...} }
+    if (response.data?.success && response.data?.data) {
+      return response.data.data;
+    }
     return response.data;
   },
 
@@ -61,11 +85,19 @@ export const adminApi = {
 
   getSyncStatus: async () => {
     const response = await apiClient.get('/admin/sync/status');
+    // Backend returns: { success: true, data: {...} }
+    if (response.data?.success && response.data?.data) {
+      return response.data.data;
+    }
     return response.data;
   },
 
   getSettings: async () => {
     const response = await apiClient.get('/admin/settings');
+    // Backend returns: { success: true, data: {...} }
+    if (response.data?.success && response.data?.data) {
+      return response.data.data;
+    }
     return response.data;
   },
 
@@ -83,6 +115,10 @@ export const adminApi = {
   // Category CRUD
   getCategories: async () => {
     const response = await apiClient.get('/admin/categories');
+    // Backend returns: { success: true, data: { categories: [...] } }
+    if (response.data?.success && response.data?.data) {
+      return response.data.data;
+    }
     return response.data;
   },
 
@@ -104,6 +140,10 @@ export const adminApi = {
   // Brand CRUD
   getBrands: async () => {
     const response = await apiClient.get('/admin/brands');
+    // Backend returns: { success: true, data: { brands: [...] } }
+    if (response.data?.success && response.data?.data) {
+      return response.data.data;
+    }
     return response.data;
   },
 
