@@ -1,7 +1,30 @@
+'use client';
+
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Mail, Phone, MapPin, Facebook, Twitter, Instagram, Youtube } from 'lucide-react';
+import { Mail, Phone, MapPin, Facebook, Twitter, Instagram, Youtube, MessageCircle } from 'lucide-react';
+import { settingsApi, PublicSettings } from '@/lib/api/settings';
 
 export default function Footer() {
+  const [settings, setSettings] = useState<PublicSettings>({
+    site_name: 'TeleTrade Hub',
+    site_email: '',
+    address: '',
+    contact_number: '',
+    whatsapp_number: '',
+  });
+
+  useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        const publicSettings = await settingsApi.getPublic();
+        setSettings(publicSettings);
+      } catch (error) {
+        console.error('Failed to load footer settings:', error);
+      }
+    };
+    loadSettings();
+  }, []);
   const footerLinks = {
     company: [
       { href: '/about', label: 'About Us' },
@@ -30,7 +53,7 @@ export default function Footer() {
               <div className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center">
                 <span className="text-secondary-foreground font-bold text-lg">TT</span>
               </div>
-              <span className="font-display font-bold text-xl">TeleTrade Hub</span>
+              <span className="font-display font-bold text-xl">{settings.site_name || 'TeleTrade Hub'}</span>
             </div>
             <p className="text-primary-foreground/70 text-sm mb-4">
               Your trusted partner for premium telecommunication products.
@@ -90,25 +113,49 @@ export default function Footer() {
           <div>
             <h3 className="font-display font-semibold text-lg mb-4">Contact</h3>
             <ul className="space-y-3">
-              <li className="flex items-start gap-3">
-                <MapPin className="w-5 h-5 text-secondary mt-0.5 flex-shrink-0" />
-                <span className="text-primary-foreground/70 text-sm">
-                  Musterstraße 123<br />
-                  10115 Berlin, Germany
-                </span>
-              </li>
-              <li className="flex items-center gap-3">
-                <Phone className="w-5 h-5 text-secondary flex-shrink-0" />
-                <a href="tel:+4930123456789" className="text-primary-foreground/70 hover:text-secondary text-sm">
-                  +49 30 123 456 789
-                </a>
-              </li>
-              <li className="flex items-center gap-3">
-                <Mail className="w-5 h-5 text-secondary flex-shrink-0" />
-                <a href="mailto:info@teletrade.com" className="text-primary-foreground/70 hover:text-secondary text-sm">
-                  info@teletrade.com
-                </a>
-              </li>
+              {settings.address && (
+                <li className="flex items-start gap-3">
+                  <MapPin className="w-5 h-5 text-secondary mt-0.5 flex-shrink-0" />
+                  <span className="text-primary-foreground/70 text-sm whitespace-pre-line">
+                    {settings.address}
+                  </span>
+                </li>
+              )}
+              {settings.contact_number && (
+                <li className="flex items-center gap-3">
+                  <Phone className="w-5 h-5 text-secondary flex-shrink-0" />
+                  <a 
+                    href={`tel:${settings.contact_number.replace(/\s/g, '')}`} 
+                    className="text-primary-foreground/70 hover:text-secondary text-sm"
+                  >
+                    {settings.contact_number}
+                  </a>
+                </li>
+              )}
+              {settings.whatsapp_number && (
+                <li className="flex items-center gap-3">
+                  <MessageCircle className="w-5 h-5 text-secondary flex-shrink-0" />
+                  <a 
+                    href={`https://wa.me/${settings.whatsapp_number.replace(/[^\d]/g, '')}`} 
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary-foreground/70 hover:text-secondary text-sm"
+                  >
+                    {settings.whatsapp_number}
+                  </a>
+                </li>
+              )}
+              {settings.site_email && (
+                <li className="flex items-center gap-3">
+                  <Mail className="w-5 h-5 text-secondary flex-shrink-0" />
+                  <a 
+                    href={`mailto:${settings.site_email}`} 
+                    className="text-primary-foreground/70 hover:text-secondary text-sm"
+                  >
+                    {settings.site_email}
+                  </a>
+                </li>
+              )}
             </ul>
           </div>
         </div>

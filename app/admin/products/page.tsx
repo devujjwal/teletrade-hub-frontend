@@ -34,11 +34,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Search, Edit, ChevronLeft, ChevronRight, Star, Package, Store, Warehouse, Plus } from 'lucide-react';
+import { Search, Edit, ChevronLeft, ChevronRight, Star, Package, Store, Warehouse, Plus, Filter, X } from 'lucide-react';
 import { formatPrice } from '@/lib/utils/format';
 import { getProxiedImageUrl } from '@/lib/utils/format';
 import Image from 'next/image';
 import toast from 'react-hot-toast';
+import { categoriesApi } from '@/lib/api/categories';
+import { brandsApi } from '@/lib/api/brands';
+import { Category } from '@/types/category';
+import { Brand } from '@/types/brand';
 
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -46,6 +50,12 @@ export default function AdminProductsPage() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [sourceFilter, setSourceFilter] = useState<string>('all'); // Filter by product_source
+  const [categoryFilter, setCategoryFilter] = useState<string>('all');
+  const [brandFilter, setBrandFilter] = useState<string>('all');
+  const [availabilityFilter, setAvailabilityFilter] = useState<string>('all');
+  const [featuredFilter, setFeaturedFilter] = useState<string>('all');
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [brands, setBrands] = useState<Brand[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [editPrice, setEditPrice] = useState('');
   const [pagination, setPagination] = useState({
@@ -55,16 +65,35 @@ export default function AdminProductsPage() {
     total: 0,
   });
 
+  const loadOptions = useCallback(async () => {
+    try {
+      const [categoriesResponse, brandsResponse] = await Promise.all([
+        categoriesApi.list('en'),
+        brandsApi.list('en'),
+      ]);
+      setCategories(categoriesResponse.data || []);
+      setBrands(brandsResponse.data || []);
+    } catch (error) {
+      console.error('Error loading options:', error);
+    }
+  }, []);
+
   const loadProducts = useCallback(async () => {
     setIsLoading(true);
     try {
-      const response = await adminApi.getProducts({
+      const filters: any = {
         page,
         limit: 50, // Increased limit to show more products per page
-        search: search || undefined,
-        // Removed is_available filter as it's not useful - show all products regardless of availability
-        product_source: sourceFilter !== 'all' ? sourceFilter : undefined,
-      });
+      };
+      
+      if (search) filters.search = search;
+      if (sourceFilter !== 'all') filters.product_source = sourceFilter;
+      if (categoryFilter !== 'all') filters.category_id = parseInt(categoryFilter);
+      if (brandFilter !== 'all') filters.brand_id = parseInt(brandFilter);
+      if (availabilityFilter !== 'all') filters.is_available = availabilityFilter === 'available' ? 1 : 0;
+      if (featuredFilter !== 'all') filters.is_featured = featuredFilter === 'featured' ? 1 : 0;
+
+      const response = await adminApi.getProducts(filters);
       // API now returns { products: [...], pagination: {...} } directly
       const productsData = response.products || [];
       const paginationData = response.pagination || {};
@@ -82,7 +111,11 @@ export default function AdminProductsPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [page, search, sourceFilter]);
+  }, [page, search, sourceFilter, categoryFilter, brandFilter, availabilityFilter, featuredFilter]);
+
+  useEffect(() => {
+    loadOptions();
+  }, [loadOptions]);
 
   useEffect(() => {
     loadProducts();
@@ -132,8 +165,9 @@ export default function AdminProductsPage() {
       {/* Filters */}
       <Card>
         <CardContent className="p-4">
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="relative flex-1">
+          <div className="space-y-4">
+            {/* Search Bar */}
+            <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search products..."
@@ -145,22 +179,197 @@ export default function AdminProductsPage() {
                 className="pl-10"
               />
             </div>
-            <Select
-              value={sourceFilter}
-              onValueChange={(value) => {
-                setSourceFilter(value);
-                setPage(1);
-              }}
-            >
-              <SelectTrigger className="w-full sm:w-48">
-                <SelectValue placeholder="Product Source" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Sources</SelectItem>
-                <SelectItem value="vendor">Vendor Stock</SelectItem>
-                <SelectItem value="own">In-House Stock</SelectItem>
-              </SelectContent>
-            </Select>
+
+            {/* Filter Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+              <Select
+                value={sourceFilter}
+                onValueChange={(value) => {
+                  setSourceFilter(value);
+                  setPage(1);
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Product Source" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Sources</SelectItem>
+                  <SelectItem value="vendor">Vendor Stock</SelectItem>
+                  <SelectItem value="own">In-House Stock</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select
+                value={categoryFilter}
+                onValueChange={(value) => {
+                  setCategoryFilter(value);
+                  setPage(1);
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Categories</SelectItem>
+                  {categories.map((cat) => (
+                    <SelectItem key={cat.id} value={cat.id.toString()}>
+                      {cat.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Select
+                value={brandFilter}
+                onValueChange={(value) => {
+                  setBrandFilter(value);
+                  setPage(1);
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Brand" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Brands</SelectItem>
+                  {brands.map((brand) => (
+                    <SelectItem key={brand.id} value={brand.id.toString()}>
+                      {brand.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Select
+                value={availabilityFilter}
+                onValueChange={(value) => {
+                  setAvailabilityFilter(value);
+                  setPage(1);
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Availability" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Products</SelectItem>
+                  <SelectItem value="available">Available</SelectItem>
+                  <SelectItem value="unavailable">Unavailable</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select
+                value={featuredFilter}
+                onValueChange={(value) => {
+                  setFeaturedFilter(value);
+                  setPage(1);
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Featured" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Products</SelectItem>
+                  <SelectItem value="featured">Featured Only</SelectItem>
+                  <SelectItem value="not-featured">Not Featured</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Active Filters Summary */}
+            {(sourceFilter !== 'all' || categoryFilter !== 'all' || brandFilter !== 'all' || 
+              availabilityFilter !== 'all' || featuredFilter !== 'all' || search) && (
+              <div className="flex items-center gap-2 flex-wrap">
+                <Filter className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm text-muted-foreground">Active filters:</span>
+                {search && (
+                  <Badge variant="secondary" className="gap-1">
+                    Search: {search}
+                    <X 
+                      className="h-3 w-3 cursor-pointer" 
+                      onClick={() => {
+                        setSearch('');
+                        setPage(1);
+                      }}
+                    />
+                  </Badge>
+                )}
+                {sourceFilter !== 'all' && (
+                  <Badge variant="secondary" className="gap-1">
+                    Source: {sourceFilter === 'vendor' ? 'Vendor' : 'In-House'}
+                    <X 
+                      className="h-3 w-3 cursor-pointer" 
+                      onClick={() => {
+                        setSourceFilter('all');
+                        setPage(1);
+                      }}
+                    />
+                  </Badge>
+                )}
+                {categoryFilter !== 'all' && (
+                  <Badge variant="secondary" className="gap-1">
+                    Category: {categories.find(c => c.id.toString() === categoryFilter)?.name || categoryFilter}
+                    <X 
+                      className="h-3 w-3 cursor-pointer" 
+                      onClick={() => {
+                        setCategoryFilter('all');
+                        setPage(1);
+                      }}
+                    />
+                  </Badge>
+                )}
+                {brandFilter !== 'all' && (
+                  <Badge variant="secondary" className="gap-1">
+                    Brand: {brands.find(b => b.id.toString() === brandFilter)?.name || brandFilter}
+                    <X 
+                      className="h-3 w-3 cursor-pointer" 
+                      onClick={() => {
+                        setBrandFilter('all');
+                        setPage(1);
+                      }}
+                    />
+                  </Badge>
+                )}
+                {availabilityFilter !== 'all' && (
+                  <Badge variant="secondary" className="gap-1">
+                    {availabilityFilter === 'available' ? 'Available' : 'Unavailable'}
+                    <X 
+                      className="h-3 w-3 cursor-pointer" 
+                      onClick={() => {
+                        setAvailabilityFilter('all');
+                        setPage(1);
+                      }}
+                    />
+                  </Badge>
+                )}
+                {featuredFilter !== 'all' && (
+                  <Badge variant="secondary" className="gap-1">
+                    {featuredFilter === 'featured' ? 'Featured' : 'Not Featured'}
+                    <X 
+                      className="h-3 w-3 cursor-pointer" 
+                      onClick={() => {
+                        setFeaturedFilter('all');
+                        setPage(1);
+                      }}
+                    />
+                  </Badge>
+                )}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setSearch('');
+                    setSourceFilter('all');
+                    setCategoryFilter('all');
+                    setBrandFilter('all');
+                    setAvailabilityFilter('all');
+                    setFeaturedFilter('all');
+                    setPage(1);
+                  }}
+                  className="h-6 text-xs"
+                >
+                  Clear All
+                </Button>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>

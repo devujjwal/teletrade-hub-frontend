@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { adminApi } from '@/lib/api/admin';
 import { categoriesApi } from '@/lib/api/categories';
@@ -38,11 +38,7 @@ export default function NewProductPage() {
     is_available: true,
   });
 
-  useEffect(() => {
-    loadOptions();
-  }, []);
-
-  const loadOptions = async () => {
+  const loadOptions = useCallback(async () => {
     try {
       const [categoriesResponse, brandsResponse] = await Promise.all([
         categoriesApi.list('en'),
@@ -54,7 +50,11 @@ export default function NewProductPage() {
       console.error('Error loading options:', error);
       toast.error('Failed to load categories and brands');
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    loadOptions();
+  }, [loadOptions]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -145,38 +145,52 @@ export default function NewProductPage() {
               <div>
                 <Label htmlFor="category_id">Category</Label>
                 <Select
-                  value={formData.category_id}
-                  onValueChange={(value) => setFormData({ ...formData, category_id: value })}
+                  value={formData.category_id || undefined}
+                  onValueChange={(value) => {
+                    setFormData((prev) => ({ ...prev, category_id: value }));
+                  }}
                 >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select category" />
+                  <SelectTrigger disabled={categories.length === 0}>
+                    <SelectValue placeholder={categories.length === 0 ? "Loading categories..." : "Select category"} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">None</SelectItem>
-                    {categories.map((cat) => (
-                      <SelectItem key={cat.id} value={cat.id.toString()}>
-                        {cat.name}
+                    {categories.length > 0 ? (
+                      categories.map((cat) => (
+                        <SelectItem key={cat.id} value={cat.id.toString()}>
+                          {cat.name}
+                        </SelectItem>
+                      ))
+                    ) : (
+                      <SelectItem value="loading" disabled>
+                        Loading categories...
                       </SelectItem>
-                    ))}
+                    )}
                   </SelectContent>
                 </Select>
               </div>
               <div>
                 <Label htmlFor="brand_id">Brand</Label>
                 <Select
-                  value={formData.brand_id}
-                  onValueChange={(value) => setFormData({ ...formData, brand_id: value })}
+                  value={formData.brand_id || undefined}
+                  onValueChange={(value) => {
+                    setFormData((prev) => ({ ...prev, brand_id: value }));
+                  }}
                 >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select brand" />
+                  <SelectTrigger disabled={brands.length === 0}>
+                    <SelectValue placeholder={brands.length === 0 ? "Loading brands..." : "Select brand"} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">None</SelectItem>
-                    {brands.map((brand) => (
-                      <SelectItem key={brand.id} value={brand.id.toString()}>
-                        {brand.name}
+                    {brands.length > 0 ? (
+                      brands.map((brand) => (
+                        <SelectItem key={brand.id} value={brand.id.toString()}>
+                          {brand.name}
+                        </SelectItem>
+                      ))
+                    ) : (
+                      <SelectItem value="loading" disabled>
+                        Loading brands...
                       </SelectItem>
-                    ))}
+                    )}
                   </SelectContent>
                 </Select>
               </div>

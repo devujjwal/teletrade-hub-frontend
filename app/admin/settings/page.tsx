@@ -15,12 +15,15 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { adminApi } from '@/lib/api/admin';
-import { Settings, Save, Globe, DollarSign, Truck, RefreshCw, Mail } from 'lucide-react';
+import { Settings, Save, Globe, DollarSign, Truck, RefreshCw, Mail, MapPin, Phone, MessageCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 interface SettingsData {
   site_name: string;
   site_email: string;
+  address: string;
+  contact_number: string;
+  whatsapp_number: string;
   currency: string;
   tax_rate: string;
   shipping_cost: string;
@@ -34,6 +37,9 @@ export default function AdminSettingsPage() {
   const [settings, setSettings] = useState<SettingsData>({
     site_name: 'TeleTrade Hub',
     site_email: 'info@teletrade-hub.com',
+    address: '',
+    contact_number: '',
+    whatsapp_number: '',
     currency: 'EUR',
     tax_rate: '19.00',
     shipping_cost: '9.99',
@@ -56,6 +62,9 @@ export default function AdminSettingsPage() {
         setSettings({
           site_name: apiSettings.site_name || 'TeleTrade Hub',
           site_email: apiSettings.site_email || 'info@teletrade-hub.com',
+          address: apiSettings.address || '',
+          contact_number: apiSettings.contact_number || '',
+          whatsapp_number: apiSettings.whatsapp_number || '',
           currency: apiSettings.currency || 'EUR',
           tax_rate: apiSettings.tax_rate || '19.00',
           shipping_cost: apiSettings.shipping_cost || '9.99',
@@ -149,6 +158,42 @@ export default function AdminSettingsPage() {
                 placeholder="info@teletrade-hub.com"
               />
             </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="address">Address</Label>
+              <textarea
+                id="address"
+                value={settings.address}
+                onChange={(e) => updateSetting('address', e.target.value)}
+                className="w-full min-h-[80px] px-3 py-2 border border-border rounded-md bg-background"
+                placeholder="Musterstraße 123&#10;10115 Berlin, Germany"
+              />
+            </div>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="contact_number">Contact Number</Label>
+                <Input
+                  id="contact_number"
+                  type="tel"
+                  value={settings.contact_number}
+                  onChange={(e) => updateSetting('contact_number', e.target.value)}
+                  placeholder="+49 30 123 456 789"
+                />
+              </div>
+              <div>
+                <Label htmlFor="whatsapp_number">WhatsApp Number</Label>
+                <Input
+                  id="whatsapp_number"
+                  type="tel"
+                  value={settings.whatsapp_number}
+                  onChange={(e) => updateSetting('whatsapp_number', e.target.value)}
+                  placeholder="+49 30 123 456 789"
+                />
+              </div>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="currency">Default Currency</Label>
               <Select value={settings.currency} onValueChange={(value) => updateSetting('currency', value)}>

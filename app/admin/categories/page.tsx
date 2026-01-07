@@ -25,7 +25,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Plus, Edit, Trash2, Package, Save } from 'lucide-react';
+import { Plus, Edit, Package, Save } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function AdminCategoriesPage() {
@@ -35,7 +35,6 @@ export default function AdminCategoriesPage() {
   const [editingCategory, setEditingCategory] = useState<any | null>(null);
   const [formData, setFormData] = useState({
     name: '',
-    slug: '',
     description: '',
   });
 
@@ -56,17 +55,25 @@ export default function AdminCategoriesPage() {
     }
   };
 
+  const generateSlug = (text: string): string => {
+    return text
+      .toLowerCase()
+      .trim()
+      .replace(/[^\w\s-]/g, '')
+      .replace(/[\s_-]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+  };
+
   const handleOpenDialog = (category?: any) => {
     if (category) {
       setEditingCategory(category);
       setFormData({
         name: category.name || '',
-        slug: category.slug || '',
         description: category.description || '',
       });
     } else {
       setEditingCategory(null);
-      setFormData({ name: '', slug: '', description: '' });
+      setFormData({ name: '', description: '' });
     }
     setIsDialogOpen(true);
   };
@@ -83,21 +90,12 @@ export default function AdminCategoriesPage() {
       setIsDialogOpen(false);
       loadCategories();
     } catch (error: any) {
-      toast.error(error.response?.data?.message || error.message || 'Failed to save category');
-    }
-  };
-
-  const handleDelete = async (id: number) => {
-    if (!confirm('Are you sure you want to delete this category? This action cannot be undone.')) {
-      return;
-    }
-
-    try {
-      await adminApi.deleteCategory(id);
-      toast.success('Category deleted successfully');
-      loadCategories();
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || error.message || 'Failed to delete category');
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to save category';
+      if (error.response?.status === 409 || errorMessage.includes('already exists')) {
+        toast.error('A category with a similar name already exists. Please use a different name.');
+      } else {
+        toast.error(errorMessage);
+      }
     }
   };
 
@@ -148,25 +146,14 @@ export default function AdminCategoriesPage() {
                       <TableCell className="font-mono text-sm">{category.slug}</TableCell>
                       <TableCell>{category.products_count || 0}</TableCell>
                       <TableCell>
-                        <div className="flex gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleOpenDialog(category)}
-                          >
-                            <Edit className="h-4 w-4 mr-1" />
-                            Edit
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleDelete(category.id)}
-                            className="text-destructive hover:text-destructive"
-                          >
-                            <Trash2 className="h-4 w-4 mr-1" />
-                            Delete
-                          </Button>
-                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleOpenDialog(category)}
+                        >
+                          <Edit className="h-4 w-4 mr-1" />
+                          Edit
+                        </Button>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -199,16 +186,11 @@ export default function AdminCategoriesPage() {
                 required
                 placeholder="Category name"
               />
-            </div>
-            <div>
-              <Label htmlFor="slug">Slug *</Label>
-              <Input
-                id="slug"
-                value={formData.slug}
-                onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
-                required
-                placeholder="category-slug"
-              />
+              {!editingCategory && formData.name && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  Slug will be auto-generated: {generateSlug(formData.name)}
+                </p>
+              )}
             </div>
             <div>
               <Label htmlFor="description">Description</Label>
