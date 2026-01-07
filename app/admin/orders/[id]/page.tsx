@@ -154,8 +154,10 @@ export default function AdminOrderDetailPage() {
           <address className="not-italic">
             {order.shipping_address.address_line_1}
             {order.shipping_address.address_line_2 && (
-              <br />
-              {order.shipping_address.address_line_2}
+              <>
+                <br />
+                {order.shipping_address.address_line_2}
+              </>
             )}
             <br />
             {order.shipping_address.city}
