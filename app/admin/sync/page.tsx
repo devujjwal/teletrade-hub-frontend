@@ -176,7 +176,7 @@ export default function AdminSyncPage() {
                 <Badge 
                   variant={
                     lastSync.status === 'completed' || lastSync.status === 'success' 
-                      ? 'outline' 
+                      ? 'success' 
                       : lastSync.status === 'failed' 
                       ? 'error' 
                       : 'default'

@@ -24,6 +24,8 @@ export default function ProductsClient({ initialProducts, initialMeta }: Product
   const [isLoading, setIsLoading] = useState(false);
   const isInitialMount = useRef(true);
 
+  const searchParamsString = searchParams.toString();
+
   useEffect(() => {
     // Skip fetch on initial mount since we already have initial data
     if (isInitialMount.current) {
@@ -50,7 +52,7 @@ export default function ProductsClient({ initialProducts, initialMeta }: Product
 
         const response = await productsApi.list(filters);
         setProducts(response.data || []);
-        setMeta(response.meta || initialMeta);
+        setMeta((prev) => response.meta || prev);
       } catch (error) {
         console.error('Error fetching products:', error);
       } finally {
@@ -59,10 +61,7 @@ export default function ProductsClient({ initialProducts, initialMeta }: Product
     };
 
     fetchProducts();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    searchParams.toString(), // Convert to string to detect changes
-  ]);
+  }, [searchParamsString, searchParams]);
 
   if (isLoading) {
     return <Skeleton className="h-96 w-full" />;

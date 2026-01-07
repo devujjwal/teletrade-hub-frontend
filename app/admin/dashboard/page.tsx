@@ -218,7 +218,7 @@ export default function AdminDashboardPage() {
             <CardDescription>Latest orders from your store</CardDescription>
           </div>
           <Link href="/admin/orders">
-            <Badge variant="outline" className="cursor-pointer hover:bg-muted">
+            <Badge variant="secondary" className="cursor-pointer hover:bg-muted">
               View All
             </Badge>
           </Link>

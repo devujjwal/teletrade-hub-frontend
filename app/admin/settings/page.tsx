@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import Card, { CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import Button from '@/components/ui/button';
 import Input from '@/components/ui/input';
-import Label from '@/components/ui/label';
+import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Switch } from '@/components/ui/switch';
 import {
@@ -45,11 +45,7 @@ export default function AdminSettingsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
-  useEffect(() => {
-    loadSettings();
-  }, []);
-
-  const loadSettings = async () => {
+  const loadSettings = useCallback(async () => {
     setIsLoading(true);
     try {
       const response = await adminApi.getSettings();
@@ -57,17 +53,17 @@ export default function AdminSettingsPage() {
         // Map API response to settings state
         const apiSettings = response.data;
         setSettings({
-          site_name: apiSettings.site_name || settings.site_name,
-          site_email: apiSettings.site_email || settings.site_email,
-          currency: apiSettings.currency || settings.currency,
-          tax_rate: apiSettings.tax_rate || settings.tax_rate,
-          shipping_cost: apiSettings.shipping_cost || settings.shipping_cost,
-          free_shipping_threshold: apiSettings.free_shipping_threshold || settings.free_shipping_threshold,
+          site_name: apiSettings.site_name || 'TeleTrade Hub',
+          site_email: apiSettings.site_email || 'info@teletrade-hub.com',
+          currency: apiSettings.currency || 'EUR',
+          tax_rate: apiSettings.tax_rate || '19.00',
+          shipping_cost: apiSettings.shipping_cost || '9.99',
+          free_shipping_threshold: apiSettings.free_shipping_threshold || '100.00',
           vendor_sync_enabled: apiSettings.vendor_sync_enabled !== undefined 
             ? apiSettings.vendor_sync_enabled === true || apiSettings.vendor_sync_enabled === 'true'
-            : settings.vendor_sync_enabled,
-          vendor_sync_frequency: apiSettings.vendor_sync_frequency || settings.vendor_sync_frequency,
-          vendor_sales_order_time: apiSettings.vendor_sales_order_time || settings.vendor_sales_order_time,
+            : true,
+          vendor_sync_frequency: apiSettings.vendor_sync_frequency || '86400',
+          vendor_sales_order_time: apiSettings.vendor_sales_order_time || '02:00',
         });
       }
     } catch (error: any) {
@@ -79,7 +75,11 @@ export default function AdminSettingsPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    loadSettings();
+  }, [loadSettings]);
 
   const handleSave = async () => {
     setIsSaving(true);

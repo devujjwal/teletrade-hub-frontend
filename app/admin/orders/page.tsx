@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { adminApi } from '@/lib/api/admin';
 import { Order } from '@/types/order';
@@ -66,11 +66,7 @@ export default function AdminOrdersPage() {
     total: 0,
   });
 
-  useEffect(() => {
-    loadOrders();
-  }, [page, search, statusFilter]);
-
-  const loadOrders = async () => {
+  const loadOrders = useCallback(async () => {
     setIsLoading(true);
     try {
       const response = await adminApi.getOrders({
@@ -81,14 +77,18 @@ export default function AdminOrdersPage() {
       });
       const data = response.data || response;
       setOrders(data.orders || data.data || []);
-      setPagination(data.pagination || data.meta || pagination);
+      setPagination((prev) => data.pagination || data.meta || prev);
     } catch (error) {
       console.error('Error loading orders:', error);
       toast.error('Failed to load orders');
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [page, search, statusFilter]);
+
+  useEffect(() => {
+    loadOrders();
+  }, [loadOrders]);
 
   const handleStatusUpdate = async (orderId: number, newStatus: string) => {
     try {
@@ -184,7 +184,7 @@ export default function AdminOrdersPage() {
                           <div>
                             <div className="font-medium">{order.customer_name || 'Guest'}</div>
                             <div className="text-sm text-muted-foreground">
-                              {order.customer_email || order.guest_email || ''}
+                              {order.customer_email || ''}
                             </div>
                           </div>
                         </TableCell>

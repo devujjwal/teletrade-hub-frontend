@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import { authApi } from '@/lib/api/auth';
 import { ordersApi } from '@/lib/api/orders';
 import OrderList from '@/components/account/order-list';
+import { Order } from '@/types/order';
 
 export const metadata: Metadata = {
   title: 'My Orders | TeleTrade Hub',
@@ -19,7 +20,7 @@ export default async function OrdersPage() {
   }
 
   // Fetch orders
-  let orders = [];
+  let orders: Order[] = [];
   try {
     const response = await ordersApi.list();
     orders = response.data || [];

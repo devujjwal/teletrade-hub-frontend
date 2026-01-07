@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { adminApi } from '@/lib/api/admin';
 import { Product } from '@/types/product';
 import Card from '@/components/ui/card';
@@ -55,11 +55,7 @@ export default function AdminProductsPage() {
     total: 0,
   });
 
-  useEffect(() => {
-    loadProducts();
-  }, [page, search, sourceFilter]);
-
-  const loadProducts = async () => {
+  const loadProducts = useCallback(async () => {
     setIsLoading(true);
     try {
       const response = await adminApi.getProducts({
@@ -86,7 +82,11 @@ export default function AdminProductsPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [page, search, sourceFilter]);
+
+  useEffect(() => {
+    loadProducts();
+  }, [loadProducts]);
 
   const handleToggleFeatured = async (product: Product) => {
     try {
