@@ -29,7 +29,7 @@ export default function Header() {
   const [isMounted, setIsMounted] = useState(false);
   const itemCount = useCartStore((state) => state.getItemCount());
   const { user, logout, isAdmin } = useAuthStore();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   // Prevent hydration mismatch by only rendering cart badge after mount
   useEffect(() => {
@@ -39,15 +39,17 @@ export default function Header() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      window.location.href = `/products?search=${encodeURIComponent(searchQuery)}`;
+      const langParam = language && language !== 'en' ? `&lang=${language}` : '';
+      window.location.href = `/products?search=${encodeURIComponent(searchQuery)}${langParam}`;
     }
   };
 
+  const langParam = language && language !== 'en' ? `?lang=${language}` : '';
   const navLinks = [
-    { href: '/', label: t('nav.home') },
-    { href: '/products', label: t('nav.products') },
-    { href: '/categories', label: t('nav.categories') },
-    { href: '/brands', label: t('nav.brands') },
+    { href: `/${langParam}`, label: t('nav.home') },
+    { href: `/products${langParam}`, label: t('nav.products') },
+    { href: `/categories${langParam}`, label: t('nav.categories') },
+    { href: `/brands${langParam}`, label: t('nav.brands') },
   ];
 
   return (

@@ -36,12 +36,19 @@ export default function ProductFilters({ categories = [], brands = [], filterOpt
       params.delete(key);
     }
     params.set('page', '1'); // Reset to first page
+    // Preserve language parameter
+    const lang = searchParams.get('lang');
+    if (lang && lang !== 'en') {
+      params.set('lang', lang);
+    }
     // Use push to ensure navigation triggers re-render
     router.push(`/products?${params.toString()}`, { scroll: false });
   };
 
   const clearFilters = () => {
-    router.push('/products', { scroll: false });
+    const lang = searchParams.get('lang');
+    const url = lang && lang !== 'en' ? `/products?lang=${lang}` : '/products';
+    router.push(url, { scroll: false });
   };
 
   const activeCategory = searchParams.get('category');

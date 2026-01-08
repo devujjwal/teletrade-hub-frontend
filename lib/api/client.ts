@@ -33,8 +33,8 @@ apiClient.interceptors.request.use(
         config.headers.Authorization = `Bearer ${token}`;
       }
 
-      // Get language preference
-      const lang = localStorage.getItem('language') || 'en';
+      // Get language preference - sync with language context key
+      const lang = localStorage.getItem('teletrade_language') || 'en';
       config.params = { ...config.params, lang };
     }
 

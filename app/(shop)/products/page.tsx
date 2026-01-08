@@ -27,10 +27,11 @@ interface ProductsPageProps {
 
 async function getProducts(searchParams: ProductsPageProps['searchParams']) {
   const page = parseInt(searchParams.page || '1', 10);
+  const lang = searchParams.lang || 'en';
   const filters: any = {
     page,
     per_page: 20,
-    lang: searchParams.lang || 'en',
+    lang,
   };
 
   // Add filters only if they exist
@@ -53,18 +54,18 @@ async function getProducts(searchParams: ProductsPageProps['searchParams']) {
   }
 }
 
-async function getCategories() {
+async function getCategories(lang: string = 'en') {
   try {
-    const response = await categoriesApi.list('en');
+    const response = await categoriesApi.list(lang);
     return response.data || [];
   } catch (error) {
     return [];
   }
 }
 
-async function getBrands() {
+async function getBrands(lang: string = 'en') {
   try {
-    const response = await brandsApi.list('en');
+    const response = await brandsApi.list(lang);
     return response.data || [];
   } catch (error) {
     return [];
@@ -72,10 +73,11 @@ async function getBrands() {
 }
 
 export default async function ProductsPage({ searchParams }: ProductsPageProps) {
+  const lang = searchParams.lang || 'en';
   const [productsData, categories, brands] = await Promise.all([
     getProducts(searchParams),
-    getCategories(),
-    getBrands(),
+    getCategories(lang),
+    getBrands(lang),
   ]);
 
   return (

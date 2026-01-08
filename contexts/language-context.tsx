@@ -276,6 +276,23 @@ const translations: Record<Language, Record<string, string>> = {
     'auth.welcomeBack': 'Welcome Back',
     'auth.loginSubtitle': 'Login to your account to continue shopping',
     'auth.registerSubtitle': 'Join TeleTrade Hub and start shopping',
+    'auth.loginSuccess': 'Login successful!',
+    'auth.loginFailed': 'Login failed. Please try again.',
+    'auth.registerSuccess': 'Account created successfully!',
+    'auth.registerFailed': 'Registration failed. Please try again.',
+    'auth.emailPlaceholder': 'your@email.com',
+    'auth.passwordPlaceholder': '••••••••',
+    'auth.fullName': 'Full Name',
+    'auth.fullNamePlaceholder': 'John Doe',
+    'auth.phone': 'Phone',
+    'auth.phonePlaceholder': '+1 234 567 8900',
+    'auth.rememberMe': 'Remember me',
+    'auth.passwordRequirements': 'Password requirements:',
+    'auth.passwordMinLength': 'At least 8 characters',
+    'auth.passwordUppercase': 'One uppercase letter',
+    'auth.passwordLowercase': 'One lowercase letter',
+    'auth.passwordNumber': 'One number',
+    'auth.passwordSpecial': 'One special character',
     
     // Common
     'common.loading': 'Loading...',
@@ -294,6 +311,7 @@ const translations: Record<Language, Record<string, string>> = {
     'common.yes': 'Yes',
     'common.no': 'No',
     'common.viewAll': 'View All',
+    'common.optional': '(Optional)',
     
     // Home
     'home.productsAvailable': 'Products Available',
@@ -313,6 +331,12 @@ const translations: Record<Language, Record<string, string>> = {
     'footer.terms': 'Terms & Conditions',
     'footer.privacy': 'Privacy Policy',
     'footer.copyright': '© 2026 TeleTrade Hub. All rights reserved.',
+    'footer.description': 'Your trusted partner for premium telecommunication products. Quality devices from the world\'s top brands.',
+    'footer.company': 'Company',
+    'footer.policies': 'Policies',
+    'footer.secureCheckout': 'Secure Checkout',
+    'footer.safePayment': 'Safe Payment',
+    'footer.fastDelivery': 'Fast Delivery',
   },
   de: {
     // Navigation
@@ -569,6 +593,23 @@ const translations: Record<Language, Record<string, string>> = {
     'auth.welcomeBack': 'Willkommen zurück',
     'auth.loginSubtitle': 'Melden Sie sich in Ihrem Konto an, um weiter einzukaufen',
     'auth.registerSubtitle': 'Treten Sie TeleTrade Hub bei und beginnen Sie mit dem Einkaufen',
+    'auth.loginSuccess': 'Anmeldung erfolgreich!',
+    'auth.loginFailed': 'Anmeldung fehlgeschlagen. Bitte versuchen Sie es erneut.',
+    'auth.registerSuccess': 'Konto erfolgreich erstellt!',
+    'auth.registerFailed': 'Registrierung fehlgeschlagen. Bitte versuchen Sie es erneut.',
+    'auth.emailPlaceholder': 'ihre@email.com',
+    'auth.passwordPlaceholder': '••••••••',
+    'auth.fullName': 'Vollständiger Name',
+    'auth.fullNamePlaceholder': 'Max Mustermann',
+    'auth.phone': 'Telefon',
+    'auth.phonePlaceholder': '+49 30 123 456 789',
+    'auth.rememberMe': 'Angemeldet bleiben',
+    'auth.passwordRequirements': 'Passwortanforderungen:',
+    'auth.passwordMinLength': 'Mindestens 8 Zeichen',
+    'auth.passwordUppercase': 'Ein Großbuchstabe',
+    'auth.passwordLowercase': 'Ein Kleinbuchstabe',
+    'auth.passwordNumber': 'Eine Zahl',
+    'auth.passwordSpecial': 'Ein Sonderzeichen',
     
     // Common
     'common.loading': 'Laden...',
@@ -587,6 +628,7 @@ const translations: Record<Language, Record<string, string>> = {
     'common.yes': 'Ja',
     'common.no': 'Nein',
     'common.viewAll': 'Alle ansehen',
+    'common.optional': '(Optional)',
     
     // Home
     'home.productsAvailable': 'Verfügbare Produkte',
@@ -606,6 +648,12 @@ const translations: Record<Language, Record<string, string>> = {
     'footer.terms': 'AGB',
     'footer.privacy': 'Datenschutz',
     'footer.copyright': '© 2026 TeleTrade Hub. Alle Rechte vorbehalten.',
+    'footer.description': 'Ihr vertrauenswürdiger Partner für Premium-Telekommunikationsprodukte. Qualitätsgeräte von Top-Marken weltweit.',
+    'footer.company': 'Unternehmen',
+    'footer.policies': 'Richtlinien',
+    'footer.secureCheckout': 'Sicherer Checkout',
+    'footer.safePayment': 'Sichere Zahlung',
+    'footer.fastDelivery': 'Schnelle Lieferung',
   },
   // Stub translations for other languages - will fallback to English via t() function
   fr: {} as Record<string, string>,
@@ -624,18 +672,30 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (typeof window === 'undefined') return;
     
-    // Check localStorage first
-    const savedLang = localStorage.getItem(LANGUAGE_KEY) as Language;
     const validLanguages: Language[] = ['en', 'de', 'fr', 'es', 'it', 'sk'];
+    
+    // Check URL params first (highest priority)
+    const params = new URLSearchParams(window.location.search);
+    const urlLang = params.get('lang') as Language;
+    if (urlLang && validLanguages.includes(urlLang)) {
+      setLanguageState(urlLang);
+      localStorage.setItem(LANGUAGE_KEY, urlLang);
+      localStorage.setItem('language', urlLang); // Sync for API client
+      return;
+    }
+    
+    // Check localStorage
+    const savedLang = localStorage.getItem(LANGUAGE_KEY) as Language;
     if (savedLang && validLanguages.includes(savedLang)) {
       setLanguageState(savedLang);
-    } else {
-      // Check URL params
-      const params = new URLSearchParams(window.location.search);
-      const urlLang = params.get('lang') as Language;
-      if (urlLang && validLanguages.includes(urlLang)) {
-        setLanguageState(urlLang);
-        localStorage.setItem(LANGUAGE_KEY, urlLang);
+      localStorage.setItem('language', savedLang); // Sync for API client
+      // Update URL if not already set
+      if (!urlLang) {
+        const url = new URL(window.location.href);
+        if (savedLang !== 'en') {
+          url.searchParams.set('lang', savedLang);
+        }
+        window.history.replaceState({}, '', url.toString());
       }
     }
   }, []);
@@ -644,8 +704,10 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     setLanguageState(lang);
     if (typeof window !== 'undefined') {
       localStorage.setItem(LANGUAGE_KEY, lang);
+      // Also sync to 'language' key for API client compatibility
+      localStorage.setItem('language', lang);
       
-      // Update URL without reload
+      // Update URL without reload - preserve current path
       const url = new URL(window.location.href);
       if (lang === 'en') {
         url.searchParams.delete('lang');
@@ -653,6 +715,9 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
         url.searchParams.set('lang', lang);
       }
       window.history.replaceState({}, '', url.toString());
+      
+      // Reload page to apply language to server components
+      window.location.reload();
     }
   };
 

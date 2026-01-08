@@ -21,11 +21,17 @@ const categoryIcons: Record<string, React.ReactNode> = {
   'Components': <Cpu className="w-8 h-8" />,
 };
 
-async function getFeaturedProducts() {
+interface HomePageProps {
+  searchParams: {
+    lang?: string;
+  };
+}
+
+async function getFeaturedProducts(lang: string = 'en') {
   try {
     const response = await productsApi.list({ 
       per_page: 8, 
-      lang: 'en',
+      lang,
       is_featured: 1 // Filter to only show featured products
     });
     return Array.isArray(response.data) ? response.data.slice(0, 8) : [];
@@ -35,9 +41,9 @@ async function getFeaturedProducts() {
   }
 }
 
-async function getCategories() {
+async function getCategories(lang: string = 'en') {
   try {
-    const response = await categoriesApi.list('en');
+    const response = await categoriesApi.list(lang);
     return Array.isArray(response.data) ? response.data.slice(0, 6) : [];
   } catch (error) {
     console.error('Error fetching categories:', error);
@@ -45,9 +51,9 @@ async function getCategories() {
   }
 }
 
-async function getBrands() {
+async function getBrands(lang: string = 'en') {
   try {
-    const response = await brandsApi.list('en');
+    const response = await brandsApi.list(lang);
     return Array.isArray(response.data) ? response.data.slice(0, 8) : [];
   } catch (error) {
     console.error('Error fetching brands:', error);
@@ -55,11 +61,12 @@ async function getBrands() {
   }
 }
 
-export default async function HomePage() {
+export default async function HomePage({ searchParams }: HomePageProps) {
+  const lang = searchParams.lang || 'en';
   const [featuredProducts, categories, brands] = await Promise.all([
-    getFeaturedProducts(),
-    getCategories(),
-    getBrands(),
+    getFeaturedProducts(lang),
+    getCategories(lang),
+    getBrands(lang),
   ]);
 
   return (

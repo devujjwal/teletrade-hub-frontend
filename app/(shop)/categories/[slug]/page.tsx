@@ -50,18 +50,18 @@ async function getProducts(slug: string, searchParams: CategoryPageProps['search
   }
 }
 
-async function getCategories() {
+async function getCategories(lang: string = 'en') {
   try {
-    const response = await categoriesApi.list('en');
+    const response = await categoriesApi.list(lang);
     return response.data;
   } catch (error) {
     return [];
   }
 }
 
-async function getBrands() {
+async function getBrands(lang: string = 'en') {
   try {
-    const response = await brandsApi.list('en');
+    const response = await brandsApi.list(lang);
     return response.data;
   } catch (error) {
     return [];
@@ -69,11 +69,12 @@ async function getBrands() {
 }
 
 export default async function CategoryPage({ params, searchParams }: CategoryPageProps) {
+  const lang = searchParams.lang || 'en';
   const [category, productsData, categories, brands] = await Promise.all([
-    getCategory(params.slug, searchParams.lang),
+    getCategory(params.slug, lang),
     getProducts(params.slug, searchParams),
-    getCategories(),
-    getBrands(),
+    getCategories(lang),
+    getBrands(lang),
   ]);
 
   if (!category) {

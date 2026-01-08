@@ -44,11 +44,22 @@ export function mapProduct(backendProduct: any): Product {
 
 /**
  * Map backend category response to frontend Category type
+ * Uses language-specific name fields (name_de, name_en, etc.) if available
  */
-export function mapCategory(backendCategory: any): Category {
+export function mapCategory(backendCategory: any, lang?: string): Category {
+  // Determine which name field to use based on language
+  let name = backendCategory.name || '';
+  
+  if (lang && backendCategory[`name_${lang}`]) {
+    name = backendCategory[`name_${lang}`];
+  } else if (backendCategory.name_en) {
+    // Fallback to English if language-specific name not available
+    name = backendCategory.name_en;
+  }
+  
   return {
     id: backendCategory.id,
-    name: backendCategory.name || '',
+    name,
     slug: backendCategory.slug || backendCategory.id?.toString() || '',
     description: backendCategory.description,
     image: backendCategory.image_url || backendCategory.image,

@@ -8,6 +8,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { authApi } from '@/lib/api/auth';
 import { useAuthStore } from '@/lib/store/auth-store';
+import { useLanguage } from '@/contexts/language-context';
 import Button from '@/components/ui/button';
 import Input from '@/components/ui/input';
 import Card from '@/components/ui/card';
@@ -38,6 +39,7 @@ export default function RegisterForm() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const login = useAuthStore((state) => state.login);
+  const { t } = useLanguage();
 
   const {
     register,
@@ -66,7 +68,7 @@ export default function RegisterForm() {
         phone: data.phone,
       });
       login(response.token, response.user, false);
-      toast.success('Account created successfully!');
+      toast.success(t('auth.registerSuccess') || 'Account created successfully!');
       router.push('/account');
     } catch (error: any) {
       // Show specific validation errors from backend
@@ -80,7 +82,7 @@ export default function RegisterForm() {
           .join('\n');
         toast.error(errorMessages);
       } else {
-        toast.error(error.response?.data?.message || 'Registration failed. Please try again.');
+        toast.error(error.response?.data?.message || t('auth.registerFailed') || 'Registration failed. Please try again.');
       }
     } finally {
       setIsLoading(false);
@@ -92,12 +94,12 @@ export default function RegisterForm() {
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div>
           <label htmlFor="name" className="block text-sm font-medium mb-2">
-            Full Name
+            {t('auth.fullName') || 'Full Name'}
           </label>
           <Input
             id="name"
             type="text"
-            placeholder="John Doe"
+            placeholder={t('auth.fullNamePlaceholder') || 'John Doe'}
             {...register('name')}
             className={errors.name ? 'border-destructive' : ''}
           />
@@ -108,12 +110,12 @@ export default function RegisterForm() {
 
         <div>
           <label htmlFor="email" className="block text-sm font-medium mb-2">
-            Email
+            {t('auth.email')}
           </label>
           <Input
             id="email"
             type="email"
-            placeholder="your@email.com"
+            placeholder={t('auth.emailPlaceholder') || 'your@email.com'}
             {...register('email')}
             className={errors.email ? 'border-destructive' : ''}
           />
@@ -124,24 +126,24 @@ export default function RegisterForm() {
 
         <div>
           <label htmlFor="phone" className="block text-sm font-medium mb-2">
-            Phone (Optional)
+            {t('auth.phone') || 'Phone'} {t('common.optional') || '(Optional)'}
           </label>
           <Input
             id="phone"
             type="tel"
-            placeholder="+1 234 567 8900"
+            placeholder={t('auth.phonePlaceholder') || '+1 234 567 8900'}
             {...register('phone')}
           />
         </div>
 
         <div>
           <label htmlFor="password" className="block text-sm font-medium mb-2">
-            Password
+            {t('auth.password')}
           </label>
           <Input
             id="password"
             type="password"
-            placeholder="••••••••"
+            placeholder={t('auth.passwordPlaceholder') || '••••••••'}
             {...register('password')}
             className={errors.password ? 'border-destructive' : ''}
           />
@@ -150,22 +152,22 @@ export default function RegisterForm() {
           )}
           {!errors.password && password && (
             <div className="mt-2 space-y-1">
-              <p className="text-xs font-medium text-muted-foreground">Password requirements:</p>
+              <p className="text-xs font-medium text-muted-foreground">{t('auth.passwordRequirements') || 'Password requirements:'}</p>
               <div className="flex flex-col gap-1">
                 <p className={`text-xs ${password.length >= 8 ? 'text-success' : 'text-muted-foreground'}`}>
-                  {password.length >= 8 ? '✓' : '○'} At least 8 characters
+                  {password.length >= 8 ? '✓' : '○'} {t('auth.passwordMinLength') || 'At least 8 characters'}
                 </p>
                 <p className={`text-xs ${/[A-Z]/.test(password) ? 'text-success' : 'text-muted-foreground'}`}>
-                  {/[A-Z]/.test(password) ? '✓' : '○'} One uppercase letter
+                  {/[A-Z]/.test(password) ? '✓' : '○'} {t('auth.passwordUppercase') || 'One uppercase letter'}
                 </p>
                 <p className={`text-xs ${/[a-z]/.test(password) ? 'text-success' : 'text-muted-foreground'}`}>
-                  {/[a-z]/.test(password) ? '✓' : '○'} One lowercase letter
+                  {/[a-z]/.test(password) ? '✓' : '○'} {t('auth.passwordLowercase') || 'One lowercase letter'}
                 </p>
                 <p className={`text-xs ${/[0-9]/.test(password) ? 'text-success' : 'text-muted-foreground'}`}>
-                  {/[0-9]/.test(password) ? '✓' : '○'} One number
+                  {/[0-9]/.test(password) ? '✓' : '○'} {t('auth.passwordNumber') || 'One number'}
                 </p>
                 <p className={`text-xs ${/[^A-Za-z0-9]/.test(password) ? 'text-success' : 'text-muted-foreground'}`}>
-                  {/[^A-Za-z0-9]/.test(password) ? '✓' : '○'} One special character
+                  {/[^A-Za-z0-9]/.test(password) ? '✓' : '○'} {t('auth.passwordSpecial') || 'One special character'}
                 </p>
               </div>
             </div>
@@ -174,12 +176,12 @@ export default function RegisterForm() {
 
         <div>
           <label htmlFor="confirmPassword" className="block text-sm font-medium mb-2">
-            Confirm Password
+            {t('auth.confirmPassword')}
           </label>
           <Input
             id="confirmPassword"
             type="password"
-            placeholder="••••••••"
+            placeholder={t('auth.passwordPlaceholder') || '••••••••'}
             {...register('confirmPassword')}
             className={errors.confirmPassword ? 'border-destructive' : ''}
           />
@@ -191,17 +193,16 @@ export default function RegisterForm() {
         </div>
 
         <Button type="submit" className="w-full" isLoading={isLoading}>
-          Create Account
+          {t('auth.createAccount') || 'Create Account'}
         </Button>
 
         <div className="text-center text-sm">
-          <span className="text-muted-foreground">Already have an account? </span>
+          <span className="text-muted-foreground">{t('auth.hasAccount')} </span>
           <Link href="/login" className="text-primary font-medium hover:underline">
-            Login
+            {t('auth.login')}
           </Link>
         </div>
       </form>
     </Card>
   );
 }
-

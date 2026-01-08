@@ -25,7 +25,8 @@ export default function HomePageClient({
   brands,
   categoryIcons 
 }: HomePageClientProps) {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const langParam = language && language !== 'en' ? `?lang=${language}` : '';
 
   return (
     <div>
@@ -59,13 +60,13 @@ export default function HomePageClient({
             
             <div className="flex flex-wrap gap-4 justify-center mb-12">
               <Button size="lg" className="h-14 px-8 bg-secondary hover:bg-secondary/90 text-secondary-foreground font-semibold text-base shadow-lg shadow-secondary/25" asChild>
-                <Link href="/products">
+                <Link href={`/products${langParam}`}>
                   {t('hero.cta')}
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </Link>
               </Button>
               <Button size="lg" variant="outline" className="h-14 px-8 border-2 border-primary-foreground/30 bg-transparent hover:bg-primary-foreground/10 text-primary-foreground font-semibold text-base" asChild>
-                <Link href="/categories">
+                <Link href={`/categories${langParam}`}>
                   {t('hero.secondary')}
                 </Link>
               </Button>
@@ -102,7 +103,7 @@ export default function HomePageClient({
             <p className="text-muted-foreground mt-1">{t('categories.subtitle') || 'Find exactly what you\'re looking for'}</p>
           </div>
           <Button variant="ghost" asChild className="hidden sm:flex">
-            <Link href="/categories">
+            <Link href={`/categories${langParam}`}>
               {t('common.viewAll') || 'View All'}
               <ChevronRight className="w-4 h-4 ml-1" />
             </Link>
@@ -113,7 +114,7 @@ export default function HomePageClient({
           {categories.map((category) => (
             <Link
               key={category.id}
-              href={`/categories/${category.slug}`}
+              href={`/categories/${category.slug}${langParam}`}
               className="group p-6 bg-card rounded-xl border border-border hover:border-primary hover:shadow-lg transition-all text-center"
             >
               <div className="w-16 h-16 mx-auto mb-4 rounded-xl bg-muted flex items-center justify-center text-muted-foreground group-hover:text-primary group-hover:bg-primary/10 transition-colors">
@@ -137,7 +138,7 @@ export default function HomePageClient({
               <p className="text-muted-foreground mt-1">{t('products.featuredSubtitle') || 'Top picks from our collection'}</p>
             </div>
             <Button variant="ghost" asChild className="hidden sm:flex">
-              <Link href="/products">
+              <Link href={`/products${langParam}`}>
                 {t('products.viewAll') || 'View All Products'}
                 <ChevronRight className="w-4 h-4 ml-1" />
               </Link>
@@ -158,7 +159,7 @@ export default function HomePageClient({
 
           <div className="text-center mt-8 sm:hidden">
             <Button asChild>
-              <Link href="/products">{t('products.viewAll') || 'View All Products'}</Link>
+              <Link href={`/products${langParam}`}>{t('products.viewAll') || 'View All Products'}</Link>
             </Button>
           </div>
         </div>
@@ -172,7 +173,7 @@ export default function HomePageClient({
             <p className="text-muted-foreground mt-1">{t('brands.subtitle') || 'Explore products from top brands'}</p>
           </div>
           <Button variant="ghost" asChild className="hidden sm:flex">
-            <Link href="/brands">
+            <Link href={`/brands${langParam}`}>
               {t('brands.viewAll') || 'View All Brands'}
               <ChevronRight className="w-4 h-4 ml-1" />
             </Link>
@@ -183,7 +184,7 @@ export default function HomePageClient({
           {brands.map((brand) => (
             <Link
               key={brand.id}
-              href={`/brands/${brand.slug}`}
+              href={`/brands/${brand.slug}${langParam}`}
               className="flex-shrink-0 group"
             >
               <div className="w-32 h-16 bg-card border border-border rounded-lg flex items-center justify-center group-hover:border-primary transition-colors">
@@ -240,7 +241,7 @@ export default function HomePageClient({
             {t('home.ctaSubtitle') || 'Browse our extensive collection of premium telecommunication products from the world\'s leading brands.'}
           </p>
           <Button size="lg" asChild>
-            <Link href="/products">
+            <Link href={`/products${langParam}`}>
               {t('home.startShopping') || 'Start Shopping'}
               <ArrowRight className="w-5 h-5 ml-2" />
             </Link>

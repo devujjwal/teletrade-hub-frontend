@@ -10,19 +10,19 @@ export const categoriesApi = {
     // Backend returns: { success: true, data: { categories: [...] } } or { success: true, data: [...] }
     if (response.data?.success) {
       if (response.data?.data?.categories && Array.isArray(response.data.data.categories)) {
-        return { data: response.data.data.categories.map(mapCategory) };
+        return { data: response.data.data.categories.map((cat: any) => mapCategory(cat, lang)) };
       }
       if (Array.isArray(response.data.data)) {
-        return { data: response.data.data.map(mapCategory) };
+        return { data: response.data.data.map((cat: any) => mapCategory(cat, lang)) };
       }
     }
     // Handle direct array response
     if (Array.isArray(response.data)) {
-      return { data: response.data.map(mapCategory) };
+      return { data: response.data.map((cat: any) => mapCategory(cat, lang)) };
     }
     // Handle nested data.data structure
     if (response.data?.data && Array.isArray(response.data.data)) {
-      return { data: response.data.data.map(mapCategory) };
+      return { data: response.data.data.map((cat: any) => mapCategory(cat, lang)) };
     }
     return { data: [] };
   },
@@ -44,7 +44,7 @@ export const categoriesApi = {
       });
       
       if (productsResponse.data?.success && productsResponse.data?.data?.category) {
-        return mapCategory(productsResponse.data.data.category);
+        return mapCategory(productsResponse.data.data.category, lang);
       }
       
       throw new Error('Category not found');
