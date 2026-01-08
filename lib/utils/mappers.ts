@@ -53,6 +53,18 @@ export function mapProduct(backendProduct: any): Product {
     specifications.full_name = backendProduct.name;
   }
   
+  // Process images: extract image_url from image objects and filter duplicates
+  let primaryImage = backendProduct.image_url || backendProduct.primary_image || backendProduct.image;
+  let imagesArray = backendProduct.images || [];
+  
+  // If images is an array of objects, extract image_url
+  const imageUrls: string[] = imagesArray
+    .map((img: any) => (typeof img === 'string' ? img : img.image_url))
+    .filter((url: string) => url && url.trim() !== '');
+  
+  // Remove primary_image from images array if it exists there (to avoid duplicates)
+  const uniqueImages = imageUrls.filter((url: string) => url !== primaryImage);
+  
   return {
     id: backendProduct.id,
     sku: backendProduct.sku || '',
@@ -60,8 +72,8 @@ export function mapProduct(backendProduct: any): Product {
     slug: backendProduct.slug || backendProduct.id?.toString() || '',
     description: backendProduct.description,
     meta_description: backendProduct.meta_description,
-    primary_image: backendProduct.image_url || backendProduct.primary_image || backendProduct.image,
-    images: backendProduct.images || [],
+    primary_image: primaryImage,
+    images: uniqueImages,
     price: Number(backendProduct.price) || 0,
     base_price: backendProduct.base_price ? Number(backendProduct.base_price) : undefined,
     original_price: backendProduct.original_price ? Number(backendProduct.original_price) : undefined,

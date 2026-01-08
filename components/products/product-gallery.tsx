@@ -21,7 +21,23 @@ export default function ProductGallery({
   isFeatured,
   discountPercent,
 }: ProductGalleryProps) {
-  const allImages = primaryImage ? [primaryImage, ...images] : images;
+  // Normalize images array - extract image_url if objects, filter out empty/null values
+  const normalizedImages = images
+    .map((img: any) => (typeof img === 'string' ? img : img?.image_url))
+    .filter((url: string | undefined): url is string => Boolean(url && url.trim()));
+  
+  // Combine primary image with other images, removing duplicates
+  const allImages: string[] = [];
+  if (primaryImage) {
+    allImages.push(primaryImage);
+  }
+  // Add other images that aren't duplicates of primary_image
+  normalizedImages.forEach((img) => {
+    if (img !== primaryImage && !allImages.includes(img)) {
+      allImages.push(img);
+    }
+  });
+  
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const hasMultipleImages = allImages.length > 1;
 
