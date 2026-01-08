@@ -10,9 +10,25 @@ export const ordersApi = {
       const ordersArray = Array.isArray(response.data.data) 
         ? response.data.data 
         : response.data.data.data || [];
-      return { data: ordersArray };
+      return { 
+        data: ordersArray,
+        meta: {
+          current_page: 1,
+          last_page: 1,
+          per_page: ordersArray.length,
+          total: ordersArray.length
+        }
+      };
     }
-    return { data: [] };
+    return { 
+      data: [],
+      meta: {
+        current_page: 1,
+        last_page: 1,
+        per_page: 0,
+        total: 0
+      }
+    };
   },
 
   create: async (orderData: CreateOrderRequest): Promise<Order> => {
