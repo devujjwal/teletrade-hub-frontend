@@ -6,6 +6,7 @@ import Card from '@/components/ui/card';
 import Button from '@/components/ui/button';
 import Image from 'next/image';
 import { getProxiedImageUrl } from '@/lib/utils/format';
+import { useLanguage } from '@/contexts/language-context';
 
 interface OrderSummaryProps {
   items: CartItem[];
@@ -14,6 +15,7 @@ interface OrderSummaryProps {
 }
 
 export default function OrderSummary({ items, getTotal, isSubmitting }: OrderSummaryProps) {
+  const { t } = useLanguage();
   const subtotal = getTotal();
   const shipping = subtotal > 100 ? 0 : 9.99;
   const tax = subtotal * 0.19;
@@ -21,7 +23,7 @@ export default function OrderSummary({ items, getTotal, isSubmitting }: OrderSum
 
   return (
     <Card className="p-6 sticky top-4">
-      <h2 className="font-display text-xl font-semibold mb-6">Order Summary</h2>
+      <h2 className="font-display text-xl font-semibold mb-6">{t('checkout.orderSummary')}</h2>
       <div className="space-y-3 mb-6 max-h-64 overflow-y-auto">
         {items.map((item) => (
           <div key={item.product_id} className="flex gap-3">
@@ -38,7 +40,7 @@ export default function OrderSummary({ items, getTotal, isSubmitting }: OrderSum
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium truncate">{item.product_name}</p>
               <p className="text-xs text-muted-foreground">
-                Qty: {item.quantity} × {formatPrice(item.price)}
+                {t('cart.quantity')}: {item.quantity} × {formatPrice(item.price)}
               </p>
             </div>
             <p className="text-sm font-semibold">{formatPrice(item.price * item.quantity)}</p>
@@ -47,11 +49,11 @@ export default function OrderSummary({ items, getTotal, isSubmitting }: OrderSum
       </div>
       <div className="space-y-3 border-t border-border pt-4">
         <div className="flex justify-between text-sm">
-          <span className="text-muted-foreground">Subtotal</span>
+          <span className="text-muted-foreground">{t('cart.subtotal')}</span>
           <span className="font-medium">{formatPrice(subtotal)}</span>
         </div>
         <div className="flex justify-between text-sm">
-          <span className="text-muted-foreground">Shipping</span>
+          <span className="text-muted-foreground">{t('cart.shipping')}</span>
           <span className="font-medium">
             {shipping === 0 ? (
               <span className="text-success">Free</span>
@@ -61,11 +63,11 @@ export default function OrderSummary({ items, getTotal, isSubmitting }: OrderSum
           </span>
         </div>
         <div className="flex justify-between text-sm">
-          <span className="text-muted-foreground">Tax (VAT)</span>
+          <span className="text-muted-foreground">{t('checkout.taxVat')}</span>
           <span className="font-medium">{formatPrice(tax)}</span>
         </div>
         <div className="flex justify-between font-semibold text-lg pt-2 border-t border-border">
-          <span>Total</span>
+          <span>{t('cart.total')}</span>
           <span>{formatPrice(total)}</span>
         </div>
       </div>
@@ -81,7 +83,7 @@ export default function OrderSummary({ items, getTotal, isSubmitting }: OrderSum
         isLoading={isSubmitting}
         disabled={isSubmitting}
       >
-        Place Order
+        {t('checkout.placeOrder')}
       </Button>
     </Card>
   );

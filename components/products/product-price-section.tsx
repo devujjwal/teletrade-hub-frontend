@@ -5,6 +5,7 @@ import { useAuthStore } from '@/lib/store/auth-store';
 import { formatPrice } from '@/lib/utils/format';
 import Badge from '@/components/ui/badge';
 import { Lock } from 'lucide-react';
+import { useLanguage } from '@/contexts/language-context';
 
 interface ProductPriceSectionProps {
   price: number;
@@ -21,6 +22,7 @@ export default function ProductPriceSection({
 }: ProductPriceSectionProps) {
   const router = useRouter();
   const { token, user } = useAuthStore();
+  const { t } = useLanguage();
 
   // If not logged in, show login prompt
   if (!token || !user) {
@@ -31,8 +33,8 @@ export default function ProductPriceSection({
       >
         <Lock className="w-5 h-5 text-muted-foreground" />
         <div>
-          <p className="font-medium">Login to view price</p>
-          <p className="text-sm text-muted-foreground">Sign in to see exclusive pricing and offers</p>
+          <p className="font-medium">{t('products.loginToViewPrice')}</p>
+          <p className="text-sm text-muted-foreground">{t('products.signInForPricing')}</p>
         </div>
       </div>
     );

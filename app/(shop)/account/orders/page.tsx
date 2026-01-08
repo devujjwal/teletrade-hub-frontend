@@ -39,16 +39,12 @@ const statusConfig = {
 
 export default function OrdersPage() {
   const router = useRouter();
-  const { user, token, initialize, _hasHydrated } = useAuthStore();
+  const { user, token, _hasHydrated } = useAuthStore();
   const { t } = useLanguage();
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-
-  useEffect(() => {
-    initialize();
-  }, [initialize]);
 
   useEffect(() => {
     // Only redirect if hydrated and user is not logged in

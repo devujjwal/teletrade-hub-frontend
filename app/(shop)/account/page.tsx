@@ -25,7 +25,7 @@ import toast from 'react-hot-toast';
 
 export default function AccountPage() {
   const router = useRouter();
-  const { user, token, initialize, _hasHydrated } = useAuthStore();
+  const { user, token, _hasHydrated } = useAuthStore();
   const login = useAuthStore((state) => state.login);
   const { t } = useLanguage();
   
@@ -37,10 +37,6 @@ export default function AccountPage() {
     phone: user?.phone || '',
   });
   const [isSaving, setIsSaving] = useState(false);
-
-  useEffect(() => {
-    initialize();
-  }, [initialize]);
 
   useEffect(() => {
     // Only redirect if hydrated and user is not logged in

@@ -22,7 +22,7 @@ import toast from 'react-hot-toast';
 
 export default function AccountSettingsPage() {
   const router = useRouter();
-  const { user, token, initialize, _hasHydrated } = useAuthStore();
+  const { user, token, _hasHydrated } = useAuthStore();
   const { t } = useLanguage();
 
   const [passwordData, setPasswordData] = useState({
@@ -32,10 +32,6 @@ export default function AccountSettingsPage() {
   });
 
   const [isChangingPassword, setIsChangingPassword] = useState(false);
-
-  useEffect(() => {
-    initialize();
-  }, [initialize]);
 
   useEffect(() => {
     // Only redirect if hydrated and user is not logged in
@@ -86,19 +82,16 @@ export default function AccountSettingsPage() {
 
     setIsChangingPassword(true);
     try {
-      // TODO: Implement change password API endpoint
-      // await authApi.changePassword({
-      //   currentPassword: passwordData.currentPassword,
-      //   newPassword: passwordData.newPassword,
-      // });
-      
-      // Simulate API call for now
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await authApi.changePassword({
+        current_password: passwordData.currentPassword,
+        new_password: passwordData.newPassword,
+        confirm_password: passwordData.confirmPassword,
+      });
       
       toast.success(t('settings.passwordChanged') || 'Password changed successfully');
       setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
     } catch (error: any) {
-      toast.error(error?.response?.data?.message || t('settings.passwordChanged') || 'Failed to change password');
+      toast.error(error?.response?.data?.message || error?.message || 'Failed to change password');
     } finally {
       setIsChangingPassword(false);
     }

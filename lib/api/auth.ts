@@ -123,5 +123,16 @@ export const authApi = {
     }
     return response.data;
   },
+
+  changePassword: async (data: { 
+    current_password: string; 
+    new_password: string; 
+    confirm_password: string 
+  }): Promise<void> => {
+    const response = await apiClient.put('/auth/password', data);
+    if (!response.data?.success) {
+      throw new Error(response.data?.message || 'Failed to change password');
+    }
+  },
 };
 

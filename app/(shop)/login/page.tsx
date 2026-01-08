@@ -1,27 +1,29 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import LoginForm from '@/components/auth/login-form';
 import { useAuthStore } from '@/lib/store/auth-store';
 import { useLanguage } from '@/contexts/language-context';
 
 export default function LoginPage() {
   const router = useRouter();
-  const { user, token, initialize, _hasHydrated } = useAuthStore();
+  const searchParams = useSearchParams();
+  const { user, token, _hasHydrated } = useAuthStore();
   const { t } = useLanguage();
-
-  useEffect(() => {
-    // Initialize auth state
-    initialize();
-  }, [initialize]);
 
   useEffect(() => {
     // Only redirect if hydrated and user is logged in
     if (_hasHydrated && token && user) {
-      router.push('/account');
+      const redirect = searchParams.get('redirect');
+      // Validate redirect URL to prevent open redirects
+      if (redirect && redirect.startsWith('/') && !redirect.startsWith('//')) {
+        router.push(redirect);
+      } else {
+        router.push('/account');
+      }
     }
-  }, [_hasHydrated, token, user, router]);
+  }, [_hasHydrated, token, user, router, searchParams]);
 
   // Show loading while hydrating
   if (!_hasHydrated) {

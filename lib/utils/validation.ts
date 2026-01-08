@@ -4,6 +4,8 @@ export const checkoutSchema = z.object({
   customer_name: z.string().min(2, 'Name must be at least 2 characters'),
   customer_email: z.string().email('Invalid email address'),
   customer_phone: z.string().optional(),
+  shipping_address_id: z.string().optional(),
+  billing_address_id: z.string().optional(),
   shipping_address: z.object({
     address_line_1: z.string().min(5, 'Address must be at least 5 characters'),
     address_line_2: z.string().optional(),

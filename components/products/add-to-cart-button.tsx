@@ -8,6 +8,7 @@ import { useAuthStore } from '@/lib/store/auth-store';
 import Button from '@/components/ui/button';
 import { Minus, Plus, ShoppingCart, Lock } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useLanguage } from '@/contexts/language-context';
 
 interface AddToCartButtonProps {
   product: Product;
@@ -18,6 +19,7 @@ export default function AddToCartButton({ product }: AddToCartButtonProps) {
   const [quantity, setQuantity] = useState(1);
   const addItem = useCartStore((state) => state.addItem);
   const { token, user } = useAuthStore();
+  const { t } = useLanguage();
 
   const isInStock = product.availability === 'in_stock' || product.availability === 'pre_order';
   const maxQuantity = product.stock_quantity || 999;
@@ -57,7 +59,7 @@ export default function AddToCartButton({ product }: AddToCartButtonProps) {
         variant="outline"
       >
         <Lock className="w-5 h-5 mr-2" />
-        Login to Purchase
+        {t('products.loginToBuy')}
       </Button>
     );
   }
@@ -66,7 +68,7 @@ export default function AddToCartButton({ product }: AddToCartButtonProps) {
     <div className="space-y-4">
       {/* Quantity Selector */}
       <div className="flex items-center gap-4">
-        <label className="text-sm font-medium">Quantity:</label>
+        <label className="text-sm font-medium">{t('cart.quantity')}:</label>
         <div className="flex items-center border border-border rounded-lg">
           <button
             onClick={() => setQuantity(Math.max(1, quantity - 1))}
@@ -99,7 +101,7 @@ export default function AddToCartButton({ product }: AddToCartButtonProps) {
         className="w-full btn-shop"
       >
         <ShoppingCart className="w-5 h-5 mr-2" />
-        {isInStock ? 'Add to Cart' : 'Out of Stock'}
+        {isInStock ? t('products.addToCart') : t('products.outOfStock')}
       </Button>
     </div>
   );

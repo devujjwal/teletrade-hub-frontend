@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -23,6 +23,7 @@ type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
   const login = useAuthStore((state) => state.login);
   const { t } = useLanguage();
@@ -41,7 +42,14 @@ export default function LoginForm() {
       const response = await authApi.login(data.email, data.password);
       login(response.token, response.user, false);
       toast.success(t('auth.loginSuccess') || 'Login successful!');
-      router.push('/account');
+      
+      // Respect redirect query parameter if present
+      const redirect = searchParams.get('redirect');
+      if (redirect && redirect.startsWith('/') && !redirect.startsWith('//')) {
+        router.push(redirect);
+      } else {
+        router.push('/account');
+      }
     } catch (error: any) {
       toast.error(error.response?.data?.message || t('auth.loginFailed') || 'Login failed. Please try again.');
     } finally {

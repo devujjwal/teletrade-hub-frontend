@@ -7,9 +7,11 @@ import CartSummary from '@/components/cart/cart-summary';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ShoppingBag, ArrowRight } from 'lucide-react';
 import Button from '@/components/ui/button';
+import { useLanguage } from '@/contexts/language-context';
 
 export default function CartPage() {
   const items = useCartStore((state) => state.items);
+  const { t } = useLanguage();
 
   if (items.length === 0) {
     return (
@@ -18,13 +20,13 @@ export default function CartPage() {
           <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-muted flex items-center justify-center">
             <ShoppingBag className="w-12 h-12 text-muted-foreground" />
           </div>
-          <h1 className="font-display text-2xl font-bold mb-4">Your cart is empty</h1>
+          <h1 className="font-display text-2xl font-bold mb-4">{t('cart.empty')}</h1>
           <p className="text-muted-foreground mb-8">
             Looks like you haven't added any products to your cart yet.
           </p>
           <Button size="lg" asChild>
             <Link href="/products">
-              Continue Shopping
+              {t('cart.continueShopping')}
               <ArrowRight className="w-5 h-5 ml-2" />
             </Link>
           </Button>
@@ -35,7 +37,7 @@ export default function CartPage() {
 
   return (
     <div className="container-wide py-8">
-      <h1 className="font-display text-3xl font-bold mb-8">Shopping Cart</h1>
+      <h1 className="font-display text-3xl font-bold mb-8">{t('cart.title')}</h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Cart Items */}

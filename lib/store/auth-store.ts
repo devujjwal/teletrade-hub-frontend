@@ -1,7 +1,7 @@
 'use client';
 
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, createJSONStorage } from 'zustand/middleware';
 import { User } from '@/types/user';
 
 interface AuthStore {
@@ -11,13 +11,12 @@ interface AuthStore {
   _hasHydrated: boolean;
   login: (token: string, user: User, isAdmin?: boolean) => void;
   logout: () => void;
-  initialize: () => void;
   setHasHydrated: (state: boolean) => void;
 }
 
 export const useAuthStore = create<AuthStore>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       token: null,
       user: null,
       isAdmin: false,
@@ -39,39 +38,18 @@ export const useAuthStore = create<AuthStore>()(
           localStorage.removeItem('is_admin');
         }
       },
-      initialize: () => {
-        // Sync from localStorage on mount (Zustand persist handles this, but we ensure compatibility)
-        if (typeof window !== 'undefined') {
-          const token = localStorage.getItem('auth_token');
-          const userStr = localStorage.getItem('user');
-          const isAdminStr = localStorage.getItem('is_admin');
-          
-          if (token && userStr) {
-            try {
-              const user = JSON.parse(userStr);
-              const isAdmin = isAdminStr === 'true';
-              set({ token, user, isAdmin });
-            } catch (error) {
-              // SECURITY: Only log errors in development
-              if (process.env.NODE_ENV === 'development') {
-                console.error('Error parsing user from localStorage:', error);
-              }
-              // Clear corrupted data
-              localStorage.removeItem('auth_token');
-              localStorage.removeItem('user');
-              localStorage.removeItem('is_admin');
-            }
-          }
-        }
-      },
       setHasHydrated: (state) => {
         set({ _hasHydrated: state });
       },
     }),
     {
       name: 'auth-storage',
+      storage: createJSONStorage(() => localStorage),
       onRehydrateStorage: () => (state) => {
-        state?.setHasHydrated(true);
+        // Mark as hydrated after rehydration completes
+        if (state) {
+          state.setHasHydrated(true);
+        }
       },
     }
   )

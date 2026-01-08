@@ -8,13 +8,8 @@ import { useLanguage } from '@/contexts/language-context';
 
 export default function RegisterPage() {
   const router = useRouter();
-  const { user, token, initialize, _hasHydrated } = useAuthStore();
+  const { user, token, _hasHydrated } = useAuthStore();
   const { t } = useLanguage();
-
-  useEffect(() => {
-    // Initialize auth state
-    initialize();
-  }, [initialize]);
 
   useEffect(() => {
     // Only redirect if hydrated and user is logged in

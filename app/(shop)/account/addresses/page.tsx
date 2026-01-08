@@ -58,7 +58,7 @@ const DEFAULT_COUNTRY_CODE = "DE";
 
 export default function AddressesPage() {
   const router = useRouter();
-  const { user, token, initialize, _hasHydrated } = useAuthStore();
+  const { user, token, _hasHydrated } = useAuthStore();
   const { t } = useLanguage();
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -106,10 +106,6 @@ export default function AddressesPage() {
   }, [formData.stateCode, formData.countryCode]);
 
   useEffect(() => {
-    initialize();
-  }, [initialize]);
-
-  useEffect(() => {
     // Only redirect if hydrated and user is not logged in
     if (_hasHydrated && (!token || !user)) {
       router.push('/login');
@@ -117,15 +113,23 @@ export default function AddressesPage() {
     }
 
     // Fetch addresses only if authenticated
-    if (_hasHydrated && token && user) {
+    if (_hasHydrated && token && user && isLoading) {
       const fetchAddresses = async () => {
         try {
           const response = await addressesApi.list();
           setAddresses(response.data || []);
-        } catch (error) {
+        } catch (error: any) {
           if (process.env.NODE_ENV === 'development') {
             console.error('Error fetching addresses:', error);
           }
+          // If 401, token might be expired - redirect to login
+          if (error?.status === 401) {
+            toast.error('Your session has expired. Please log in again.');
+            router.push('/login');
+            return;
+          }
+          // For other errors, just show empty addresses
+          toast.error('Failed to load addresses. Please try again.');
         } finally {
           setIsLoading(false);
         }
@@ -133,7 +137,7 @@ export default function AddressesPage() {
 
       fetchAddresses();
     }
-  }, [_hasHydrated, token, user, router]);
+  }, [_hasHydrated, token, user, router, isLoading]);
 
   // Show loading while hydrating
   if (!_hasHydrated) {

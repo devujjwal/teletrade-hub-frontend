@@ -50,24 +50,46 @@ apiClient.interceptors.response.use(
   (response) => response,
   (error: AxiosError) => {
     if (error.response?.status === 401) {
-      // Handle unauthorized - clear token and redirect to login
+      // Handle unauthorized
       if (typeof window !== 'undefined') {
         const pathname = window.location.pathname;
         const isAdminRoute = pathname.startsWith('/admin');
+        const requestUrl = error.config?.url || '';
         
-        // Clear auth state from localStorage
-        localStorage.removeItem('auth_token');
-        localStorage.removeItem('user');
-        localStorage.removeItem('is_admin');
+        // Only force logout and redirect for critical auth endpoints
+        // For example: /auth/me, /auth/profile, admin endpoints
+        // For other endpoints like /auth/addresses, let the page handle it
+        const isCriticalAuthEndpoint = 
+          requestUrl.includes('/auth/me') || 
+          requestUrl.includes('/auth/profile') ||
+          requestUrl.includes('/admin/');
         
-        // Redirect to appropriate login page
-        if (!pathname.includes('/login')) {
-          if (isAdminRoute) {
-            window.location.href = '/admin/login';
-          } else {
-            window.location.href = '/login';
+        if (isCriticalAuthEndpoint) {
+          // Clear auth state from localStorage
+          localStorage.removeItem('auth_token');
+          localStorage.removeItem('user');
+          localStorage.removeItem('is_admin');
+          
+          // Also clear Zustand persist storage
+          localStorage.removeItem('auth-storage');
+          
+          // Only redirect if not already on a login or auth-related page
+          // This prevents redirect loops
+          const isAuthPage = pathname.includes('/login') || pathname.includes('/register');
+          
+          if (!isAuthPage) {
+            // Use a small delay to prevent race conditions with multiple 401s
+            setTimeout(() => {
+              if (isAdminRoute) {
+                window.location.href = '/admin/login';
+              } else {
+                window.location.href = '/login';
+              }
+            }, 100);
           }
         }
+        // For non-critical endpoints, just return the error
+        // The page component can decide how to handle it
       }
     }
 

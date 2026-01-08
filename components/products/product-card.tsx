@@ -12,6 +12,7 @@ import Button from '@/components/ui/button';
 import Badge from '@/components/ui/badge';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
+import { useLanguage } from '@/contexts/language-context';
 
 interface ProductCardProps {
   product: Product;
@@ -21,6 +22,7 @@ export default function ProductCard({ product }: ProductCardProps) {
   const router = useRouter();
   const addItem = useCartStore((state) => state.addItem);
   const { token, user } = useAuthStore();
+  const { t } = useLanguage();
 
   const price = Number(product.price) || 0;
   const originalPrice = Number(product.original_price) || 0;
@@ -137,7 +139,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             ) : (
               <div className="flex items-center gap-1.5 text-muted-foreground">
                 <Lock className="w-3.5 h-3.5 flex-shrink-0" />
-                <span className="text-sm font-medium whitespace-nowrap">Login to view price</span>
+                <span className="text-sm font-medium whitespace-nowrap">{t('products.loginToViewPrice')}</span>
               </div>
             )}
           </div>
@@ -145,12 +147,12 @@ export default function ProductCard({ product }: ProductCardProps) {
           <div className="min-h-[1.25rem]">
             {isInStock ? (
               isLowStock ? (
-                <span className="badge-warning inline-block">Low Stock</span>
+                <span className="badge-warning inline-block">{t('products.lowStock')}</span>
               ) : (
-                <span className="badge-success inline-block">In Stock</span>
+                <span className="badge-success inline-block">{t('products.inStock')}</span>
               )
             ) : (
-              <span className="badge-destructive inline-block">Out of Stock</span>
+              <span className="badge-destructive inline-block">{t('products.outOfStock')}</span>
             )}
           </div>
         </div>
@@ -163,7 +165,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             disabled={!isInStock}
           >
             <ShoppingCart className="w-4 h-4 mr-2" />
-            Add to Cart
+            {t('products.addToCart')}
           </Button>
         ) : (
           <Button
@@ -176,7 +178,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             }}
           >
             <Lock className="w-4 h-4 mr-2" />
-            Login to Purchase
+            {t('products.loginToBuy')}
           </Button>
         )}
       </div>
