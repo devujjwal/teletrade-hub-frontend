@@ -102,9 +102,10 @@ export default function OrdersPage() {
     );
   }
 
-  const filteredOrders = orders.filter(order => {
+  const filteredOrders = (orders || []).filter(order => {
+    if (!order) return false;
     const matchesSearch = order.order_number?.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                         order.id.toString().includes(searchQuery);
+                         order.id?.toString().includes(searchQuery);
     const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
     return matchesSearch && matchesStatus;
   });

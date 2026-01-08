@@ -3,8 +3,16 @@ import { Order, CreateOrderRequest, OrderListResponse } from '@/types/order';
 
 export const ordersApi = {
   list: async (): Promise<OrderListResponse> => {
-    const response = await apiClient.get<OrderListResponse>('/orders');
-    return response.data;
+    const response = await apiClient.get<any>('/orders');
+    // Backend returns: { success: true, data: { data: [...] } } or { success: true, data: [...] }
+    if (response.data?.success && response.data?.data) {
+      // Handle both nested and flat data structures
+      const ordersArray = Array.isArray(response.data.data) 
+        ? response.data.data 
+        : response.data.data.data || [];
+      return { data: ordersArray };
+    }
+    return { data: [] };
   },
 
   create: async (orderData: CreateOrderRequest): Promise<Order> => {
