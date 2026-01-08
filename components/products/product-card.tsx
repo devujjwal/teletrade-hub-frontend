@@ -124,60 +124,56 @@ export default function ProductCard({ product }: ProductCardProps) {
         )}
 
         {/* Price & Stock */}
-        {token && user ? (
-          <>
-            <div className="flex items-center justify-between mb-3">
-              <div>
-                <span className="price-current">{formatPrice(price)}</span>
-                {hasDiscount && (
-                  <span className="price-original ml-2">{formatPrice(originalPrice)}</span>
-                )}
-              </div>
-              <div>
-                {isInStock ? (
-                  isLowStock ? (
-                    <span className="badge-warning">Low Stock</span>
-                  ) : (
-                    <span className="badge-success">In Stock</span>
-                  )
-                ) : (
-                  <span className="badge-destructive">Out of Stock</span>
-                )}
-              </div>
+        <div className="flex items-center justify-between mb-3">
+          {token && user ? (
+            <div>
+              <span className="price-current">{formatPrice(price)}</span>
+              {hasDiscount && (
+                <span className="price-original ml-2">{formatPrice(originalPrice)}</span>
+              )}
             </div>
+          ) : (
+            <div className="flex items-center gap-1.5 text-muted-foreground">
+              <Lock className="w-3.5 h-3.5" />
+              <span className="text-sm font-medium">Login to view price</span>
+            </div>
+          )}
+          <div>
+            {isInStock ? (
+              isLowStock ? (
+                <span className="badge-warning">Low Stock</span>
+              ) : (
+                <span className="badge-success">In Stock</span>
+              )
+            ) : (
+              <span className="badge-destructive">Out of Stock</span>
+            )}
+          </div>
+        </div>
 
-            {/* Add to Cart Button - Green Shop Button */}
-            <Button
-              className="w-full btn-shop"
-              onClick={handleAddToCart}
-              disabled={!isInStock}
-            >
-              <ShoppingCart className="w-4 h-4 mr-2" />
-              Add to Cart
-            </Button>
-          </>
+        {/* Add to Cart Button or Login Prompt */}
+        {token && user ? (
+          <Button
+            className="w-full btn-shop"
+            onClick={handleAddToCart}
+            disabled={!isInStock}
+          >
+            <ShoppingCart className="w-4 h-4 mr-2" />
+            Add to Cart
+          </Button>
         ) : (
-          <>
-            {/* Login to view price */}
-            <div className="flex items-center gap-2 p-4 bg-muted rounded-lg mb-3">
-              <Lock className="w-5 h-5 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground font-medium">Login to view price</span>
-            </div>
-            
-            {/* Login to Purchase Button */}
-            <Button
-              className="w-full"
-              variant="outline"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                router.push('/login');
-              }}
-            >
-              <Lock className="w-4 h-4 mr-2" />
-              Login to Purchase
-            </Button>
-          </>
+          <Button
+            className="w-full"
+            variant="outline"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              router.push('/login');
+            }}
+          >
+            <Lock className="w-4 h-4 mr-2" />
+            Login to Purchase
+          </Button>
         )}
       </div>
     </div>
