@@ -281,6 +281,7 @@ const translations: Record<Language, Record<string, string>> = {
     // Auth
     'auth.login': 'Login',
     'auth.register': 'Create Account',
+    'auth.createAccount': 'Create Account',
     'auth.email': 'Email',
     'auth.password': 'Password',
     'auth.confirmPassword': 'Confirm Password',
@@ -612,6 +613,7 @@ const translations: Record<Language, Record<string, string>> = {
     // Auth
     'auth.login': 'Anmelden',
     'auth.register': 'Konto erstellen',
+    'auth.createAccount': 'Konto erstellen',
     'auth.email': 'E-Mail',
     'auth.password': 'Passwort',
     'auth.confirmPassword': 'Passwort bestätigen',
@@ -943,6 +945,7 @@ const translations: Record<Language, Record<string, string>> = {
     // Auth
     'auth.login': 'Connexion',
     'auth.register': 'Créer un Compte',
+    'auth.createAccount': 'Créer un Compte',
     'auth.email': 'Email',
     'auth.password': 'Mot de Passe',
     'auth.confirmPassword': 'Confirmer le Mot de Passe',
@@ -1274,6 +1277,7 @@ const translations: Record<Language, Record<string, string>> = {
     // Auth
     'auth.login': 'Iniciar Sesión',
     'auth.register': 'Crear Cuenta',
+    'auth.createAccount': 'Crear Cuenta',
     'auth.email': 'Email',
     'auth.password': 'Contraseña',
     'auth.confirmPassword': 'Confirmar Contraseña',
@@ -1605,6 +1609,7 @@ const translations: Record<Language, Record<string, string>> = {
     // Auth
     'auth.login': 'Accedi',
     'auth.register': 'Crea Account',
+    'auth.createAccount': 'Crea Account',
     'auth.email': 'Email',
     'auth.password': 'Password',
     'auth.confirmPassword': 'Conferma Password',
@@ -1936,6 +1941,7 @@ const translations: Record<Language, Record<string, string>> = {
     // Auth
     'auth.login': 'Prihlásiť sa',
     'auth.register': 'Vytvoriť Účet',
+    'auth.createAccount': 'Vytvoriť Účet',
     'auth.email': 'Email',
     'auth.password': 'Heslo',
     'auth.confirmPassword': 'Potvrdiť Heslo',
