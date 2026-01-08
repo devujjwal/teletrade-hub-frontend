@@ -47,7 +47,7 @@ export default function ProductPriceSection({
           <span className="text-xl text-muted-foreground line-through">
             {formatPrice(originalPrice)}
           </span>
-          <Badge variant="destructive">Save {discountPercent}%</Badge>
+          <Badge variant="error">Save {discountPercent}%</Badge>
         </>
       )}
     </div>

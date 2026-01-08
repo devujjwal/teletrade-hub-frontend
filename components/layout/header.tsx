@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import Input from '@/components/ui/input';
 import Badge from '@/components/ui/badge';
 import LanguageSelector from '@/components/layout/language-selector';
+import { useLanguage } from '@/contexts/language-context';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,6 +29,7 @@ export default function Header() {
   const [isMounted, setIsMounted] = useState(false);
   const itemCount = useCartStore((state) => state.getItemCount());
   const { user, logout, isAdmin } = useAuthStore();
+  const { t } = useLanguage();
 
   // Prevent hydration mismatch by only rendering cart badge after mount
   useEffect(() => {
@@ -42,10 +44,10 @@ export default function Header() {
   };
 
   const navLinks = [
-    { href: '/', label: 'Home' },
-    { href: '/products', label: 'Products' },
-    { href: '/categories', label: 'Categories' },
-    { href: '/brands', label: 'Brands' },
+    { href: '/', label: t('nav.home') },
+    { href: '/products', label: t('nav.products') },
+    { href: '/categories', label: t('nav.categories') },
+    { href: '/brands', label: t('nav.brands') },
   ];
 
   return (
@@ -66,7 +68,7 @@ export default function Header() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
                 type="text"
-                placeholder="Search products..."
+                placeholder={t('products.search')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10 pr-4 w-full"
@@ -95,13 +97,16 @@ export default function Header() {
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="sm" className="gap-2 hidden sm:flex">
                     <User className="w-4 h-4" />
-                    <span className="hidden md:inline">{user.name}</span>
+                    <span className="hidden md:inline">{user.first_name || user.name}</span>
                     <ChevronDown className="w-3 h-3" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem asChild>
-                    <Link href="/account">Account</Link>
+                    <Link href="/account">{t('account.title')}</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/account/orders">{t('nav.myOrders')}</Link>
                   </DropdownMenuItem>
                   {isAdmin && (
                     <DropdownMenuItem asChild>
@@ -109,16 +114,16 @@ export default function Header() {
                     </DropdownMenuItem>
                   )}
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={logout}>Logout</DropdownMenuItem>
+                  <DropdownMenuItem onClick={logout}>{t('nav.logout')}</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
               <div className="hidden sm:flex items-center gap-2">
                 <Button variant="ghost" size="sm" asChild>
-                  <Link href="/login">Login</Link>
+                  <Link href="/login">{t('nav.login')}</Link>
                 </Button>
                 <Button size="sm" className="bg-secondary text-secondary-foreground hover:bg-secondary/90" asChild>
-                  <Link href="/register">Register</Link>
+                  <Link href="/register">{t('nav.register')}</Link>
                 </Button>
               </div>
             )}
@@ -157,10 +162,10 @@ export default function Header() {
                   {!user && (
                     <>
                       <Link href="/login" className="text-lg font-medium py-2">
-                        Login
+                        {t('nav.login')}
                       </Link>
                       <Link href="/register" className="text-lg font-medium py-2">
-                        Register
+                        {t('nav.register')}
                       </Link>
                     </>
                   )}
@@ -190,7 +195,7 @@ export default function Header() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
                 type="text"
-                placeholder="Search products..."
+                placeholder={t('products.search')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10 pr-4 w-full text-base"
