@@ -9,7 +9,8 @@ import Badge from '@/components/ui/badge';
 import Card from '@/components/ui/card';
 import Button from '@/components/ui/button';
 import { Metadata } from 'next';
-import { ChevronRight, Shield, Truck, RotateCcw } from 'lucide-react';
+import { ChevronRight, Shield, Truck, RotateCcw, Lock } from 'lucide-react';
+import ProductPriceSection from '@/components/products/product-price-section';
 
 export const revalidate = 300;
 
@@ -141,17 +142,12 @@ export default async function ProductPage({ params, searchParams }: ProductPageP
           </p>
 
           {/* Price */}
-          <div className="flex items-baseline gap-4">
-            <span className="text-3xl font-bold">{formatPrice(price)}</span>
-            {hasDiscount && (
-              <>
-                <span className="text-xl text-muted-foreground line-through">
-                  {formatPrice(originalPrice)}
-                </span>
-                <Badge variant="error">Save {discountPercent}%</Badge>
-              </>
-            )}
-          </div>
+          <ProductPriceSection
+            price={price}
+            originalPrice={originalPrice}
+            hasDiscount={hasDiscount}
+            discountPercent={discountPercent}
+          />
 
           {/* Stock Status */}
           <div>

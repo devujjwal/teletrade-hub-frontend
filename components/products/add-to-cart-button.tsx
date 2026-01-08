@@ -1,10 +1,12 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Product } from '@/types/product';
 import { useCartStore } from '@/lib/store/cart-store';
+import { useAuthStore } from '@/lib/store/auth-store';
 import Button from '@/components/ui/button';
-import { Minus, Plus, ShoppingCart } from 'lucide-react';
+import { Minus, Plus, ShoppingCart, Lock } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 interface AddToCartButtonProps {
@@ -12,13 +14,22 @@ interface AddToCartButtonProps {
 }
 
 export default function AddToCartButton({ product }: AddToCartButtonProps) {
+  const router = useRouter();
   const [quantity, setQuantity] = useState(1);
   const addItem = useCartStore((state) => state.addItem);
+  const { token, user } = useAuthStore();
 
   const isInStock = product.availability === 'in_stock' || product.availability === 'pre_order';
   const maxQuantity = product.stock_quantity || 999;
 
   const handleAddToCart = () => {
+    // Check if user is logged in
+    if (!token || !user) {
+      toast.error('Please login to add items to cart');
+      router.push('/login');
+      return;
+    }
+    
     if (!isInStock) {
       toast.error('This product is currently out of stock');
       return;
@@ -35,6 +46,21 @@ export default function AddToCartButton({ product }: AddToCartButtonProps) {
 
     toast.success(`${product.name} added to cart`);
   };
+
+  // If not logged in, show login prompt
+  if (!token || !user) {
+    return (
+      <Button
+        onClick={() => router.push('/login')}
+        size="lg"
+        className="w-full"
+        variant="outline"
+      >
+        <Lock className="w-5 h-5 mr-2" />
+        Login to Purchase
+      </Button>
+    );
+  }
 
   return (
     <div className="space-y-4">

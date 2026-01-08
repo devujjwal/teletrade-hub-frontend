@@ -2,21 +2,25 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { ShoppingCart } from 'lucide-react';
+import { ShoppingCart, Lock } from 'lucide-react';
 import { Product } from '@/types/product';
 import { useCartStore } from '@/lib/store/cart-store';
+import { useAuthStore } from '@/lib/store/auth-store';
 import { getProxiedImageUrl } from '@/lib/utils/format';
 import { formatPrice } from '@/lib/utils/format';
 import Button from '@/components/ui/button';
 import Badge from '@/components/ui/badge';
 import toast from 'react-hot-toast';
+import { useRouter } from 'next/navigation';
 
 interface ProductCardProps {
   product: Product;
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
+  const router = useRouter();
   const addItem = useCartStore((state) => state.addItem);
+  const { token, user } = useAuthStore();
 
   const price = Number(product.price) || 0;
   const originalPrice = Number(product.original_price) || 0;
@@ -32,6 +36,14 @@ export default function ProductCard({ product }: ProductCardProps) {
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    
+    // Check if user is logged in
+    if (!token || !user) {
+      toast.error('Please login to add items to cart');
+      router.push('/login');
+      return;
+    }
+    
     if (isInStock) {
       addItem({
         product_id: product.id,
@@ -112,35 +124,61 @@ export default function ProductCard({ product }: ProductCardProps) {
         )}
 
         {/* Price & Stock */}
-        <div className="flex items-center justify-between mb-3">
-          <div>
-            <span className="price-current">{formatPrice(price)}</span>
-            {hasDiscount && (
-              <span className="price-original ml-2">{formatPrice(originalPrice)}</span>
-            )}
-          </div>
-          <div>
-            {isInStock ? (
-              isLowStock ? (
-                <span className="badge-warning">Low Stock</span>
-              ) : (
-                <span className="badge-success">In Stock</span>
-              )
-            ) : (
-              <span className="badge-destructive">Out of Stock</span>
-            )}
-          </div>
-        </div>
+        {token && user ? (
+          <>
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <span className="price-current">{formatPrice(price)}</span>
+                {hasDiscount && (
+                  <span className="price-original ml-2">{formatPrice(originalPrice)}</span>
+                )}
+              </div>
+              <div>
+                {isInStock ? (
+                  isLowStock ? (
+                    <span className="badge-warning">Low Stock</span>
+                  ) : (
+                    <span className="badge-success">In Stock</span>
+                  )
+                ) : (
+                  <span className="badge-destructive">Out of Stock</span>
+                )}
+              </div>
+            </div>
 
-        {/* Add to Cart Button - Green Shop Button */}
-        <Button
-          className="w-full btn-shop"
-          onClick={handleAddToCart}
-          disabled={!isInStock}
-        >
-          <ShoppingCart className="w-4 h-4 mr-2" />
-          Add to Cart
-        </Button>
+            {/* Add to Cart Button - Green Shop Button */}
+            <Button
+              className="w-full btn-shop"
+              onClick={handleAddToCart}
+              disabled={!isInStock}
+            >
+              <ShoppingCart className="w-4 h-4 mr-2" />
+              Add to Cart
+            </Button>
+          </>
+        ) : (
+          <>
+            {/* Login to view price */}
+            <div className="flex items-center gap-2 p-4 bg-muted rounded-lg mb-3">
+              <Lock className="w-5 h-5 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground font-medium">Login to view price</span>
+            </div>
+            
+            {/* Login to Purchase Button */}
+            <Button
+              className="w-full"
+              variant="outline"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                router.push('/login');
+              }}
+            >
+              <Lock className="w-4 h-4 mr-2" />
+              Login to Purchase
+            </Button>
+          </>
+        )}
       </div>
     </div>
   );
