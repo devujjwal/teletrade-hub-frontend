@@ -1,40 +1,48 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { 
   Settings, 
   ChevronRight,
-  User,
-  Mail,
-  Phone,
   Lock,
-  Bell
+  Bell,
+  ArrowLeft
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import Input from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { useAuthStore } from '@/lib/store/auth-store';
 import { useLanguage } from '@/contexts/language-context';
 import { Skeleton } from '@/components/ui/skeleton';
 import Card from '@/components/ui/card';
+import { authApi } from '@/lib/api/auth';
+import toast from 'react-hot-toast';
 
 export default function AccountSettingsPage() {
   const router = useRouter();
   const { user, token, initialize } = useAuthStore();
   const { t } = useLanguage();
 
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+  });
+
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
+
   useEffect(() => {
     initialize();
   }, [initialize]);
 
   useEffect(() => {
-    // Check authentication - redirect if not logged in
     if (!token || !user) {
       router.push('/login');
     }
   }, [token, user, router]);
 
-  // Redirect to login if not authenticated
   if (!token || !user) {
     return (
       <div className="container-wide py-16 text-center">
@@ -52,27 +60,62 @@ export default function AccountSettingsPage() {
     );
   }
 
+  const handlePasswordChange = async () => {
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      toast.error(t('settings.passwordMismatch') || 'Passwords do not match');
+      return;
+    }
+
+    if (passwordData.newPassword.length < 8) {
+      toast.error(t('settings.passwordTooShort') || 'Password must be at least 8 characters');
+      return;
+    }
+
+    setIsChangingPassword(true);
+    try {
+      // TODO: Implement change password API endpoint
+      // await authApi.changePassword({
+      //   currentPassword: passwordData.currentPassword,
+      //   newPassword: passwordData.newPassword,
+      // });
+      
+      // Simulate API call for now
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      toast.success(t('settings.passwordChanged') || 'Password changed successfully');
+      setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || t('settings.passwordChanged') || 'Failed to change password');
+    } finally {
+      setIsChangingPassword(false);
+    }
+  };
+
   return (
     <div className="container-wide py-8">
-      {/* Breadcrumb */}
-      <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
-        <Link href="/account" className="hover:text-foreground">{t('account.title')}</Link>
-        <ChevronRight className="w-4 h-4" />
-        <span className="text-foreground">{t('account.accountSettings')}</span>
-      </nav>
+      <Button
+        variant="ghost"
+        onClick={() => router.push('/account')}
+        className="mb-6"
+      >
+        <ArrowLeft className="h-4 w-4 mr-2" />
+        {t('common.back')}
+      </Button>
 
-      <h1 className="font-display text-3xl font-bold mb-8">{t('account.accountSettings')}</h1>
+      <div className="mb-8">
+        <h1 className="font-display text-3xl font-bold">{t('settings.title') || t('account.accountSettings')}</h1>
+        <p className="text-muted-foreground mt-1">{t('settings.subtitle') || 'Manage your account preferences'}</p>
+      </div>
 
       <div className="space-y-6">
         {/* Account Information */}
         <Card className="p-6">
           <div className="flex items-center gap-3 mb-6">
-            <User className="w-5 h-5 text-primary" />
+            <Settings className="w-5 h-5 text-primary" />
             <h2 className="font-display text-xl font-bold">Account Information</h2>
           </div>
           <div className="space-y-4">
             <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
-              <Mail className="w-4 h-4 text-muted-foreground" />
               <div>
                 <p className="text-sm text-muted-foreground">Email</p>
                 <p className="font-medium">{user.email}</p>
@@ -80,7 +123,6 @@ export default function AccountSettingsPage() {
             </div>
             {user.phone && (
               <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
-                <Phone className="w-4 h-4 text-muted-foreground" />
                 <div>
                   <p className="text-sm text-muted-foreground">Phone</p>
                   <p className="font-medium">{user.phone}</p>
@@ -90,19 +132,52 @@ export default function AccountSettingsPage() {
           </div>
         </Card>
 
-        {/* Security */}
+        {/* Password Section */}
         <Card className="p-6">
           <div className="flex items-center gap-3 mb-6">
             <Lock className="w-5 h-5 text-primary" />
-            <h2 className="font-display text-xl font-bold">Security</h2>
+            <div>
+              <h2 className="font-display text-xl font-bold">{t('settings.changePassword') || 'Change Password'}</h2>
+              <p className="text-sm text-muted-foreground mt-1">
+                {t('settings.changePasswordDesc') || 'Update your password to keep your account secure.'}
+              </p>
+            </div>
           </div>
           <div className="space-y-4">
-            <Button variant="outline" className="w-full justify-start">
-              Change Password
+            <div className="space-y-2">
+              <Label htmlFor="currentPassword">{t('settings.currentPassword') || 'Current Password'}</Label>
+              <Input
+                id="currentPassword"
+                type="password"
+                value={passwordData.currentPassword}
+                onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="newPassword">{t('settings.newPassword') || 'New Password'}</Label>
+              <Input
+                id="newPassword"
+                type="password"
+                value={passwordData.newPassword}
+                onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword">{t('settings.confirmPassword') || 'Confirm New Password'}</Label>
+              <Input
+                id="confirmPassword"
+                type="password"
+                value={passwordData.confirmPassword}
+                onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
+              />
+            </div>
+            <Button 
+              className="btn-shop" 
+              onClick={handlePasswordChange}
+              disabled={isChangingPassword}
+            >
+              {isChangingPassword ? t('common.loading') : (t('settings.updatePassword') || 'Update Password')}
             </Button>
-            <p className="text-sm text-muted-foreground">
-              Update your password to keep your account secure
-            </p>
           </div>
         </Card>
 
@@ -110,11 +185,16 @@ export default function AccountSettingsPage() {
         <Card className="p-6">
           <div className="flex items-center gap-3 mb-6">
             <Bell className="w-5 h-5 text-primary" />
-            <h2 className="font-display text-xl font-bold">Notifications</h2>
+            <div>
+              <h2 className="font-display text-xl font-bold">{t('settings.notifications') || 'Notifications'}</h2>
+              <p className="text-sm text-muted-foreground mt-1">
+                {t('settings.notificationsDesc') || 'Choose what notifications you receive.'}
+              </p>
+            </div>
           </div>
           <div className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              Notification preferences coming soon
+              {t('settings.notificationsDesc') || 'Notification preferences coming soon'}
             </p>
           </div>
         </Card>

@@ -2,13 +2,23 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
-export type Language = 'en' | 'de';
+export type Language = 'en' | 'de' | 'fr' | 'es' | 'it' | 'sk';
 
 interface LanguageContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
   t: (key: string) => string;
 }
+
+// Language configuration with flags
+export const languageConfig: Record<Language, { name: string; flag: string }> = {
+  en: { name: 'English', flag: '🇬🇧' },
+  de: { name: 'Deutsch', flag: '🇩🇪' },
+  fr: { name: 'Français', flag: '🇫🇷' },
+  es: { name: 'Español', flag: '🇪🇸' },
+  it: { name: 'Italiano', flag: '🇮🇹' },
+  sk: { name: 'Slovenčina', flag: '🇸🇰' },
+};
 
 const translations: Record<Language, Record<string, string>> = {
   en: {
@@ -24,6 +34,7 @@ const translations: Record<Language, Record<string, string>> = {
     'nav.logout': 'Logout',
     'nav.myOrders': 'My Orders',
     'nav.trackOrder': 'Track Order',
+    'nav.signIn': 'Sign In',
     
     // Hero
     'hero.title': 'Premium Telecom Products',
@@ -173,6 +184,75 @@ const translations: Record<Language, Record<string, string>> = {
     'account.signInToAccount': 'Sign in to your account',
     'account.accessAccount': 'Access your orders, wishlist, and account settings',
     'account.createAccount': 'Create Account',
+    'account.signInRequired': 'Sign in required',
+    
+    // Addresses
+    'addresses.title': 'My Addresses',
+    'addresses.subtitle': 'Manage your delivery addresses',
+    'addresses.addNew': 'Add Address',
+    'addresses.edit': 'Edit Address',
+    'addresses.name': 'Address Name',
+    'addresses.namePlaceholder': 'e.g., Home, Office',
+    'addresses.street': 'Street Address',
+    'addresses.streetPlaceholder': 'Enter street address',
+    'addresses.city': 'City',
+    'addresses.cityPlaceholder': 'Enter city',
+    'addresses.postalCode': 'Postal Code',
+    'addresses.postalCodePlaceholder': 'Enter postal code',
+    'addresses.country': 'Country',
+    'addresses.countryPlaceholder': 'Enter country',
+    'addresses.selectCountry': 'Select country',
+    'addresses.state': 'State/Region',
+    'addresses.selectState': 'Select state/region',
+    'addresses.selectCity': 'Select city',
+    'addresses.default': 'Default',
+    'addresses.setDefault': 'Set as default',
+    'addresses.noAddresses': 'No addresses saved',
+    'addresses.noAddressesDesc': 'Add your first delivery address to make checkout faster.',
+    'addresses.addFirst': 'Add your first address',
+    'addresses.updated': 'Address updated',
+    'addresses.updatedDesc': 'Your address has been updated successfully.',
+    'addresses.added': 'Address added',
+    'addresses.addedDesc': 'Your new address has been saved.',
+    'addresses.deleted': 'Address deleted',
+    'addresses.deletedDesc': 'Your address has been removed.',
+    'addresses.defaultSet': 'Default address set',
+    'addresses.defaultSetDesc': 'This address will be used as your default delivery address.',
+    'addresses.deleteConfirm': 'Delete this address?',
+    'addresses.deleteConfirmDesc': 'This action cannot be undone.',
+    
+    // Settings
+    'settings.title': 'Account Settings',
+    'settings.subtitle': 'Manage your account preferences',
+    'settings.changePassword': 'Change Password',
+    'settings.changePasswordDesc': 'Update your password to keep your account secure.',
+    'settings.currentPassword': 'Current Password',
+    'settings.newPassword': 'New Password',
+    'settings.confirmPassword': 'Confirm New Password',
+    'settings.updatePassword': 'Update Password',
+    'settings.passwordChanged': 'Password changed',
+    'settings.passwordChangedDesc': 'Your password has been updated successfully.',
+    'settings.passwordMismatch': 'Passwords do not match',
+    'settings.passwordMismatchDesc': 'Please make sure your passwords match.',
+    'settings.passwordTooShort': 'Password too short',
+    'settings.passwordTooShortDesc': 'Password must be at least 8 characters.',
+    'settings.notifications': 'Notifications',
+    'settings.notificationsDesc': 'Choose what notifications you receive.',
+    'settings.orderUpdates': 'Order Updates',
+    'settings.orderUpdatesDesc': 'Get notified about your order status.',
+    'settings.promotions': 'Promotions',
+    'settings.promotionsDesc': 'Receive promotional offers and discounts.',
+    'settings.newsletter': 'Newsletter',
+    'settings.newsletterDesc': 'Stay updated with our latest news.',
+    'settings.language': 'Language',
+    'settings.languageDesc': 'Choose your preferred language.',
+    'settings.dangerZone': 'Danger Zone',
+    'settings.dangerZoneDesc': 'Irreversible actions for your account.',
+    'settings.deleteAccount': 'Delete Account',
+    'settings.deleteConfirm': 'Are you sure?',
+    'settings.deleteConfirmDesc': 'This will permanently delete your account and all associated data. This action cannot be undone.',
+    'settings.accountDeleted': 'Account deleted',
+    'settings.accountDeletedDesc': 'Your account has been permanently deleted.',
     
     // Auth
     'auth.login': 'Login',
@@ -224,6 +304,7 @@ const translations: Record<Language, Record<string, string>> = {
     'nav.logout': 'Abmelden',
     'nav.myOrders': 'Meine Bestellungen',
     'nav.trackOrder': 'Bestellung verfolgen',
+    'nav.signIn': 'Anmelden',
     
     // Hero
     'hero.title': 'Premium Telekom Produkte',
@@ -373,6 +454,75 @@ const translations: Record<Language, Record<string, string>> = {
     'account.signInToAccount': 'Bei Ihrem Konto anmelden',
     'account.accessAccount': 'Zugriff auf Ihre Bestellungen, Wunschliste und Kontoeinstellungen',
     'account.createAccount': 'Konto erstellen',
+    'account.signInRequired': 'Anmeldung erforderlich',
+    
+    // Addresses
+    'addresses.title': 'Meine Adressen',
+    'addresses.subtitle': 'Verwalten Sie Ihre Lieferadressen',
+    'addresses.addNew': 'Adresse hinzufügen',
+    'addresses.edit': 'Adresse bearbeiten',
+    'addresses.name': 'Adressname',
+    'addresses.namePlaceholder': 'z.B. Zuhause, Büro',
+    'addresses.street': 'Straße',
+    'addresses.streetPlaceholder': 'Straße eingeben',
+    'addresses.city': 'Stadt',
+    'addresses.cityPlaceholder': 'Stadt eingeben',
+    'addresses.postalCode': 'Postleitzahl',
+    'addresses.postalCodePlaceholder': 'PLZ eingeben',
+    'addresses.country': 'Land',
+    'addresses.countryPlaceholder': 'Land eingeben',
+    'addresses.selectCountry': 'Land auswählen',
+    'addresses.state': 'Bundesland/Region',
+    'addresses.selectState': 'Bundesland/Region auswählen',
+    'addresses.selectCity': 'Stadt auswählen',
+    'addresses.default': 'Standard',
+    'addresses.setDefault': 'Als Standard festlegen',
+    'addresses.noAddresses': 'Keine Adressen gespeichert',
+    'addresses.noAddressesDesc': 'Fügen Sie Ihre erste Lieferadresse hinzu.',
+    'addresses.addFirst': 'Erste Adresse hinzufügen',
+    'addresses.updated': 'Adresse aktualisiert',
+    'addresses.updatedDesc': 'Ihre Adresse wurde erfolgreich aktualisiert.',
+    'addresses.added': 'Adresse hinzugefügt',
+    'addresses.addedDesc': 'Ihre neue Adresse wurde gespeichert.',
+    'addresses.deleted': 'Adresse gelöscht',
+    'addresses.deletedDesc': 'Ihre Adresse wurde entfernt.',
+    'addresses.defaultSet': 'Standardadresse festgelegt',
+    'addresses.defaultSetDesc': 'Diese Adresse wird als Standard verwendet.',
+    'addresses.deleteConfirm': 'Diese Adresse löschen?',
+    'addresses.deleteConfirmDesc': 'Diese Aktion kann nicht rückgängig gemacht werden.',
+    
+    // Settings
+    'settings.title': 'Kontoeinstellungen',
+    'settings.subtitle': 'Verwalten Sie Ihre Kontoeinstellungen',
+    'settings.changePassword': 'Passwort ändern',
+    'settings.changePasswordDesc': 'Aktualisieren Sie Ihr Passwort.',
+    'settings.currentPassword': 'Aktuelles Passwort',
+    'settings.newPassword': 'Neues Passwort',
+    'settings.confirmPassword': 'Neues Passwort bestätigen',
+    'settings.updatePassword': 'Passwort aktualisieren',
+    'settings.passwordChanged': 'Passwort geändert',
+    'settings.passwordChangedDesc': 'Ihr Passwort wurde erfolgreich aktualisiert.',
+    'settings.passwordMismatch': 'Passwörter stimmen nicht überein',
+    'settings.passwordMismatchDesc': 'Bitte stellen Sie sicher, dass Ihre Passwörter übereinstimmen.',
+    'settings.passwordTooShort': 'Passwort zu kurz',
+    'settings.passwordTooShortDesc': 'Das Passwort muss mindestens 8 Zeichen lang sein.',
+    'settings.notifications': 'Benachrichtigungen',
+    'settings.notificationsDesc': 'Wählen Sie, welche Benachrichtigungen Sie erhalten.',
+    'settings.orderUpdates': 'Bestellstatus',
+    'settings.orderUpdatesDesc': 'Benachrichtigungen über Ihren Bestellstatus erhalten.',
+    'settings.promotions': 'Werbeaktionen',
+    'settings.promotionsDesc': 'Angebote und Rabatte erhalten.',
+    'settings.newsletter': 'Newsletter',
+    'settings.newsletterDesc': 'Bleiben Sie über unsere neuesten Nachrichten informiert.',
+    'settings.language': 'Sprache',
+    'settings.languageDesc': 'Wählen Sie Ihre bevorzugte Sprache.',
+    'settings.dangerZone': 'Gefahrenzone',
+    'settings.dangerZoneDesc': 'Unwiderrufliche Aktionen für Ihr Konto.',
+    'settings.deleteAccount': 'Konto löschen',
+    'settings.deleteConfirm': 'Sind Sie sicher?',
+    'settings.deleteConfirmDesc': 'Dies löscht Ihr Konto und alle zugehörigen Daten dauerhaft.',
+    'settings.accountDeleted': 'Konto gelöscht',
+    'settings.accountDeletedDesc': 'Ihr Konto wurde dauerhaft gelöscht.',
     
     // Auth
     'auth.login': 'Anmelden',
@@ -411,6 +561,11 @@ const translations: Record<Language, Record<string, string>> = {
     'footer.privacy': 'Datenschutz',
     'footer.copyright': '© 2026 TeleTrade Hub. Alle Rechte vorbehalten.',
   },
+  // Stub translations for other languages - will fallback to English via t() function
+  fr: {} as Record<string, string>,
+  es: {} as Record<string, string>,
+  it: {} as Record<string, string>,
+  sk: {} as Record<string, string>,
 };
 
 const LanguageContext = createContext<LanguageContextType | null>(null);
@@ -421,15 +576,18 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const [language, setLanguageState] = useState<Language>('en');
 
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
     // Check localStorage first
     const savedLang = localStorage.getItem(LANGUAGE_KEY) as Language;
-    if (savedLang && (savedLang === 'en' || savedLang === 'de')) {
+    const validLanguages: Language[] = ['en', 'de', 'fr', 'es', 'it', 'sk'];
+    if (savedLang && validLanguages.includes(savedLang)) {
       setLanguageState(savedLang);
     } else {
       // Check URL params
       const params = new URLSearchParams(window.location.search);
       const urlLang = params.get('lang') as Language;
-      if (urlLang && (urlLang === 'en' || urlLang === 'de')) {
+      if (urlLang && validLanguages.includes(urlLang)) {
         setLanguageState(urlLang);
         localStorage.setItem(LANGUAGE_KEY, urlLang);
       }
@@ -438,20 +596,32 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 
   const setLanguage = (lang: Language) => {
     setLanguageState(lang);
-    localStorage.setItem(LANGUAGE_KEY, lang);
-    
-    // Update URL without reload
-    const url = new URL(window.location.href);
-    if (lang === 'en') {
-      url.searchParams.delete('lang');
-    } else {
-      url.searchParams.set('lang', lang);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(LANGUAGE_KEY, lang);
+      
+      // Update URL without reload
+      const url = new URL(window.location.href);
+      if (lang === 'en') {
+        url.searchParams.delete('lang');
+      } else {
+        url.searchParams.set('lang', lang);
+      }
+      window.history.replaceState({}, '', url.toString());
     }
-    window.history.replaceState({}, '', url.toString());
   };
 
   const t = (key: string): string => {
-    return translations[language][key] || key;
+    // Try current language first
+    const langTranslations = translations[language];
+    if (langTranslations && langTranslations[key]) {
+      return langTranslations[key];
+    }
+    // Fallback to English for missing languages or missing keys
+    if (language !== 'en' && translations.en[key]) {
+      return translations.en[key];
+    }
+    // Return key if no translation found
+    return key;
   };
 
   return (
