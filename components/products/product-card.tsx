@@ -124,29 +124,33 @@ export default function ProductCard({ product }: ProductCardProps) {
         )}
 
         {/* Price & Stock */}
-        <div className="flex items-center justify-between mb-3">
-          {token && user ? (
-            <div>
-              <span className="price-current">{formatPrice(price)}</span>
-              {hasDiscount && (
-                <span className="price-original ml-2">{formatPrice(originalPrice)}</span>
-              )}
-            </div>
-          ) : (
-            <div className="flex items-center gap-1.5 text-muted-foreground">
-              <Lock className="w-3.5 h-3.5" />
-              <span className="text-sm font-medium">Login to view price</span>
-            </div>
-          )}
-          <div>
+        <div className="flex flex-col gap-2 mb-3">
+          {/* Price Section */}
+          <div className="min-h-[1.5rem]">
+            {token && user ? (
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="price-current">{formatPrice(price)}</span>
+                {hasDiscount && (
+                  <span className="price-original">{formatPrice(originalPrice)}</span>
+                )}
+              </div>
+            ) : (
+              <div className="flex items-center gap-1.5 text-muted-foreground">
+                <Lock className="w-3.5 h-3.5 flex-shrink-0" />
+                <span className="text-sm font-medium whitespace-nowrap">Login to view price</span>
+              </div>
+            )}
+          </div>
+          {/* Stock Status */}
+          <div className="min-h-[1.25rem]">
             {isInStock ? (
               isLowStock ? (
-                <span className="badge-warning">Low Stock</span>
+                <span className="badge-warning inline-block">Low Stock</span>
               ) : (
-                <span className="badge-success">In Stock</span>
+                <span className="badge-success inline-block">In Stock</span>
               )
             ) : (
-              <span className="badge-destructive">Out of Stock</span>
+              <span className="badge-destructive inline-block">Out of Stock</span>
             )}
           </div>
         </div>
