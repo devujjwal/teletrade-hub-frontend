@@ -185,10 +185,12 @@ export default async function ProductPage({ params, searchParams }: ProductPageP
               <p className="text-muted-foreground whitespace-pre-line">{product.description}</p>
             </div>
           )}
-
-          {/* Specifications */}
-          <ProductSpecifications product={product} />
         </div>
+      </div>
+
+      {/* Specifications - Full Width Below Grid */}
+      <div className="mt-12">
+        <ProductSpecifications product={product} />
       </div>
 
       {/* Related Products */}
