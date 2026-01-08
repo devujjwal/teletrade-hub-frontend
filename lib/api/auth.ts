@@ -3,12 +3,48 @@ import { LoginRequest, RegisterRequest, AuthResponse, User } from '@/types/user'
 
 export const authApi = {
   login: async (email: string, password: string): Promise<AuthResponse> => {
-    const response = await apiClient.post<AuthResponse>('/auth/login', { email, password });
+    const response = await apiClient.post<any>('/auth/login', { email, password });
+    
+    // Backend returns: { success: true, data: { user: {...}, token: "..." } }
+    if (response.data?.success && response.data?.data) {
+      const { user, token } = response.data.data;
+      const fullName = user.first_name && user.last_name 
+        ? `${user.first_name} ${user.last_name}`.trim()
+        : user.first_name || user.last_name || user.email || 'User';
+      
+      return {
+        token,
+        user: {
+          id: user.id,
+          name: fullName,
+          email: user.email,
+          phone: user.phone,
+          role: 'customer' as const,
+        },
+      };
+    }
+    
+    // Fallback for direct response
     return response.data;
   },
 
   register: async (userData: RegisterRequest): Promise<AuthResponse> => {
-    const response = await apiClient.post<AuthResponse>('/auth/register', userData);
+    const response = await apiClient.post<any>('/auth/register', userData);
+    
+    // Backend returns: { success: true, data: { user: {...} } } but no token
+    // We need to log in after registration to get a token
+    if (response.data?.success && response.data?.data?.user) {
+      const user = response.data.data.user;
+      const fullName = user.first_name && user.last_name 
+        ? `${user.first_name} ${user.last_name}`.trim()
+        : user.first_name || user.last_name || user.email || 'User';
+      
+      // Auto-login after registration
+      const loginResponse = await authApi.login(userData.email, userData.password);
+      return loginResponse;
+    }
+    
+    // Fallback for direct response
     return response.data;
   },
 
