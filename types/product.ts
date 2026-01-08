@@ -20,6 +20,7 @@ export interface Product {
   brand_slug?: string;
   specifications?: Record<string, string>;
   warranty?: string;
+  warranty_months?: number;
   created_at?: string;
   updated_at?: string;
   is_featured?: number;

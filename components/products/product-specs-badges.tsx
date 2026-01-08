@@ -29,13 +29,20 @@ export default function ProductSpecsBadges({ product }: ProductSpecsBadgesProps)
               product.specifications?.ram ||
               null;
   
-  // Get warranty - format it nicely
-  let warranty = product.warranty || product.specifications?.warranty || null;
-  if (warranty && typeof warranty === 'string') {
-    // If warranty is like "12 months" or "12 month", keep it as is
-    // If it's just a number, add "months"
-    if (/^\d+$/.test(warranty.trim())) {
-      warranty = `${warranty} ${t('products.months')}`;
+  // Get warranty - prioritize warranty_months, format as "12 Months Warranty"
+  let warranty: string | null = null;
+  if (product.warranty_months) {
+    const months = product.warranty_months;
+    const monthLabel = months === 1 ? t('products.month') || 'Month' : t('products.months') || 'Months';
+    warranty = `${months} ${monthLabel} ${t('products.warranty') || 'Warranty'}`;
+  } else if (product.warranty || product.specifications?.warranty) {
+    warranty = product.warranty || product.specifications?.warranty || null;
+    if (warranty && typeof warranty === 'string') {
+      // If warranty is like "12 months" or "12 month", keep it as is
+      // If it's just a number, add "months"
+      if (/^\d+$/.test(warranty.trim())) {
+        warranty = `${warranty} ${t('products.months')}`;
+      }
     }
   }
   

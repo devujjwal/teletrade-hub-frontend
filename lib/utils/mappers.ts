@@ -79,6 +79,7 @@ export function mapProduct(backendProduct: any): Product {
     brand_slug: backendProduct.brand_slug,
     specifications,
     warranty,
+    warranty_months: backendProduct.warranty_months ? Number(backendProduct.warranty_months) : undefined,
     created_at: backendProduct.created_at,
     updated_at: backendProduct.updated_at,
     // Handle is_featured
