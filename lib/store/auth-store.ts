@@ -8,9 +8,11 @@ interface AuthStore {
   token: string | null;
   user: User | null;
   isAdmin: boolean;
+  _hasHydrated: boolean;
   login: (token: string, user: User, isAdmin?: boolean) => void;
   logout: () => void;
   initialize: () => void;
+  setHasHydrated: (state: boolean) => void;
 }
 
 export const useAuthStore = create<AuthStore>()(
@@ -19,6 +21,7 @@ export const useAuthStore = create<AuthStore>()(
       token: null,
       user: null,
       isAdmin: false,
+      _hasHydrated: false,
       login: (token, user, isAdmin = false) => {
         set({ token, user, isAdmin });
         // Also sync to individual keys for API client compatibility
@@ -54,9 +57,15 @@ export const useAuthStore = create<AuthStore>()(
           }
         }
       },
+      setHasHydrated: (state) => {
+        set({ _hasHydrated: state });
+      },
     }),
     {
       name: 'auth-storage',
+      onRehydrateStorage: () => (state) => {
+        state?.setHasHydrated(true);
+      },
     }
   )
 );

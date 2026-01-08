@@ -8,29 +8,28 @@ import { useLanguage } from '@/contexts/language-context';
 
 export default function RegisterPage() {
   const router = useRouter();
-  const { user, token, initialize } = useAuthStore();
+  const { user, token, initialize, _hasHydrated } = useAuthStore();
   const { t } = useLanguage();
-  const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
+    // Initialize auth state
     initialize();
-    setIsInitialized(true);
   }, [initialize]);
 
   useEffect(() => {
-    // Only redirect if initialized and user is logged in
-    if (isInitialized && token && user) {
+    // Only redirect if hydrated and user is logged in
+    if (_hasHydrated && token && user) {
       router.push('/account');
     }
-  }, [isInitialized, token, user, router]);
+  }, [_hasHydrated, token, user, router]);
 
-  // Show loading while initializing
-  if (!isInitialized) {
+  // Show loading while hydrating
+  if (!_hasHydrated) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-hero py-12 px-4">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-muted-foreground">{t('common.loading')}</p>
+          <p className="mt-4 text-muted-foreground">{t('common.loading') || 'Loading...'}</p>
         </div>
       </div>
     );
@@ -38,7 +37,14 @@ export default function RegisterPage() {
 
   // Don't show register form if user is already logged in (will redirect)
   if (token && user) {
-    return null;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-hero py-12 px-4">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">{t('common.loading') || 'Loading...'}</p>
+        </div>
+      </div>
+    );
   }
 
   return (
