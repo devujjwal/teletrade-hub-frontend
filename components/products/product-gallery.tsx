@@ -65,7 +65,7 @@ export default function ProductGallery({
         {isFeatured && (
           <span className="featured-badge">Featured</span>
         )}
-        {discountPercent && discountPercent > 0 && (
+        {(discountPercent ?? 0) > 0 && (
           <span className="discount-badge">-{discountPercent}%</span>
         )}
       </div>
@@ -114,7 +114,7 @@ export default function ProductGallery({
         {isFeatured && (
           <span className="featured-badge">Featured</span>
         )}
-        {discountPercent && discountPercent > 0 && (
+        {(discountPercent ?? 0) > 0 && (
           <span className="discount-badge">-{discountPercent}%</span>
         )}
       </div>
