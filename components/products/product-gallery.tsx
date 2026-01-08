@@ -43,7 +43,7 @@ export default function ProductGallery({
 
   if (allImages.length === 0) {
     return (
-      <div className="relative aspect-square bg-muted rounded-xl flex items-center justify-center">
+      <div className="relative aspect-square rounded-xl flex items-center justify-center">
         <span className="text-muted-foreground">No image available</span>
       </div>
     );
@@ -52,7 +52,7 @@ export default function ProductGallery({
   // If only one image, show it without carousel controls
   if (!hasMultipleImages) {
     return (
-      <div className="relative aspect-square bg-muted rounded-xl overflow-hidden">
+      <div className="relative aspect-square rounded-xl overflow-hidden bg-white">
         <Image
           src={getProxiedImageUrl(allImages[0])}
           alt={productName}
@@ -83,7 +83,7 @@ export default function ProductGallery({
   return (
     <div className="space-y-4">
       {/* Main Image */}
-      <div className="relative aspect-square bg-muted rounded-xl overflow-hidden">
+      <div className="relative aspect-square rounded-xl overflow-hidden bg-white">
         <Image
           src={getProxiedImageUrl(allImages[selectedImageIndex])}
           alt={productName}
