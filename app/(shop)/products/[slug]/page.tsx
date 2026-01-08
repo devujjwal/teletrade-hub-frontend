@@ -11,6 +11,9 @@ import Button from '@/components/ui/button';
 import { Metadata } from 'next';
 import { ChevronRight, Shield, Truck, RotateCcw, Lock } from 'lucide-react';
 import ProductPriceSection from '@/components/products/product-price-section';
+import ProductSpecsBadges from '@/components/products/product-specs-badges';
+import ProductSpecifications from '@/components/products/product-specifications';
+import ProductTrustBadges from '@/components/products/product-trust-badges';
 
 export const revalidate = 300;
 
@@ -166,28 +169,14 @@ export default async function ProductPage({ params, searchParams }: ProductPageP
             )}
           </div>
 
+          {/* Specs Badges (Color, Storage, RAM, Warranty) */}
+          <ProductSpecsBadges product={product} />
+
           {/* Add to Cart */}
           <AddToCartButton product={product} />
 
           {/* Trust Badges */}
-          <div className="grid grid-cols-2 gap-4 pt-6 border-t border-border">
-            <div className="flex items-center gap-2 text-sm">
-              <Truck className="w-5 h-5 text-primary" />
-              <span>Free Shipping</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm">
-              <Shield className="w-5 h-5 text-primary" />
-              <span>2 Year Warranty</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm">
-              <RotateCcw className="w-5 h-5 text-primary" />
-              <span>Easy Returns</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm">
-              <Shield className="w-5 h-5 text-primary" />
-              <span>Secure Payment</span>
-            </div>
-          </div>
+          <ProductTrustBadges />
 
           {/* Description */}
           {product.description && (
@@ -198,27 +187,7 @@ export default async function ProductPage({ params, searchParams }: ProductPageP
           )}
 
           {/* Specifications */}
-          {product.specifications && Object.keys(product.specifications).length > 0 && (
-            <Card className="p-6">
-              <h2 className="font-semibold text-lg mb-4">Specifications</h2>
-              <dl className="space-y-3">
-                {Object.entries(product.specifications).map(([key, value]) => (
-                  <div key={key} className="flex justify-between border-b border-border pb-2 last:border-0">
-                    <dt className="font-medium text-foreground">{key}</dt>
-                    <dd className="text-muted-foreground">{String(value)}</dd>
-                  </div>
-                ))}
-              </dl>
-            </Card>
-          )}
-
-          {/* Warranty */}
-          {product.warranty && (
-            <div className="pt-6 border-t border-border">
-              <h3 className="font-semibold mb-2">Warranty</h3>
-              <p className="text-muted-foreground">{product.warranty}</p>
-            </div>
-          )}
+          <ProductSpecifications product={product} />
         </div>
       </div>
 
@@ -236,4 +205,3 @@ export default async function ProductPage({ params, searchParams }: ProductPageP
     </div>
   );
 }
-

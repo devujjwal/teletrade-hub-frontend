@@ -82,6 +82,9 @@ const translations: Record<Language, Record<string, string>> = {
     'products.warranty': 'Warranty',
     'products.months': 'months',
     'products.loginToViewPrice': 'Login to view price',
+    'products.fastDelivery': 'Fast Delivery',
+    'products.securePayment': 'Secure Payment',
+    'products.easyReturns': 'Easy Returns',
     'products.signInForPricing': 'Sign in to see exclusive pricing and offers',
     'products.loginToBuy': 'Login to Purchase',
     
@@ -399,6 +402,9 @@ const translations: Record<Language, Record<string, string>> = {
     'products.warranty': 'Garantie',
     'products.months': 'Monate',
     'products.loginToViewPrice': 'Anmelden für Preise',
+    'products.fastDelivery': 'Schnelle Lieferung',
+    'products.securePayment': 'Sichere Zahlung',
+    'products.easyReturns': 'Einfache Rückgabe',
     'products.signInForPricing': 'Melden Sie sich an, um exklusive Preise zu sehen',
     'products.loginToBuy': 'Zum Kaufen anmelden',
     

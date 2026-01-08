@@ -6,6 +6,53 @@ import { Brand } from '@/types/brand';
  * Map backend product response to frontend Product type
  */
 export function mapProduct(backendProduct: any): Product {
+  // Parse specifications if it's a string
+  let specifications = backendProduct.specifications || {};
+  if (typeof specifications === 'string') {
+    try {
+      specifications = JSON.parse(specifications);
+    } catch (e) {
+      specifications = {};
+    }
+  }
+  
+  // Ensure specifications is an object
+  if (!specifications || typeof specifications !== 'object') {
+    specifications = {};
+  }
+  
+  // Add EAN, color, storage, RAM to specifications if they exist as separate fields
+  if (backendProduct.ean && !specifications.ean) {
+    specifications.ean = backendProduct.ean;
+  }
+  if (backendProduct.color && !specifications.color) {
+    specifications.color = backendProduct.color;
+  }
+  if (backendProduct.storage && !specifications.storage && !specifications.prod_storage) {
+    specifications.prod_storage = backendProduct.storage;
+  }
+  if (backendProduct.ram && !specifications.ram && !specifications.prod_memory) {
+    specifications.prod_memory = backendProduct.ram;
+  }
+  
+  // Get warranty from warranty_name or warranty_months
+  let warranty = backendProduct.warranty;
+  if (!warranty && backendProduct.warranty_name) {
+    warranty = backendProduct.warranty_name;
+  } else if (!warranty && backendProduct.warranty_months) {
+    warranty = `${backendProduct.warranty_months} ${backendProduct.warranty_months === 1 ? 'month' : 'months'}`;
+  }
+  
+  // Add warranty to specifications if not already there
+  if (warranty && !specifications.warranty) {
+    specifications.warranty = warranty;
+  }
+  
+  // Add full_name if name exists
+  if (backendProduct.name && !specifications.full_name) {
+    specifications.full_name = backendProduct.name;
+  }
+  
   return {
     id: backendProduct.id,
     sku: backendProduct.sku || '',
@@ -30,8 +77,8 @@ export function mapProduct(backendProduct: any): Product {
     brand_id: backendProduct.brand_id || 0,
     brand_name: backendProduct.brand_name,
     brand_slug: backendProduct.brand_slug,
-    specifications: backendProduct.specifications || {},
-    warranty: backendProduct.warranty || backendProduct.warranty_months ? `${backendProduct.warranty_months} months` : undefined,
+    specifications,
+    warranty,
     created_at: backendProduct.created_at,
     updated_at: backendProduct.updated_at,
     // Handle is_featured
