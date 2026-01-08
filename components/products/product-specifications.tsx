@@ -78,6 +78,7 @@ export default function ProductSpecifications({ product }: ProductSpecifications
               className={`flex justify-between py-3 ${index < allSpecs.length - 1 ? 'border-b border-border' : ''}`}
             >
               <dt className="font-medium text-foreground pr-4">{label}</dt>
+              {/* SECURITY: React automatically escapes HTML in JSX, value is safe */}
               <dd className="text-muted-foreground text-right">{value}</dd>
             </div>
           );

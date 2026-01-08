@@ -29,7 +29,10 @@ async function getProduct(slug: string, lang?: string) {
   try {
     return await productsApi.getBySlug(slug, lang);
   } catch (error) {
-    console.error('Error fetching product:', error);
+    // SECURITY: Only log errors in development to prevent information disclosure
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Error fetching product:', error);
+    }
     return null;
   }
 }
@@ -181,6 +184,7 @@ export default async function ProductPage({ params, searchParams }: ProductPageP
           {product.description && (
             <div className="pt-6 border-t border-border">
               <h2 className="font-semibold text-lg mb-3">Description</h2>
+              {/* SECURITY: React automatically escapes HTML, but we ensure safe rendering */}
               <p className="text-muted-foreground whitespace-pre-line">{product.description}</p>
             </div>
           )}

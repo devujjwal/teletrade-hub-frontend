@@ -64,7 +64,9 @@ export default function OrdersPage() {
           const response = await ordersApi.list();
           setOrders(response.data || []);
         } catch (error) {
-          console.error('Error fetching orders:', error);
+          if (process.env.NODE_ENV === 'development') {
+            console.error('Error fetching orders:', error);
+          }
         } finally {
           setIsLoading(false);
         }

@@ -71,10 +71,36 @@ apiClient.interceptors.response.use(
       }
     }
 
+    // SECURITY: Sanitize error messages to prevent information disclosure
+    const isProduction = process.env.NODE_ENV === 'production';
+    let errorMessage = 'An error occurred';
+    
+    if (!isProduction) {
+      // In development, show detailed errors
+      errorMessage = (error.response?.data as any)?.message || error.message || 'An error occurred';
+    } else {
+      // In production, use generic messages based on status code
+      const status = error.response?.status;
+      if (status === 401) {
+        errorMessage = 'Authentication required';
+      } else if (status === 403) {
+        errorMessage = 'Access denied';
+      } else if (status === 404) {
+        errorMessage = 'Resource not found';
+      } else if (status === 429) {
+        errorMessage = 'Too many requests. Please try again later';
+      } else if (status >= 500) {
+        errorMessage = 'Server error. Please try again later';
+      } else if (error.response?.data?.message) {
+        // Use backend message if it's user-friendly (already sanitized)
+        errorMessage = (error.response.data as any).message;
+      }
+    }
+
     const apiError: ApiError = {
-      message: (error.response?.data as any)?.message || error.message || 'An error occurred',
+      message: errorMessage,
       status: error.response?.status || 500,
-      errors: (error.response?.data as any)?.errors,
+      errors: isProduction ? undefined : (error.response?.data as any)?.errors, // Hide detailed errors in production
     };
 
     return Promise.reject(apiError);

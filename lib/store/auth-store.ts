@@ -52,7 +52,14 @@ export const useAuthStore = create<AuthStore>()(
               const isAdmin = isAdminStr === 'true';
               set({ token, user, isAdmin });
             } catch (error) {
-              console.error('Error parsing user from localStorage:', error);
+              // SECURITY: Only log errors in development
+              if (process.env.NODE_ENV === 'development') {
+                console.error('Error parsing user from localStorage:', error);
+              }
+              // Clear corrupted data
+              localStorage.removeItem('auth_token');
+              localStorage.removeItem('user');
+              localStorage.removeItem('is_admin');
             }
           }
         }

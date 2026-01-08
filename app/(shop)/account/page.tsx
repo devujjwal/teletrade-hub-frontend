@@ -102,7 +102,9 @@ export default function AccountPage() {
       toast.success('Logged out successfully');
       router.push('/');
     } catch (error) {
-      console.error('Logout error:', error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Logout error:', error);
+      }
       useAuthStore.getState().logout();
       router.push('/');
     }
@@ -124,7 +126,9 @@ export default function AccountPage() {
       setIsEditing(false);
     } catch (error: any) {
       toast.error(error?.response?.data?.message || 'Failed to update profile');
-      console.error('Error updating profile:', error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Error updating profile:', error);
+      }
     } finally {
       setIsSaving(false);
     }

@@ -25,13 +25,13 @@ export const checkoutSchema = z.object({
 });
 
 export const loginSchema = z.object({
-  email: z.string().min(1, 'Username or email is required'), // For admin login, this is username
-  password: z.string().min(6, 'Password must be at least 6 characters'),
+  email: z.string().min(1, 'Username or email is required').email('Invalid email address'),
+  password: z.string().min(1, 'Password is required'), // Length validated server-side
 });
 
 export const adminLoginSchema = z.object({
   username: z.string().min(1, 'Username is required'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
+  password: z.string().min(1, 'Password is required'), // Length validated server-side
 });
 
 export const registerSchema = z.object({

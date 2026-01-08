@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useCartStore } from '@/lib/store/cart-store';
 import { useAuthStore } from '@/lib/store/auth-store';
 import { Search, ShoppingCart, User, Menu, ChevronDown } from 'lucide-react';
@@ -24,6 +25,7 @@ import {
 } from '@/components/ui/sheet';
 
 export default function Header() {
+  const router = useRouter();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isMounted, setIsMounted] = useState(false);
@@ -39,8 +41,11 @@ export default function Header() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
+      // SECURITY: Use encodeURIComponent to prevent XSS in URL parameters
+      const encodedQuery = encodeURIComponent(searchQuery.trim());
       const langParam = language && language !== 'en' ? `&lang=${language}` : '';
-      window.location.href = `/products?search=${encodeURIComponent(searchQuery)}${langParam}`;
+      // Use Next.js router for better security and performance
+      router.push(`/products?search=${encodedQuery}${langParam}`);
     }
   };
 

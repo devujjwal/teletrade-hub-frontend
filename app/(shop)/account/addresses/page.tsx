@@ -123,7 +123,9 @@ export default function AddressesPage() {
           const response = await addressesApi.list();
           setAddresses(response.data || []);
         } catch (error) {
-          console.error('Error fetching addresses:', error);
+          if (process.env.NODE_ENV === 'development') {
+            console.error('Error fetching addresses:', error);
+          }
         } finally {
           setIsLoading(false);
         }
@@ -270,7 +272,9 @@ export default function AddressesPage() {
       setIsDialogOpen(false);
     } catch (error: any) {
       toast.error(error?.response?.data?.message || 'Failed to save address');
-      console.error('Error saving address:', error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Error saving address:', error);
+      }
     }
   };
 
