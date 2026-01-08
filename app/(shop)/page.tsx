@@ -10,8 +10,7 @@ import ProductCard from '@/components/products/product-card';
 import HomePageClient from '@/components/home/home-page-client';
 import { ArrowRight, ChevronRight, Smartphone, Tablet, Headphones, Watch, Cpu, Cable, Truck, Shield, CreditCard, Headset } from 'lucide-react';
 
-export const revalidate = 0; // Disable caching to always show fresh data
-export const dynamic = 'force-dynamic'; // Force dynamic rendering
+export const revalidate = 300; // Revalidate every 5 minutes
 
 const categoryIcons: Record<string, React.ReactNode> = {
   'Smartphones': <Smartphone className="w-8 h-8" />,

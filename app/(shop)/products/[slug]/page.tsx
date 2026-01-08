@@ -15,8 +15,7 @@ import ProductSpecsBadges from '@/components/products/product-specs-badges';
 import ProductSpecifications from '@/components/products/product-specifications';
 import ProductTrustBadges from '@/components/products/product-trust-badges';
 
-export const revalidate = 0; // Disable caching to always show fresh data
-export const dynamic = 'force-dynamic'; // Force dynamic rendering
+export const revalidate = 300; // Revalidate every 5 minutes
 
 interface ProductPageProps {
   params: {
