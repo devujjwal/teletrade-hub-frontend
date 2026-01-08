@@ -26,12 +26,12 @@ export default function ProductPriceSection({
   if (!token || !user) {
     return (
       <div 
-        className="flex items-center gap-3 p-6 bg-muted rounded-lg border border-border cursor-pointer hover:bg-muted/80 transition-colors"
+        className="flex items-center gap-3 mb-6 p-4 bg-muted rounded-lg border border-border cursor-pointer hover:bg-muted/80 transition-colors"
         onClick={() => router.push('/login')}
       >
         <Lock className="w-5 h-5 text-muted-foreground" />
         <div>
-          <p className="font-medium text-base">Login to view price</p>
+          <p className="font-medium">Login to view price</p>
           <p className="text-sm text-muted-foreground">Sign in to see exclusive pricing and offers</p>
         </div>
       </div>
@@ -40,14 +40,14 @@ export default function ProductPriceSection({
 
   // Show price for logged-in users
   return (
-    <div className="flex items-baseline gap-4">
+    <div className="flex items-baseline gap-4 mb-6">
       <span className="text-3xl font-bold">{formatPrice(price)}</span>
       {hasDiscount && originalPrice && (
         <>
           <span className="text-xl text-muted-foreground line-through">
             {formatPrice(originalPrice)}
           </span>
-          <Badge variant="error">Save {discountPercent}%</Badge>
+          <Badge variant="destructive">Save {discountPercent}%</Badge>
         </>
       )}
     </div>
