@@ -89,9 +89,9 @@ apiClient.interceptors.response.use(
         errorMessage = 'Resource not found';
       } else if (status === 429) {
         errorMessage = 'Too many requests. Please try again later';
-      } else if (status >= 500) {
+      } else if (status !== undefined && status >= 500) {
         errorMessage = 'Server error. Please try again later';
-      } else if (error.response?.data?.message) {
+      } else if (error.response?.data && typeof (error.response.data as any).message === 'string') {
         // Use backend message if it's user-friendly (already sanitized)
         errorMessage = (error.response.data as any).message;
       }
