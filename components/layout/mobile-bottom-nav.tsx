@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { Home, ShoppingBag, Search, User, ShoppingCart } from 'lucide-react';
+import { Home, ShoppingBag, User, ShoppingCart } from 'lucide-react';
 import { useCartStore } from '@/lib/store/cart-store';
 import { cn } from '@/lib/utils/cn';
 
@@ -20,7 +20,6 @@ export default function MobileBottomNav() {
   const navItems = [
     { href: '/', label: 'Home', icon: Home },
     { href: '/products', label: 'Products', icon: ShoppingBag },
-    { href: '/products?search=', label: 'Search', icon: Search },
     { href: '/cart', label: 'Cart', icon: ShoppingCart, badge: isMounted ? itemCount : 0 },
     { href: '/account', label: 'Account', icon: User },
   ];

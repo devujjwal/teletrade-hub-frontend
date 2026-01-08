@@ -62,10 +62,11 @@ export default function ProductGrid({ products = [], meta, searchParams }: Produ
         <p className="text-sm text-muted-foreground">
           Showing {productsList.length} of {metaData.total} products
         </p>
+        {/* Hide on mobile/tablet since we have Sort button in bottom bar */}
         <select
           value={searchParams.sort || 'newest'}
           onChange={(e) => updateSort(e.target.value)}
-          className="rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+          className="hidden lg:block rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
         >
           <option value="newest">Newest</option>
           <option value="price_asc">Price: Low to High</option>

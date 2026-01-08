@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import Input from '@/components/ui/input';
 import Badge from '@/components/ui/badge';
 import LanguageSelector from '@/components/layout/language-selector';
+import MobileSearchOverlay from '@/components/layout/mobile-search-overlay';
 import { useLanguage } from '@/contexts/language-context';
 import {
   DropdownMenu,
@@ -26,7 +27,7 @@ import {
 
 export default function Header() {
   const router = useRouter();
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isMounted, setIsMounted] = useState(false);
   const itemCount = useCartStore((state) => state.getItemCount());
@@ -93,7 +94,7 @@ export default function Header() {
               variant="ghost"
               size="icon"
               className="md:hidden"
-              onClick={() => setIsSearchOpen(!isSearchOpen)}
+              onClick={() => setIsMobileSearchOpen(true)}
             >
               <Search className="w-5 h-5" />
             </Button>
@@ -194,24 +195,13 @@ export default function Header() {
             </Link>
           ))}
         </nav>
-
-        {/* Mobile Search - Expandable */}
-        {isSearchOpen && (
-          <form onSubmit={handleSearch} className="md:hidden py-3">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                type="text"
-                placeholder={t('products.search')}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 pr-4 w-full text-base"
-                autoFocus
-              />
-            </div>
-          </form>
-        )}
       </div>
+
+      {/* Mobile Search Overlay */}
+      <MobileSearchOverlay
+        isOpen={isMobileSearchOpen}
+        onClose={() => setIsMobileSearchOpen(false)}
+      />
     </header>
   );
 }
