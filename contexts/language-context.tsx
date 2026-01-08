@@ -41,10 +41,17 @@ const translations: Record<Language, Record<string, string>> = {
     'hero.subtitle': 'Discover the latest smartphones, tablets, and accessories from top brands',
     'hero.cta': 'Shop Now',
     'hero.secondary': 'View Categories',
+    'hero.newArrivals': 'New Arrivals Available',
+    'hero.freeShipping': 'Free Shipping',
+    'hero.warranty': '2 Year Warranty',
+    'hero.securePayment': 'Secure Payment',
+    'hero.support': '24/7 Support',
     
     // Products
     'products.title': 'Products',
     'products.featured': 'Featured Products',
+    'products.featuredSubtitle': 'Top picks from our collection',
+    'products.viewAll': 'View All Products',
     'products.all': 'All Products',
     'products.search': 'Search products...',
     'products.filter': 'Filter',
@@ -81,11 +88,14 @@ const translations: Record<Language, Record<string, string>> = {
     // Categories
     'categories.title': 'Categories',
     'categories.shopBy': 'Shop by Category',
+    'categories.subtitle': 'Find exactly what you\'re looking for',
     'categories.productsCount': 'products',
     
     // Brands
     'brands.title': 'Brands',
     'brands.shopBy': 'Shop by Brand',
+    'brands.subtitle': 'Explore products from top brands',
+    'brands.viewAll': 'View All Brands',
     
     // Cart
     'cart.title': 'Shopping Cart',
@@ -263,6 +273,9 @@ const translations: Record<Language, Record<string, string>> = {
     'auth.forgotPassword': 'Forgot Password?',
     'auth.noAccount': "Don't have an account?",
     'auth.hasAccount': 'Already have an account?',
+    'auth.welcomeBack': 'Welcome Back',
+    'auth.loginSubtitle': 'Login to your account to continue shopping',
+    'auth.registerSubtitle': 'Join TeleTrade Hub and start shopping',
     
     // Common
     'common.loading': 'Loading...',
@@ -280,6 +293,16 @@ const translations: Record<Language, Record<string, string>> = {
     'common.close': 'Close',
     'common.yes': 'Yes',
     'common.no': 'No',
+    'common.viewAll': 'View All',
+    
+    // Home
+    'home.productsAvailable': 'Products Available',
+    'home.topBrands': 'Top Brands',
+    'home.customerSupport': 'Customer Support',
+    'home.securePayments': 'Secure Payments',
+    'home.ctaTitle': 'Ready to upgrade your tech?',
+    'home.ctaSubtitle': 'Browse our extensive collection of premium telecommunication products from the world\'s leading brands.',
+    'home.startShopping': 'Start Shopping',
     
     // Footer
     'footer.about': 'About Us',
@@ -311,10 +334,17 @@ const translations: Record<Language, Record<string, string>> = {
     'hero.subtitle': 'Entdecken Sie die neuesten Smartphones, Tablets und Zubehör von Top-Marken',
     'hero.cta': 'Jetzt Einkaufen',
     'hero.secondary': 'Kategorien ansehen',
+    'hero.newArrivals': 'Neue Artikel verfügbar',
+    'hero.freeShipping': 'Kostenloser Versand',
+    'hero.warranty': '2 Jahre Garantie',
+    'hero.securePayment': 'Sichere Zahlung',
+    'hero.support': '24/7 Support',
     
     // Products
     'products.title': 'Produkte',
     'products.featured': 'Empfohlene Produkte',
+    'products.featuredSubtitle': 'Top-Auswahl aus unserer Sammlung',
+    'products.viewAll': 'Alle Produkte ansehen',
     'products.all': 'Alle Produkte',
     'products.search': 'Produkte suchen...',
     'products.filter': 'Filtern',
@@ -351,11 +381,14 @@ const translations: Record<Language, Record<string, string>> = {
     // Categories
     'categories.title': 'Kategorien',
     'categories.shopBy': 'Nach Kategorie einkaufen',
+    'categories.subtitle': 'Finden Sie genau das, was Sie suchen',
     'categories.productsCount': 'Produkte',
     
     // Brands
     'brands.title': 'Marken',
     'brands.shopBy': 'Nach Marke einkaufen',
+    'brands.subtitle': 'Produkte von Top-Marken erkunden',
+    'brands.viewAll': 'Alle Marken ansehen',
     
     // Cart
     'cart.title': 'Warenkorb',
@@ -533,6 +566,9 @@ const translations: Record<Language, Record<string, string>> = {
     'auth.forgotPassword': 'Passwort vergessen?',
     'auth.noAccount': 'Noch kein Konto?',
     'auth.hasAccount': 'Bereits ein Konto?',
+    'auth.welcomeBack': 'Willkommen zurück',
+    'auth.loginSubtitle': 'Melden Sie sich in Ihrem Konto an, um weiter einzukaufen',
+    'auth.registerSubtitle': 'Treten Sie TeleTrade Hub bei und beginnen Sie mit dem Einkaufen',
     
     // Common
     'common.loading': 'Laden...',
@@ -550,6 +586,16 @@ const translations: Record<Language, Record<string, string>> = {
     'common.close': 'Schließen',
     'common.yes': 'Ja',
     'common.no': 'Nein',
+    'common.viewAll': 'Alle ansehen',
+    
+    // Home
+    'home.productsAvailable': 'Verfügbare Produkte',
+    'home.topBrands': 'Top-Marken',
+    'home.customerSupport': 'Kundensupport',
+    'home.securePayments': 'Sichere Zahlungen',
+    'home.ctaTitle': 'Bereit, Ihre Technik zu verbessern?',
+    'home.ctaSubtitle': 'Durchsuchen Sie unsere umfangreiche Sammlung von Premium-Telekommunikationsprodukten von führenden Marken weltweit.',
+    'home.startShopping': 'Einkaufen beginnen',
     
     // Footer
     'footer.about': 'Über uns',
