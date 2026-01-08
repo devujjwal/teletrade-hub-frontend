@@ -39,7 +39,7 @@ const statusConfig = {
 
 export default function OrdersPage() {
   const router = useRouter();
-  const { user, token, initialize } = useAuthStore();
+  const { user, token, initialize, _hasHydrated } = useAuthStore();
   const { t } = useLanguage();
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -51,28 +51,42 @@ export default function OrdersPage() {
   }, [initialize]);
 
   useEffect(() => {
-    // Check authentication - redirect if not logged in
-    if (!token || !user) {
+    // Only redirect if hydrated and user is not logged in
+    if (_hasHydrated && (!token || !user)) {
       router.push('/login');
       return;
     }
 
-    // Fetch orders
-    const fetchOrders = async () => {
-      try {
-        const response = await ordersApi.list();
-        setOrders(response.data || []);
-      } catch (error) {
-        console.error('Error fetching orders:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+    // Fetch orders only if authenticated
+    if (_hasHydrated && token && user) {
+      const fetchOrders = async () => {
+        try {
+          const response = await ordersApi.list();
+          setOrders(response.data || []);
+        } catch (error) {
+          console.error('Error fetching orders:', error);
+        } finally {
+          setIsLoading(false);
+        }
+      };
 
-    fetchOrders();
-  }, [token, user, router]);
+      fetchOrders();
+    }
+  }, [_hasHydrated, token, user, router]);
 
-  // Redirect to login if not authenticated
+  // Show loading while hydrating
+  if (!_hasHydrated) {
+    return (
+      <div className="container-wide py-16 text-center">
+        <div className="max-w-md mx-auto">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">{t('common.loading') || 'Loading...'}</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Redirect to login if not authenticated (only show after hydration)
   if (!token || !user) {
     return (
       <div className="container-wide py-16 text-center">

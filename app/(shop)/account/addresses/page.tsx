@@ -58,7 +58,7 @@ const DEFAULT_COUNTRY_CODE = "DE";
 
 export default function AddressesPage() {
   const router = useRouter();
-  const { user, token, initialize } = useAuthStore();
+  const { user, token, initialize, _hasHydrated } = useAuthStore();
   const { t } = useLanguage();
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -110,24 +110,40 @@ export default function AddressesPage() {
   }, [initialize]);
 
   useEffect(() => {
-    if (!token || !user) {
+    // Only redirect if hydrated and user is not logged in
+    if (_hasHydrated && (!token || !user)) {
       router.push('/login');
       return;
     }
 
-    const fetchAddresses = async () => {
-      try {
-        const response = await addressesApi.list();
-        setAddresses(response.data || []);
-      } catch (error) {
-        console.error('Error fetching addresses:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+    // Fetch addresses only if authenticated
+    if (_hasHydrated && token && user) {
+      const fetchAddresses = async () => {
+        try {
+          const response = await addressesApi.list();
+          setAddresses(response.data || []);
+        } catch (error) {
+          console.error('Error fetching addresses:', error);
+        } finally {
+          setIsLoading(false);
+        }
+      };
 
-    fetchAddresses();
-  }, [token, user, router]);
+      fetchAddresses();
+    }
+  }, [_hasHydrated, token, user, router]);
+
+  // Show loading while hydrating
+  if (!_hasHydrated) {
+    return (
+      <div className="container-wide py-16 text-center">
+        <div className="max-w-md mx-auto">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">{t('common.loading') || 'Loading...'}</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!token || !user) {
     return (

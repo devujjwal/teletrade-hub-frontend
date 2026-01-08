@@ -25,7 +25,7 @@ import toast from 'react-hot-toast';
 
 export default function AccountPage() {
   const router = useRouter();
-  const { user, token, initialize } = useAuthStore();
+  const { user, token, initialize, _hasHydrated } = useAuthStore();
   const login = useAuthStore((state) => state.login);
   const { t } = useLanguage();
   
@@ -43,11 +43,11 @@ export default function AccountPage() {
   }, [initialize]);
 
   useEffect(() => {
-    // Check authentication - redirect if not logged in
-    if (!token || !user) {
+    // Only redirect if hydrated and user is not logged in
+    if (_hasHydrated && (!token || !user)) {
       router.push('/login');
     }
-  }, [token, user, router]);
+  }, [_hasHydrated, token, user, router]);
 
   useEffect(() => {
     if (user) {
@@ -60,7 +60,19 @@ export default function AccountPage() {
     }
   }, [user]);
 
-  // Redirect to login if not authenticated
+  // Show loading while hydrating
+  if (!_hasHydrated) {
+    return (
+      <div className="container-wide py-16 text-center">
+        <div className="max-w-md mx-auto">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">{t('common.loading') || 'Loading...'}</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show sign-in prompt only if hydrated and user is not logged in
   if (!token || !user) {
     return (
       <div className="container-wide py-16 text-center">
