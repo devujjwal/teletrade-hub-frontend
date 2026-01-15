@@ -16,11 +16,19 @@ interface CartItemProps {
 export default function CartItem({ item }: CartItemProps) {
   const updateQuantity = useCartStore((state) => state.updateQuantity);
   const removeItem = useCartStore((state) => state.removeItem);
+  
+  const isAtStockLimit = item.quantity >= item.stock_quantity;
+
+  const handleIncreaseQuantity = () => {
+    if (!isAtStockLimit) {
+      updateQuantity(item.product_id, item.quantity + 1);
+    }
+  };
 
   return (
     <div className="flex gap-4 p-4 bg-card rounded-xl border border-border">
       {/* Image */}
-      <Link href={`/products/${item.product_id}`} className="flex-shrink-0">
+      <Link href={`/products/${item.slug}`} className="flex-shrink-0">
         <div className="w-24 h-24 bg-muted rounded-lg overflow-hidden">
           {item.product_image ? (
             <Image
@@ -40,7 +48,7 @@ export default function CartItem({ item }: CartItemProps) {
 
       {/* Details */}
       <div className="flex-1 min-w-0">
-        <Link href={`/products/${item.product_id}`}>
+        <Link href={`/products/${item.slug}`}>
           <h3 className="font-semibold hover:text-primary transition-colors line-clamp-2">
             {item.product_name}
           </h3>
@@ -61,20 +69,26 @@ export default function CartItem({ item }: CartItemProps) {
         </button>
 
         {/* Quantity */}
-        <div className="flex items-center border border-border rounded-lg">
-          <button
-            className="w-8 h-8 flex items-center justify-center hover:bg-muted transition-colors"
-            onClick={() => updateQuantity(item.product_id, item.quantity - 1)}
-          >
-            <Minus className="w-4 h-4" />
-          </button>
-          <span className="w-12 text-center text-sm font-medium">{item.quantity}</span>
-          <button
-            className="w-8 h-8 flex items-center justify-center hover:bg-muted transition-colors"
-            onClick={() => updateQuantity(item.product_id, item.quantity + 1)}
-          >
-            <Plus className="w-4 h-4" />
-          </button>
+        <div className="flex flex-col items-end gap-1">
+          <div className="flex items-center border border-border rounded-lg">
+            <button
+              className="w-8 h-8 flex items-center justify-center hover:bg-muted transition-colors"
+              onClick={() => updateQuantity(item.product_id, item.quantity - 1)}
+            >
+              <Minus className="w-4 h-4" />
+            </button>
+            <span className="w-12 text-center text-sm font-medium">{item.quantity}</span>
+            <button
+              className="w-8 h-8 flex items-center justify-center hover:bg-muted transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              onClick={handleIncreaseQuantity}
+              disabled={isAtStockLimit}
+            >
+              <Plus className="w-4 h-4" />
+            </button>
+          </div>
+          {isAtStockLimit && (
+            <span className="text-xs text-muted-foreground">(Max)</span>
+          )}
         </div>
 
         {/* Price */}

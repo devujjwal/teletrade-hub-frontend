@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { ShoppingCart, Lock } from 'lucide-react';
+import { ShoppingCart, Lock, Minus, Plus } from 'lucide-react';
 import { Product } from '@/types/product';
 import { useCartStore } from '@/lib/store/cart-store';
 import { useAuthStore } from '@/lib/store/auth-store';
@@ -10,7 +10,6 @@ import { getProxiedImageUrl } from '@/lib/utils/format';
 import { formatPrice } from '@/lib/utils/format';
 import Button from '@/components/ui/button';
 import Badge from '@/components/ui/badge';
-import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import { useLanguage } from '@/contexts/language-context';
 
@@ -21,6 +20,8 @@ interface ProductCardProps {
 export default function ProductCard({ product }: ProductCardProps) {
   const router = useRouter();
   const addItem = useCartStore((state) => state.addItem);
+  const updateQuantity = useCartStore((state) => state.updateQuantity);
+  const items = useCartStore((state) => state.items);
   const { token, user } = useAuthStore();
   const { t } = useLanguage();
 
@@ -34,6 +35,10 @@ export default function ProductCard({ product }: ProductCardProps) {
     : 0;
 
   const imageUrl = product.primary_image || '/placeholder.svg';
+  
+  // Check if product is in cart - subscribe to items array for reactivity
+  const cartItem = items.find((item) => item.product_id === product.id);
+  const isInCart = !!cartItem;
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -41,7 +46,6 @@ export default function ProductCard({ product }: ProductCardProps) {
     
     // Check if user is logged in
     if (!token || !user) {
-      toast.error('Please login to add items to cart');
       router.push('/login');
       return;
     }
@@ -54,10 +58,25 @@ export default function ProductCard({ product }: ProductCardProps) {
         price: product.price,
         quantity: 1,
         sku: product.sku,
+        slug: product.slug,
+        stock_quantity: product.stock_quantity,
       });
-      toast.success(`${product.name} added to cart`);
-    } else {
-      toast.error('Product is out of stock');
+    }
+  };
+
+  const handleIncreaseQuantity = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (cartItem && cartItem.quantity < product.stock_quantity) {
+      updateQuantity(product.id, cartItem.quantity + 1);
+    }
+  };
+
+  const handleDecreaseQuantity = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (cartItem) {
+      updateQuantity(product.id, cartItem.quantity - 1);
     }
   };
 
@@ -157,16 +176,39 @@ export default function ProductCard({ product }: ProductCardProps) {
           </div>
         </div>
 
-        {/* Add to Cart Button or Login Prompt */}
+        {/* Add to Cart Button or Quantity Controls */}
         {token && user ? (
-          <Button
-            className="w-full btn-shop"
-            onClick={handleAddToCart}
-            disabled={!isInStock}
-          >
-            <ShoppingCart className="w-4 h-4 mr-2" />
-            {t('products.addToCart')}
-          </Button>
+          isInCart ? (
+            <div className="flex items-center justify-center border border-primary rounded-full overflow-hidden bg-primary/5">
+              <button
+                onClick={handleDecreaseQuantity}
+                className="w-10 h-10 flex items-center justify-center hover:bg-primary/10 transition-colors text-primary"
+                type="button"
+              >
+                <Minus className="w-4 h-4" />
+              </button>
+              <span className="flex-1 text-center text-sm font-semibold text-primary px-2">
+                {cartItem?.quantity || 0}
+              </span>
+              <button
+                onClick={handleIncreaseQuantity}
+                disabled={cartItem && cartItem.quantity >= product.stock_quantity}
+                className="w-10 h-10 flex items-center justify-center hover:bg-primary/10 transition-colors text-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                type="button"
+              >
+                <Plus className="w-4 h-4" />
+              </button>
+            </div>
+          ) : (
+            <Button
+              className="w-full btn-shop"
+              onClick={handleAddToCart}
+              disabled={!isInStock}
+            >
+              <ShoppingCart className="w-4 h-4 mr-2" />
+              {t('products.addToCart')}
+            </Button>
+          )
         ) : (
           <Button
             className="w-full"

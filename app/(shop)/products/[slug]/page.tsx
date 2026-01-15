@@ -157,12 +157,14 @@ export default async function ProductPage({ params, searchParams }: ProductPageP
           {/* Stock Status */}
           <div>
             {product.availability === 'in_stock' ? (
-              product.stock_quantity <= 5 ? (
+              product.stock_quantity <= 5 && product.stock_quantity > 0 ? (
                 <span className="badge-warning">
                   Only {product.stock_quantity} left in stock
                 </span>
-              ) : (
+              ) : product.stock_quantity > 0 ? (
                 <span className="badge-success">In Stock</span>
+              ) : (
+                <span className="badge-destructive">Out of Stock</span>
               )
             ) : product.availability === 'pre_order' ? (
               <span className="badge-info">Pre-Order</span>

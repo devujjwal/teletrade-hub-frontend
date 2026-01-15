@@ -38,6 +38,7 @@ import { Search, Edit, ChevronLeft, ChevronRight, Star, Package, Store, Warehous
 import { formatPrice } from '@/lib/utils/format';
 import { getProxiedImageUrl } from '@/lib/utils/format';
 import Image from 'next/image';
+import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { categoriesApi } from '@/lib/api/categories';
 import { brandsApi } from '@/lib/api/brands';
@@ -412,16 +413,28 @@ export default function AdminProductsPage() {
                       <TableRow key={product.id}>
                         <TableCell>
                           <div className="flex items-center gap-3">
-                            <div className="relative w-12 h-12 rounded-md overflow-hidden">
+                            <Link
+                              href={`/products/${product.slug}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="relative w-12 h-12 rounded-md overflow-hidden hover:opacity-80 transition-opacity"
+                            >
                               <Image
                                 src={getProxiedImageUrl(product.primary_image)}
                                 alt={product.name}
                                 fill
                                 className="object-cover"
                               />
-                            </div>
+                            </Link>
                             <div>
-                              <div className="font-medium">{product.name}</div>
+                              <Link
+                                href={`/products/${product.slug}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="font-medium hover:text-primary hover:underline transition-colors"
+                              >
+                                {product.name}
+                              </Link>
                               <div className="text-sm text-muted-foreground">
                                 {product.category_name}
                               </div>
@@ -472,7 +485,30 @@ export default function AdminProductsPage() {
                             </div>
                           )}
                         </TableCell>
-                        <TableCell>{product.stock_quantity}</TableCell>
+                        <TableCell>
+                          {product.is_available === 0 ? (
+                            <Badge variant="error" className="text-xs">
+                              Unavailable
+                            </Badge>
+                          ) : product.stock_quantity <= 0 ? (
+                            <Badge variant="error" className="text-xs">
+                              Out of Stock
+                            </Badge>
+                          ) : (
+                            <div className="space-y-1">
+                              <div className="font-medium">{product.stock_quantity}</div>
+                              {product.stock_quantity <= 5 ? (
+                                <Badge variant="warning" className="text-xs">
+                                  Low Stock
+                                </Badge>
+                              ) : (
+                                <Badge variant="success" className="text-xs">
+                                  In Stock
+                                </Badge>
+                              )}
+                            </div>
+                          )}
+                        </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2">
                             <Switch
