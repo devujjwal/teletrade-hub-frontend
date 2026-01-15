@@ -25,8 +25,8 @@ export default function AdminSyncPage() {
   const loadSyncStatus = async () => {
     try {
       const response = await adminApi.getSyncStatus();
-      // API now returns sync status data directly
-      setStatusData(response);
+      // API returns { success: true, data: { last_sync: {...} } }
+      setStatusData(response.data || response);
     } catch (error) {
       console.error('Error loading sync status:', error);
       toast.error('Failed to load sync status');

@@ -95,9 +95,9 @@ export default function AdminProductsPage() {
       if (featuredFilter !== 'all') filters.is_featured = featuredFilter === 'featured' ? 1 : 0;
 
       const response = await adminApi.getProducts(filters);
-      // API now returns { products: [...], pagination: {...} } directly
-      const productsData = response.products || [];
-      const paginationData = response.pagination || {};
+      // API returns { success: true, data: { products: [...], pagination: {...} } }
+      const productsData = response.data?.products || [];
+      const paginationData = response.data?.pagination || {};
       
       setProducts(productsData);
       setPagination({
