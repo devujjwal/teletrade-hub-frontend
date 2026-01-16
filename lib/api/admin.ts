@@ -156,12 +156,14 @@ export const adminApi = {
   // Settings
   getSettings: async () => {
     const response = await apiClient.get<any>('/admin/settings');
-    return response.data;
+    // API returns { success, message, data: { settings } }
+    return response.data?.data || response.data;
   },
 
   updateSettings: async (data: any) => {
     const response = await apiClient.put<any>('/admin/settings', data);
-    return response.data;
+    // API returns { success, message, data: { settings } }
+    return response.data?.data || response.data;
   },
 
   // Password Management
