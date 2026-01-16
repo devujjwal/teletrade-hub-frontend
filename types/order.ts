@@ -2,42 +2,41 @@ export interface OrderItem {
   product_id: number;
   product_name: string;
   product_image?: string;
-  sku: string;
+  product_sku: string;
   price: number;
   quantity: number;
   subtotal: number;
+}
+
+export interface Address {
+  first_name: string;
+  last_name: string;
+  company?: string;
+  address_line1: string;
+  address_line2?: string;
+  city: string;
+  state?: string;
+  postal_code: string;
+  country: string;
+  phone?: string;
 }
 
 export interface Order {
   id: number;
   order_number: string;
   user_id?: number;
-  customer_name: string;
-  customer_email: string;
+  customer_name?: string;
+  customer_email?: string;
   customer_phone?: string;
-  shipping_address: {
-    address_line_1: string;
-    address_line_2?: string;
-    city: string;
-    state?: string;
-    postal_code: string;
-    country: string;
-  };
-  billing_address?: {
-    address_line_1: string;
-    address_line_2?: string;
-    city: string;
-    state?: string;
-    postal_code: string;
-    country: string;
-  };
+  shipping_address: Address;
+  billing_address: Address;
   items: OrderItem[];
   subtotal: number;
   shipping_cost?: number;
   tax?: number;
   total: number;
   status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
-  payment_status: 'pending' | 'paid' | 'failed' | 'refunded';
+  payment_status: 'pending' | 'paid' | 'failed' | 'refunded' | 'unpaid';
   payment_method?: string;
   notes?: string;
   created_at: string;
