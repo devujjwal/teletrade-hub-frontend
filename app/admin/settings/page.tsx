@@ -15,8 +15,9 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { adminApi } from '@/lib/api/admin';
-import { Settings, Save, Globe, DollarSign, Truck, RefreshCw, Mail, MapPin, Phone, MessageCircle } from 'lucide-react';
+import { Settings, Save, Globe, DollarSign, Truck, RefreshCw, Mail, MapPin, Phone, MessageCircle, Lock, Key, AlertCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface SettingsData {
   site_name: string;
@@ -50,6 +51,15 @@ export default function AdminSettingsPage() {
   });
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  
+  // Password change state
+  const [passwordData, setPasswordData] = useState({
+    current_password: '',
+    new_password: '',
+    confirm_password: '',
+  });
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [isResettingPassword, setIsResettingPassword] = useState(false);
 
   const loadSettings = useCallback(async () => {
     setIsLoading(true);
@@ -110,6 +120,50 @@ export default function AdminSettingsPage() {
 
   const updateSetting = (key: keyof SettingsData, value: string | boolean) => {
     setSettings((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const handleChangePassword = async () => {
+    if (!passwordData.current_password || !passwordData.new_password || !passwordData.confirm_password) {
+      toast.error('Please fill in all password fields');
+      return;
+    }
+
+    if (passwordData.new_password !== passwordData.confirm_password) {
+      toast.error('New password and confirmation do not match');
+      return;
+    }
+
+    if (passwordData.new_password.length < 6) {
+      toast.error('Password must be at least 6 characters long');
+      return;
+    }
+
+    setIsChangingPassword(true);
+    try {
+      await adminApi.changePassword(passwordData.current_password, passwordData.new_password);
+      toast.success('Password changed successfully');
+      setPasswordData({ current_password: '', new_password: '', confirm_password: '' });
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || error.message || 'Failed to change password');
+    } finally {
+      setIsChangingPassword(false);
+    }
+  };
+
+  const handleResetToDefault = async () => {
+    if (!confirm('Are you sure you want to reset your password to the default password (Ujjwal@2026)? This will immediately change your password.')) {
+      return;
+    }
+
+    setIsResettingPassword(true);
+    try {
+      await adminApi.resetPasswordToDefault();
+      toast.success('Password reset to default: Ujjwal@2026');
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || error.message || 'Failed to reset password');
+    } finally {
+      setIsResettingPassword(false);
+    }
   };
 
   if (isLoading) {
@@ -335,6 +389,100 @@ export default function AdminSettingsPage() {
               </div>
             </div>
           )}
+        </CardContent>
+      </Card>
+
+      {/* Security Settings */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Lock className="h-5 w-5" />
+            Security Settings
+          </CardTitle>
+          <CardDescription>Change your admin password</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* Default Password Note */}
+          <Alert>
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              <strong>Default Password:</strong> Ujjwal@2026
+              <br />
+              <span className="text-xs text-muted-foreground">
+                If you forget your password, you can reset it to the default using the button below.
+              </span>
+            </AlertDescription>
+          </Alert>
+
+          {/* Change Password Form */}
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="current_password">Current Password</Label>
+              <Input
+                id="current_password"
+                type="password"
+                value={passwordData.current_password}
+                onChange={(e) => setPasswordData({ ...passwordData, current_password: e.target.value })}
+                placeholder="Enter current password"
+              />
+            </div>
+            <div>
+              <Label htmlFor="new_password">New Password</Label>
+              <Input
+                id="new_password"
+                type="password"
+                value={passwordData.new_password}
+                onChange={(e) => setPasswordData({ ...passwordData, new_password: e.target.value })}
+                placeholder="Enter new password (min 6 characters)"
+              />
+            </div>
+            <div>
+              <Label htmlFor="confirm_password">Confirm New Password</Label>
+              <Input
+                id="confirm_password"
+                type="password"
+                value={passwordData.confirm_password}
+                onChange={(e) => setPasswordData({ ...passwordData, confirm_password: e.target.value })}
+                placeholder="Confirm new password"
+              />
+            </div>
+            <div className="flex gap-3 pt-2">
+              <Button
+                onClick={handleChangePassword}
+                disabled={isChangingPassword}
+                variant="default"
+              >
+                {isChangingPassword ? (
+                  <>
+                    <Lock className="h-4 w-4 mr-2 animate-spin" />
+                    Changing...
+                  </>
+                ) : (
+                  <>
+                    <Key className="h-4 w-4 mr-2" />
+                    Change Password
+                  </>
+                )}
+              </Button>
+              <Button
+                onClick={handleResetToDefault}
+                disabled={isResettingPassword}
+                variant="outline"
+              >
+                {isResettingPassword ? (
+                  <>
+                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                    Resetting...
+                  </>
+                ) : (
+                  <>
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                    Reset to Default
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
         </CardContent>
       </Card>
 

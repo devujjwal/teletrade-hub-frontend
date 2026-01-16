@@ -163,4 +163,18 @@ export const adminApi = {
     const response = await apiClient.put<any>('/admin/settings', data);
     return response.data;
   },
+
+  // Password Management
+  changePassword: async (currentPassword: string, newPassword: string) => {
+    const response = await apiClient.put<any>('/admin/change-password', {
+      current_password: currentPassword,
+      new_password: newPassword,
+    });
+    return response.data;
+  },
+
+  resetPasswordToDefault: async () => {
+    const response = await apiClient.post<any>('/admin/reset-password');
+    return response.data;
+  },
 };
