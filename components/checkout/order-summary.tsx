@@ -7,6 +7,7 @@ import Button from '@/components/ui/button';
 import Image from 'next/image';
 import { getProxiedImageUrl } from '@/lib/utils/format';
 import { useLanguage } from '@/contexts/language-context';
+import { useSettings } from '@/contexts/settings-context';
 
 interface OrderSummaryProps {
   items: CartItem[];
@@ -16,9 +17,10 @@ interface OrderSummaryProps {
 
 export default function OrderSummary({ items, getTotal, isSubmitting }: OrderSummaryProps) {
   const { t } = useLanguage();
+  const { settings } = useSettings();
   const subtotal = getTotal();
-  const shipping = subtotal > 100 ? 0 : 9.99;
-  const tax = subtotal * 0.19;
+  const shipping = subtotal >= settings.free_shipping_threshold ? 0 : settings.shipping_cost;
+  const tax = subtotal * settings.tax_rate;
   const total = subtotal + shipping + tax;
 
   return (
@@ -71,9 +73,9 @@ export default function OrderSummary({ items, getTotal, isSubmitting }: OrderSum
           <span>{formatPrice(total)}</span>
         </div>
       </div>
-      {subtotal < 100 && (
+      {subtotal < settings.free_shipping_threshold && (
         <p className="text-xs text-muted-foreground mt-4 text-center">
-          Add {formatPrice(100 - subtotal)} more for free shipping
+          Add {formatPrice(settings.free_shipping_threshold - subtotal)} more for free shipping
         </p>
       )}
       <Button

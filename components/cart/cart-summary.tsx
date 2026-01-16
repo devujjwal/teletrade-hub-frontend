@@ -6,16 +6,17 @@ import { formatPrice } from '@/lib/utils/format';
 import Card from '@/components/ui/card';
 import Button from '@/components/ui/button';
 import { useLanguage } from '@/contexts/language-context';
+import { useSettings } from '@/contexts/settings-context';
 
 export default function CartSummary() {
   const items = useCartStore((state) => state.items);
   const getTotal = useCartStore((state) => state.getTotal);
   const { t } = useLanguage();
+  const { settings } = useSettings();
 
-  const TAX_RATE = 0.19; // 19% German VAT
   const subtotal = getTotal();
-  const tax = subtotal * TAX_RATE;
-  const shipping = subtotal > 100 ? 0 : 9.99;
+  const tax = subtotal * settings.tax_rate;
+  const shipping = subtotal >= settings.free_shipping_threshold ? 0 : settings.shipping_cost;
   const total = subtotal + tax + shipping;
 
   return (
@@ -47,9 +48,9 @@ export default function CartSummary() {
         </div>
       </div>
 
-      {subtotal < 100 && (
+      {subtotal < settings.free_shipping_threshold && (
         <p className="text-xs text-muted-foreground mb-4 text-center">
-          Add {formatPrice(100 - subtotal)} more for free shipping
+          Add {formatPrice(settings.free_shipping_threshold - subtotal)} more for free shipping
         </p>
       )}
 
