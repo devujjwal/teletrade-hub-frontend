@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import Button from '@/components/ui/button';
@@ -11,6 +12,7 @@ import { getProxiedImageUrl } from '@/lib/utils/format';
 import { Product } from '@/types/product';
 import { Category } from '@/types/category';
 import { Brand } from '@/types/brand';
+import { productsApi } from '@/lib/api/products';
 
 interface HomePageClientProps {
   featuredProducts: Product[];
@@ -27,6 +29,16 @@ export default function HomePageClient({
 }: HomePageClientProps) {
   const { t, language } = useLanguage();
   const langParam = language && language !== 'en' ? `?lang=${language}` : '';
+  const [totalProducts, setTotalProducts] = useState(100);
+
+  useEffect(() => {
+    // Fetch total product count for stats
+    productsApi.list({ page: 1, per_page: 1 }).then(response => {
+      setTotalProducts(response.meta?.total || 100);
+    }).catch(() => {
+      // Keep default if fetch fails
+    });
+  }, []);
 
   return (
     <div>
@@ -212,16 +224,16 @@ export default function HomePageClient({
         <div className="container-wide">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
             <div>
-              <div className="text-4xl font-bold mb-2">10K+</div>
+              <div className="text-4xl font-bold mb-2">{totalProducts}+</div>
               <p className="text-primary-foreground/80">{t('home.productsAvailable') || 'Products Available'}</p>
             </div>
             <div>
-              <div className="text-4xl font-bold mb-2">50+</div>
+              <div className="text-4xl font-bold mb-2">{brands.length}+</div>
               <p className="text-primary-foreground/80">{t('home.topBrands') || 'Top Brands'}</p>
             </div>
             <div>
-              <div className="text-4xl font-bold mb-2">24/7</div>
-              <p className="text-primary-foreground/80">{t('home.customerSupport') || 'Customer Support'}</p>
+              <div className="text-4xl font-bold mb-2">2Y</div>
+              <p className="text-primary-foreground/80">{t('home.warranty') || 'Warranty Available'}</p>
             </div>
             <div>
               <div className="text-4xl font-bold mb-2">100%</div>
