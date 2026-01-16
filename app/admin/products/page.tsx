@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { adminApi } from '@/lib/api/admin';
 import { Product } from '@/types/product';
 import Card from '@/components/ui/card';
@@ -46,6 +47,7 @@ import { Category } from '@/types/category';
 import { Brand } from '@/types/brand';
 
 export default function AdminProductsPage() {
+  const router = useRouter();
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -521,17 +523,30 @@ export default function AdminProductsPage() {
                           </div>
                         </TableCell>
                         <TableCell>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              setSelectedProduct(product);
-                              setEditPrice(product.price.toString());
-                            }}
-                          >
-                            <Edit className="h-4 w-4 mr-1" />
-                            Edit Price
-                          </Button>
+                          <div className="flex items-center gap-2">
+                            {product.product_source === 'own' ? (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => router.push(`/admin/products/${product.id}`)}
+                              >
+                                <Edit className="h-4 w-4 mr-1" />
+                                Edit
+                              </Button>
+                            ) : (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  setSelectedProduct(product);
+                                  setEditPrice(product.price.toString());
+                                }}
+                              >
+                                <Edit className="h-4 w-4 mr-1" />
+                                Edit Price
+                              </Button>
+                            )}
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
