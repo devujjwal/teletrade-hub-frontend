@@ -4,6 +4,7 @@ import { productsApi } from '@/lib/api/products';
 import ProductGrid from '@/components/products/product-grid';
 import ProductFilters from '@/components/products/product-filters';
 import { categoriesApi } from '@/lib/api/categories';
+import BrandLogo from '@/components/ui/brand-logo';
 import { Suspense } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -83,7 +84,18 @@ export default async function BrandPage({ params, searchParams }: BrandPageProps
   return (
     <div className="container-wide py-8">
       <div className="mb-8">
-        <h1 className="font-display text-3xl md:text-4xl font-bold mb-2">{brand.name}</h1>
+        <div className="flex items-center gap-4 mb-4">
+          <div className="w-20 h-20 flex items-center justify-center">
+            <BrandLogo
+              brandName={brand.name}
+              height={80}
+              width={120}
+              className="max-w-full max-h-full object-contain"
+              showFallbackText={false}
+            />
+          </div>
+          <h1 className="font-display text-3xl md:text-4xl font-bold">{brand.name}</h1>
+        </div>
         {brand.description && (
           <p className="text-muted-foreground">{brand.description}</p>
         )}

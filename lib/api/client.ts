@@ -2,7 +2,7 @@ import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from 'ax
 import https from 'https';
 import { ApiError } from '@/types/api';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.vs-mjrinfotech.com';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 // Configure SSL certificate handling for server-side requests
 // In development, allow self-signed certificates to avoid SSL errors

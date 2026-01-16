@@ -29,10 +29,14 @@ export function formatDateTime(date: string | Date): string {
 export function getProxiedImageUrl(originalUrl?: string): string {
   if (!originalUrl) return '/placeholder-image.jpg';
   
-  // If it's a local upload (starts with /uploads/), serve directly from API
+  // If it's a local upload (starts with /uploads/), construct full URL to production API
   if (originalUrl.startsWith('/uploads/')) {
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.vs-mjrinfotech.com';
-    return `${API_URL}${originalUrl}`;
+    // Always use production URL for uploaded images (they're hosted on shared hosting)
+    const API_URL = 'https://api.vs-mjrinfotech.com';
+    const fullUrl = `${API_URL}${originalUrl}`;
+    // Use proxy for in-house images too to handle SSL and caching
+    const encoded = encodeURIComponent(fullUrl);
+    return `/api/images/${encoded}`;
   }
   
   // For external images (vendor images), use proxy

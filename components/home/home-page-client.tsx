@@ -2,13 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import Button from '@/components/ui/button';
 import Card from '@/components/ui/card';
 import ProductCard from '@/components/products/product-card';
+import BrandLogo from '@/components/ui/brand-logo';
 import { ArrowRight, ChevronRight, Truck, Shield, CreditCard, Headset, Smartphone } from 'lucide-react';
 import { useLanguage } from '@/contexts/language-context';
-import { getProxiedImageUrl } from '@/lib/utils/format';
 import { Product } from '@/types/product';
 import { Category } from '@/types/category';
 import { Brand } from '@/types/brand';
@@ -199,20 +198,14 @@ export default function HomePageClient({
               href={`/brands/${brand.slug}${langParam}`}
               className="flex-shrink-0 group"
             >
-              <div className="w-32 h-16 bg-card border border-border rounded-lg flex items-center justify-center group-hover:border-primary transition-colors">
-                {brand.logo ? (
-                  <Image
-                    src={getProxiedImageUrl(brand.logo)}
-                    alt={brand.name}
-                    width={96}
-                    height={48}
-                    className="max-w-24 max-h-12 object-contain grayscale group-hover:grayscale-0 transition-all"
-                  />
-                ) : (
-                  <span className="font-semibold text-muted-foreground group-hover:text-primary">
-                    {brand.name}
-                  </span>
-                )}
+              <div className="w-32 h-16 bg-card border border-border rounded-lg flex items-center justify-center group-hover:border-primary transition-colors px-2">
+                <BrandLogo
+                  brandName={brand.name}
+                  height={60}
+                  width={96}
+                  className="max-w-24 max-h-12 object-contain transition-all font-semibold text-muted-foreground group-hover:text-primary"
+                  showFallbackText={true}
+                />
               </div>
             </Link>
           ))}
@@ -232,12 +225,12 @@ export default function HomePageClient({
               <p className="text-primary-foreground/80">{t('home.topBrands') || 'Top Brands'}</p>
             </div>
             <div>
-              <div className="text-4xl font-bold mb-2">2Y</div>
-              <p className="text-primary-foreground/80">{t('home.warranty') || 'Warranty Available'}</p>
+              <div className="text-4xl font-bold mb-2">24/7</div>
+              <p className="text-primary-foreground/80">{t('home.support') || 'Support Available'}</p>
             </div>
             <div>
               <div className="text-4xl font-bold mb-2">100%</div>
-              <p className="text-primary-foreground/80">{t('home.securePayments') || 'Secure Payments'}</p>
+              <p className="text-primary-foreground/80">{t('home.authenticProducts') || 'Authentic Products'}</p>
             </div>
           </div>
         </div>

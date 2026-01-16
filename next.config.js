@@ -11,6 +11,16 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'api.vs-mjrinfotech.com',
       },
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '3001',
+      },
+      {
+        protocol: 'https',
+        hostname: 'www.google.com',
+        pathname: '/s2/favicons',
+      },
     ],
     formats: ['image/avif', 'image/webp'],
   },

@@ -1,8 +1,7 @@
 import Link from 'next/link';
 import { brandsApi } from '@/lib/api/brands';
-import { getProxiedImageUrl } from '@/lib/utils/format';
-import Image from 'next/image';
 import Card from '@/components/ui/card';
+import BrandLogo from '@/components/ui/brand-logo';
 
 export const revalidate = 300;
 
@@ -30,23 +29,15 @@ export default async function BrandsPage() {
         {brands.map((brand) => (
           <Link key={brand.id} href={`/brands/${brand.slug}`}>
             <Card className="group p-6 hover:shadow-lg transition-all border-border hover:border-primary text-center">
-              {brand.logo ? (
-                <div className="relative w-full h-24 mb-4 flex items-center justify-center">
-                  <Image
-                    src={getProxiedImageUrl(brand.logo)}
-                    alt={brand.name}
-                    width={120}
-                    height={60}
-                    className="max-w-full max-h-full object-contain grayscale group-hover:grayscale-0 transition-all"
-                  />
-                </div>
-              ) : (
-                <div className="w-full h-24 mb-4 flex items-center justify-center">
-                  <span className="font-semibold text-lg text-muted-foreground group-hover:text-primary transition-colors">
-                    {brand.name}
-                  </span>
-                </div>
-              )}
+              <div className="relative w-full h-20 mb-4 flex items-center justify-center">
+                <BrandLogo
+                  brandName={brand.name}
+                  height={80}
+                  width={120}
+                  className="max-w-full max-h-full object-contain transition-all font-semibold text-lg text-muted-foreground group-hover:text-primary"
+                  showFallbackText={true}
+                />
+              </div>
               <h3 className="font-semibold text-sm mb-2 group-hover:text-primary transition-colors">
                 {brand.name}
               </h3>

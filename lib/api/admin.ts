@@ -55,7 +55,7 @@ export const adminApi = {
     const formData = new FormData();
     formData.append('image', file);
     
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.vs-mjrinfotech.com';
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
     const token = typeof window !== 'undefined' ? localStorage.getItem('admin_token') || localStorage.getItem('auth_token') : '';
     
     const response = await fetch(`${API_URL}/upload-image.php`, {
