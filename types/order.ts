@@ -45,31 +45,38 @@ export interface Order {
 }
 
 export interface CreateOrderRequest {
-  customer_name: string;
-  customer_email: string;
-  customer_phone?: string;
-  shipping_address: {
-    address_line_1: string;
-    address_line_2?: string;
-    city: string;
-    state?: string;
-    postal_code: string;
-    country: string;
-  };
-  billing_address?: {
-    address_line_1: string;
-    address_line_2?: string;
-    city: string;
-    state?: string;
-    postal_code: string;
-    country: string;
-  };
-  items: Array<{
+  cart_items: Array<{
     product_id: number;
     quantity: number;
   }>;
-  payment_method?: string;
+  billing_address: {
+    first_name: string;
+    last_name: string;
+    company?: string;
+    address_line1: string;
+    address_line2?: string;
+    city: string;
+    state?: string;
+    postal_code: string;
+    country: string;
+    phone: string;
+  };
+  shipping_address?: {
+    first_name: string;
+    last_name: string;
+    company?: string;
+    address_line1: string;
+    address_line2?: string;
+    city: string;
+    state?: string;
+    postal_code: string;
+    country: string;
+    phone: string;
+  };
+  payment_method: string;
   notes?: string;
+  user_id?: number;
+  guest_email?: string;
 }
 
 export interface OrderListResponse {

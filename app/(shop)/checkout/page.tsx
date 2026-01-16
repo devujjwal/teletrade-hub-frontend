@@ -53,13 +53,53 @@ export default function CheckoutPage() {
     setIsSubmitting(true);
 
     try {
+      // Parse customer name into first and last name
+      const nameParts = data.customer_name.split(' ');
+      const firstName = nameParts[0] || '';
+      const lastName = nameParts.slice(1).join(' ') || firstName;
+
+      // Prepare shipping address with customer details
+      const shippingAddress = {
+        first_name: firstName,
+        last_name: lastName,
+        company: '',
+        address_line1: data.shipping_address.address_line_1,
+        address_line2: data.shipping_address.address_line_2 || '',
+        city: data.shipping_address.city,
+        state: data.shipping_address.state || '',
+        postal_code: data.shipping_address.postal_code,
+        country: data.shipping_address.country,
+        phone: data.customer_phone || '',
+      };
+
+      // Prepare billing address (same as shipping if not provided)
+      let billingAddress = shippingAddress;
+      if (!sameAsShipping && data.billing_address) {
+        billingAddress = {
+          first_name: firstName,
+          last_name: lastName,
+          company: '',
+          address_line1: data.billing_address.address_line_1,
+          address_line2: data.billing_address.address_line_2 || '',
+          city: data.billing_address.city,
+          state: data.billing_address.state || '',
+          postal_code: data.billing_address.postal_code,
+          country: data.billing_address.country,
+          phone: data.customer_phone || '',
+        };
+      }
+
       const orderData = {
-        ...data,
-        items: items.map((item) => ({
+        cart_items: items.map((item) => ({
           product_id: item.product_id,
           quantity: item.quantity,
         })),
-        billing_address: sameAsShipping ? data.shipping_address : data.billing_address,
+        billing_address: billingAddress,
+        shipping_address: shippingAddress,
+        payment_method: 'bank_transfer',
+        notes: data.notes || '',
+        user_id: user?.id,
+        guest_email: !user ? data.customer_email : undefined,
       };
 
       const order = await ordersApi.create(orderData);
