@@ -35,6 +35,11 @@ export const adminApi = {
     return response.data;
   },
 
+  getProduct: async (id: number) => {
+    const response = await apiClient.get<any>(`/admin/products/${id}`);
+    return response.data;
+  },
+
   createProduct: async (data: any) => {
     const response = await apiClient.post<any>('/admin/products', data);
     return response.data;

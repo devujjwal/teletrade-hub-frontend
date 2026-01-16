@@ -84,9 +84,8 @@ export default function EditProductPage() {
 
   const loadProduct = useCallback(async () => {
     try {
-      const response = await adminApi.getProducts({ page: 1, limit: 1000 });
-      const products = response.products || [];
-      const product = products.find((p: any) => p.id === productId);
+      const response = await adminApi.getProduct(productId);
+      const product = response.product || response.data?.product;
       
       if (!product) {
         toast.error('Product not found');
