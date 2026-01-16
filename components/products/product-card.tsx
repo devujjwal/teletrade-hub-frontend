@@ -135,14 +135,16 @@ export default function ProductCard({ product }: ProductCardProps) {
           </h3>
         </Link>
 
-        {/* Specs */}
-        {specs.length > 0 && (
-          <div className="flex flex-wrap gap-1 mb-3 min-h-[1.5rem]">
-            {specs.map((spec, index) => (
+        {/* Specs - Always render to maintain consistent height */}
+        <div className="flex flex-wrap gap-1 mb-3 min-h-[1.5rem]">
+          {specs.length > 0 ? (
+            specs.map((spec, index) => (
               <span key={index} className="badge-muted">{spec}</span>
-            ))}
-          </div>
-        )}
+            ))
+          ) : (
+            <span className="invisible">placeholder</span>
+          )}
+        </div>
 
         {/* Price & Stock */}
         <div className="flex flex-col gap-2 mb-3">
