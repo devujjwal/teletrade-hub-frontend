@@ -127,22 +127,46 @@ export default function OrderPage() {
   }
 
   const isPending = order?.payment_status === 'unpaid' || order?.payment_status === 'pending';
+  const isProcessing = order?.status === 'processing';
+  const isShipped = order?.status === 'shipped';
+  const isDelivered = order?.status === 'delivered';
+  const isCancelled = order?.status === 'cancelled';
 
   return (
     <div className="container-wide py-8">
-      {/* Success Message */}
+      {/* Status-based Header Message */}
       <div className="max-w-2xl mx-auto mb-8 text-center">
-        <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-success/10 flex items-center justify-center">
-          <CheckCircle className="w-8 h-8 text-success" />
+        <div className={`w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center ${
+          isDelivered ? 'bg-success/10' : 
+          isCancelled ? 'bg-destructive/10' : 
+          isShipped ? 'bg-primary/10' :
+          'bg-success/10'
+        }`}>
+          <CheckCircle className={`w-8 h-8 ${
+            isDelivered ? 'text-success' : 
+            isCancelled ? 'text-destructive' : 
+            isShipped ? 'text-primary' :
+            'text-success'
+          }`} />
         </div>
-        <h1 className="font-display text-3xl font-bold mb-2">Order Confirmed!</h1>
+        <h1 className="font-display text-3xl font-bold mb-2">
+          {isCancelled ? 'Order Cancelled' :
+           isDelivered ? 'Order Delivered!' :
+           isShipped ? 'Order Shipped!' :
+           isProcessing ? 'Order Processing' :
+           'Order Confirmed!'}
+        </h1>
         <p className="text-muted-foreground">
-          Thank you for your order. We've sent a confirmation email to {order.customer_email}
+          {isCancelled ? 'This order has been cancelled. If you have any questions, please contact us.' :
+           isDelivered ? 'Your order has been delivered. Thank you for shopping with us!' :
+           isShipped ? 'Your order is on its way! We\'ve sent tracking information to ' + order.customer_email :
+           isProcessing ? 'Your order is being processed. We\'ll notify you once it ships.' :
+           'Thank you for your order. We\'ve sent a confirmation email to ' + order.customer_email}
         </p>
       </div>
 
-      {/* Payment Pending Notice */}
-      {isPending && (
+      {/* Payment Pending Notice - Only show for pending orders */}
+      {isPending && order?.status === 'pending' && (
         <div className="max-w-4xl mx-auto mb-6">
           <Alert>
             <Info className="h-4 w-4" />
@@ -302,8 +326,8 @@ export default function OrderPage() {
           </Card>
         </div>
 
-        {/* Bank Details - Only show if payment is pending */}
-        {isPending && !isLoadingSettings && settings && (
+        {/* Bank Details - Only show if payment is pending AND order status is pending */}
+        {isPending && order?.status === 'pending' && !isLoadingSettings && settings && (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -437,22 +461,24 @@ export default function OrderPage() {
 
         {/* Actions */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          <Button variant="outline" asChild>
-            <Link href="/products">
-              <ShoppingBag className="w-4 h-4 mr-2" />
-              Continue Shopping
-            </Link>
-          </Button>
+          {!isCancelled && (
+            <Button variant="outline" asChild>
+              <Link href="/products">
+                <ShoppingBag className="w-4 h-4 mr-2" />
+                Continue Shopping
+              </Link>
+            </Button>
+          )}
           <Button variant="outline" asChild>
             <Link href="/account/orders">
               <Package className="w-4 h-4 mr-2" />
               View All Orders
             </Link>
           </Button>
-          {isPending && (
+          {isPending && order?.status === 'pending' && (
             <Button variant="default" asChild>
               <Link href={`/checkout/payment-instructions/${orderNumber}`}>
-                <Landmark className="w-4 w-4 mr-2" />
+                <Landmark className="w-4 h-4 mr-2" />
                 Payment Instructions
               </Link>
             </Button>
