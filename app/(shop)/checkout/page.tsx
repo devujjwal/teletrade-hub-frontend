@@ -20,6 +20,7 @@ export default function CheckoutPage() {
   const getTotal = useCartStore((state) => state.getTotal);
   const { user, token, _hasHydrated } = useAuthStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [orderPlaced, setOrderPlaced] = useState(false);
 
   useEffect(() => {
     // Only redirect if hydrated and user is not logged in
@@ -103,12 +104,18 @@ export default function CheckoutPage() {
       };
 
       const order = await ordersApi.create(orderData);
+      
+      // Mark order as placed to prevent cart redirect
+      setOrderPlaced(true);
+      
+      // Clear cart and redirect
       clearCart();
       toast.success('Order placed successfully!');
-      router.push(`/checkout/payment-instructions/${order.order_number}`);
+      
+      // Use replace instead of push to prevent back button issues
+      router.replace(`/checkout/payment-instructions/${order.order_number}`);
     } catch (error: any) {
       toast.error(error.message || 'Failed to place order. Please try again.');
-    } finally {
       setIsSubmitting(false);
     }
   };
@@ -144,9 +151,23 @@ export default function CheckoutPage() {
     );
   }
 
-  if (items.length === 0) {
+  // Only redirect to cart if empty AND not in the process of placing an order
+  if (items.length === 0 && !isSubmitting && !orderPlaced) {
     router.push('/cart');
     return null;
+  }
+
+  // Show processing state after order is placed
+  if (orderPlaced) {
+    return (
+      <div className="container-wide py-16 text-center">
+        <div className="max-w-md mx-auto">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <h2 className="text-xl font-semibold mb-2">Processing Your Order...</h2>
+          <p className="text-muted-foreground">Please wait while we redirect you to payment instructions.</p>
+        </div>
+      </div>
+    );
   }
 
   return (

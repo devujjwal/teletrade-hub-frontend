@@ -208,11 +208,11 @@ export default function AdminOrdersPage() {
                               <Eye className="h-4 w-4 mr-1" />
                               View
                             </Button>
-                            <Link href={`/admin/orders/${order.id}`}>
-                              <Button variant="outline" size="sm">
+                            <Button variant="outline" size="sm" asChild>
+                              <Link href={`/admin/orders/${order.id}`}>
                                 Details
-                              </Button>
-                            </Link>
+                              </Link>
+                            </Button>
                           </div>
                         </TableCell>
                       </TableRow>

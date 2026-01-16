@@ -7,20 +7,37 @@ import Image from 'next/image';
 import { ordersApi } from '@/lib/api/orders';
 import { formatPrice } from '@/lib/utils/format';
 import { formatDateTime } from '@/lib/utils/format';
-import Card from '@/components/ui/card';
+import Card, { CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import Badge from '@/components/ui/badge';
 import Button from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { CheckCircle, ArrowRight, Package } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { CheckCircle, ArrowRight, Package, Printer, Copy, Mail, MessageCircle, Landmark, Info, ShoppingBag } from 'lucide-react';
 import { Order } from '@/types/order';
+import { getProxiedImageUrl } from '@/lib/utils/format';
 import toast from 'react-hot-toast';
+import apiClient from '@/lib/api/client';
+
+interface PublicSettings {
+  site_name: string;
+  site_email: string;
+  contact_number: string;
+  whatsapp_number: string;
+  bank_name: string;
+  account_holder: string;
+  iban: string;
+  bic: string;
+  bank_additional_info: string;
+}
 
 export default function OrderPage() {
   const params = useParams();
   const router = useRouter();
   const orderNumber = params.orderId as string;
   const [order, setOrder] = useState<Order | null>(null);
+  const [settings, setSettings] = useState<PublicSettings | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingSettings, setIsLoadingSettings] = useState(true);
 
   useEffect(() => {
     const fetchOrder = async () => {
@@ -40,6 +57,48 @@ export default function OrderPage() {
       fetchOrder();
     }
   }, [orderNumber, router]);
+
+  useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        const response = await apiClient.get<{ success: boolean; data: PublicSettings }>('/settings/public');
+        if (response.data.success && response.data.data) {
+          setSettings(response.data.data);
+        }
+      } catch (error) {
+        console.error('Error loading settings:', error);
+      } finally {
+        setIsLoadingSettings(false);
+      }
+    };
+
+    loadSettings();
+  }, []);
+
+  const handlePrint = () => {
+    window.print();
+  };
+
+  const copyToClipboard = (text: string, label: string) => {
+    navigator.clipboard.writeText(text);
+    toast.success(`${label} copied to clipboard`);
+  };
+
+  const openWhatsApp = () => {
+    if (settings?.whatsapp_number) {
+      const phoneNumber = settings.whatsapp_number.replace(/[^0-9]/g, '');
+      const message = encodeURIComponent(`Hello, I have a question about my order ${orderNumber}.`);
+      window.open(`https://wa.me/${phoneNumber}?text=${message}`, '_blank');
+    }
+  };
+
+  const sendEmail = () => {
+    if (settings?.site_email) {
+      const subject = encodeURIComponent(`Order Inquiry - ${orderNumber}`);
+      const body = encodeURIComponent(`Hello,\n\nI have a question about my order ${orderNumber}.\n\nThank you.`);
+      window.location.href = `mailto:${settings.site_email}?subject=${subject}&body=${body}`;
+    }
+  };
 
   if (isLoading) {
     return (
@@ -67,6 +126,8 @@ export default function OrderPage() {
     );
   }
 
+  const isPending = order?.payment_status === 'unpaid' || order?.payment_status === 'pending';
+
   return (
     <div className="container-wide py-8">
       {/* Success Message */}
@@ -79,6 +140,18 @@ export default function OrderPage() {
           Thank you for your order. We've sent a confirmation email to {order.customer_email}
         </p>
       </div>
+
+      {/* Payment Pending Notice */}
+      {isPending && (
+        <div className="max-w-4xl mx-auto mb-6">
+          <Alert>
+            <Info className="h-4 w-4" />
+            <AlertDescription>
+              <strong>Payment Required:</strong> Your order is pending payment. Please complete the bank transfer to process your order.
+            </AlertDescription>
+          </Alert>
+        </div>
+      )}
 
       {/* Order Details */}
       <div className="max-w-4xl mx-auto space-y-6">
@@ -125,7 +198,7 @@ export default function OrderPage() {
                 {/* Product Image */}
                 <div className="w-16 h-16 rounded-lg bg-muted overflow-hidden flex-shrink-0">
                   <Image 
-                    src={item.product_image || '/placeholder-image.jpg'} 
+                    src={getProxiedImageUrl(item.product_image)} 
                     alt={item.product_name || 'Product'}
                     width={64}
                     height={64}
@@ -229,15 +302,163 @@ export default function OrderPage() {
           </Card>
         </div>
 
+        {/* Bank Details - Only show if payment is pending */}
+        {isPending && !isLoadingSettings && settings && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Landmark className="h-5 w-5" />
+                Bank Transfer Details
+              </CardTitle>
+              <CardDescription>
+                Please use the following information to complete your payment
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {settings.bank_name && (
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-muted-foreground">Bank Name</label>
+                  <div className="flex items-center justify-between p-3 border rounded-lg bg-muted/50">
+                    <span className="font-medium">{settings.bank_name}</span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => copyToClipboard(settings.bank_name, 'Bank name')}
+                    >
+                      <Copy className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {settings.account_holder && (
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-muted-foreground">Account Holder</label>
+                  <div className="flex items-center justify-between p-3 border rounded-lg bg-muted/50">
+                    <span className="font-medium">{settings.account_holder}</span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => copyToClipboard(settings.account_holder, 'Account holder')}
+                    >
+                      <Copy className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {settings.iban && (
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-muted-foreground">IBAN</label>
+                  <div className="flex items-center justify-between p-3 border rounded-lg bg-muted/50">
+                    <span className="font-mono font-medium">{settings.iban}</span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => copyToClipboard(settings.iban, 'IBAN')}
+                    >
+                      <Copy className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {settings.bic && (
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-muted-foreground">BIC/SWIFT Code</label>
+                  <div className="flex items-center justify-between p-3 border rounded-lg bg-muted/50">
+                    <span className="font-mono font-medium">{settings.bic}</span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => copyToClipboard(settings.bic, 'BIC')}
+                    >
+                      <Copy className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-muted-foreground">Payment Reference</label>
+                <div className="flex items-center justify-between p-3 border rounded-lg bg-muted/50">
+                  <span className="font-medium">Order #{orderNumber}</span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => copyToClipboard(`Order #${orderNumber}`, 'Reference')}
+                  >
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Please include this reference in your bank transfer
+                </p>
+              </div>
+
+              {settings.bank_additional_info && (
+                <div className="p-3 border rounded-lg bg-blue-50 dark:bg-blue-900/10 border-blue-200 dark:border-blue-800">
+                  <p className="text-sm text-blue-900 dark:text-blue-100 whitespace-pre-line">
+                    {settings.bank_additional_info}
+                  </p>
+                </div>
+              )}
+
+              {/* Contact Options */}
+              <div className="pt-4 border-t">
+                <p className="text-sm font-medium mb-3">Send Payment Confirmation</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {settings.site_email && (
+                    <Button
+                      onClick={sendEmail}
+                      variant="outline"
+                      size="sm"
+                    >
+                      <Mail className="h-4 w-4 mr-2" />
+                      Email Screenshot
+                    </Button>
+                  )}
+                  
+                  {settings.whatsapp_number && (
+                    <Button
+                      onClick={openWhatsApp}
+                      variant="outline"
+                      size="sm"
+                    >
+                      <MessageCircle className="h-4 w-4 mr-2" />
+                      WhatsApp
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Actions */}
-        <div className="flex flex-col sm:flex-row gap-4">
-          <Button variant="outline" className="flex-1" asChild>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <Button variant="outline" asChild>
             <Link href="/products">
+              <ShoppingBag className="w-4 h-4 mr-2" />
               Continue Shopping
-              <ArrowRight className="w-4 h-4 ml-2" />
             </Link>
           </Button>
-          <Button variant="outline" className="flex-1">
+          <Button variant="outline" asChild>
+            <Link href="/account/orders">
+              <Package className="w-4 h-4 mr-2" />
+              View All Orders
+            </Link>
+          </Button>
+          {isPending && (
+            <Button variant="default" asChild>
+              <Link href={`/checkout/payment-instructions/${orderNumber}`}>
+                <Landmark className="w-4 w-4 mr-2" />
+                Payment Instructions
+              </Link>
+            </Button>
+          )}
+          <Button variant="outline" onClick={handlePrint} className="print:hidden">
+            <Printer className="w-4 h-4 mr-2" />
             Print Order
           </Button>
         </div>

@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'next/navigation';
+import Link from 'next/link';
 import { adminApi } from '@/lib/api/admin';
 import { Order } from '@/types/order';
 import Card from '@/components/ui/card';
@@ -10,6 +11,7 @@ import Button from '@/components/ui/button';
 import { formatPrice } from '@/lib/utils/format';
 import { formatDateTime } from '@/lib/utils/format';
 import { Skeleton } from '@/components/ui/skeleton';
+import { ExternalLink } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function AdminOrderDetailPage() {
@@ -22,7 +24,8 @@ export default function AdminOrderDetailPage() {
     setIsLoading(true);
     try {
       const data = await adminApi.getOrder(parseInt(orderId));
-      setOrder(data);
+      // API returns { order: {...} }, extract the order object
+      setOrder(data.order || data);
     } catch (error) {
       console.error('Error loading order:', error);
       toast.error('Failed to load order');
@@ -77,7 +80,7 @@ export default function AdminOrderDetailPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Order Information */}
-        <Card className="p-6">
+        <Card className="p-6 lg:col-span-1">
           <h2 className="text-xl font-semibold mb-4">Order Information</h2>
           <dl className="space-y-2">
             <div className="flex justify-between">
@@ -128,62 +131,129 @@ export default function AdminOrderDetailPage() {
         </Card>
 
         {/* Customer Information */}
-        <Card className="p-6">
+        <Card className="p-6 lg:col-span-1">
           <h2 className="text-xl font-semibold mb-4">Customer Information</h2>
           <dl className="space-y-2">
             <div>
               <dt className="text-secondary-600">Name:</dt>
-              <dd className="font-medium">{order.customer_name}</dd>
+              <dd className="font-medium">{order.customer_name || `${order.shipping_address?.first_name || ''} ${order.shipping_address?.last_name || ''}`.trim() || 'N/A'}</dd>
             </div>
             <div>
               <dt className="text-secondary-600">Email:</dt>
-              <dd>{order.customer_email}</dd>
+              <dd>{order.customer_email || order.guest_email || 'N/A'}</dd>
             </div>
-            {order.customer_phone && (
+            {(order.customer_phone || order.shipping_address?.phone) && (
               <div>
                 <dt className="text-secondary-600">Phone:</dt>
-                <dd>{order.customer_phone}</dd>
+                <dd>{order.customer_phone || order.shipping_address?.phone}</dd>
               </div>
             )}
           </dl>
         </Card>
 
         {/* Shipping Address */}
-        <Card className="p-6">
+        <Card className="p-6 lg:col-span-1">
           <h2 className="text-xl font-semibold mb-4">Shipping Address</h2>
-          <address className="not-italic">
-            {order.shipping_address.address_line_1}
-            {order.shipping_address.address_line_2 && (
-              <>
-                <br />
-                {order.shipping_address.address_line_2}
-              </>
-            )}
-            <br />
-            {order.shipping_address.city}
-            {order.shipping_address.state && `, ${order.shipping_address.state}`}
-            <br />
-            {order.shipping_address.postal_code}
-            <br />
-            {order.shipping_address.country}
-          </address>
+          {order.shipping_address ? (
+            <address className="not-italic text-muted-foreground">
+              {order.shipping_address.first_name} {order.shipping_address.last_name}
+              <br />
+              {order.shipping_address.address_line1}
+              {order.shipping_address.address_line2 && (
+                <>
+                  <br />
+                  {order.shipping_address.address_line2}
+                </>
+              )}
+              <br />
+              {order.shipping_address.city}
+              {order.shipping_address.state && `, ${order.shipping_address.state}`} {order.shipping_address.postal_code}
+              <br />
+              {order.shipping_address.country}
+              {order.shipping_address.phone && (
+                <>
+                  <br />
+                  Tel: {order.shipping_address.phone}
+                </>
+              )}
+            </address>
+          ) : (
+            <p className="text-muted-foreground">No shipping address provided</p>
+          )}
+        </Card>
+
+        {/* Billing Address */}
+        <Card className="p-6 lg:col-span-1">
+          <h2 className="text-xl font-semibold mb-4">Billing Address</h2>
+          {order.billing_address ? (
+            <address className="not-italic text-muted-foreground">
+              {order.billing_address.first_name} {order.billing_address.last_name}
+              <br />
+              {order.billing_address.address_line1}
+              {order.billing_address.address_line2 && (
+                <>
+                  <br />
+                  {order.billing_address.address_line2}
+                </>
+              )}
+              <br />
+              {order.billing_address.city}
+              {order.billing_address.state && `, ${order.billing_address.state}`} {order.billing_address.postal_code}
+              <br />
+              {order.billing_address.country}
+              {order.billing_address.phone && (
+                <>
+                  <br />
+                  Tel: {order.billing_address.phone}
+                </>
+              )}
+            </address>
+          ) : (
+            <p className="text-muted-foreground">Same as shipping address</p>
+          )}
         </Card>
 
         {/* Order Items */}
-        <Card className="p-6">
+        <Card className="p-6 lg:col-span-2">
           <h2 className="text-xl font-semibold mb-4">Order Items</h2>
           <div className="space-y-3">
-            {order.items.map((item, index) => (
-              <div key={index} className="flex justify-between border-b border-secondary-200 pb-3">
-                <div>
-                  <p className="font-medium">{item.product_name}</p>
-                  <p className="text-sm text-secondary-600">
-                    SKU: {item.sku} × {item.quantity}
-                  </p>
+            {order.items?.map((item: any, index) => {
+              // Construct product URL - try slug first, fallback to ID
+              const productUrl = item.product_slug 
+                ? `/products/${item.product_slug}` 
+                : `/products/${item.product_id}`;
+              
+              return (
+                <div key={index} className="flex items-start justify-between border-b border-secondary-200 pb-3 last:border-0">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <Link 
+                        href={productUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-medium hover:text-primary hover:underline inline-flex items-center gap-1"
+                      >
+                        {item.product_name}
+                        <ExternalLink className="h-3 w-3" />
+                      </Link>
+                      <Badge 
+                        variant={item.product_source === 'own' ? 'success' : 'default'}
+                        className="text-xs"
+                      >
+                        {item.product_source === 'own' ? 'In-House' : 'Vendor'}
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-secondary-600 mt-1">
+                      SKU: {item.product_sku || item.sku} × {item.quantity}
+                    </p>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {formatPrice(item.price)} each
+                    </p>
+                  </div>
+                  <p className="font-semibold">{formatPrice(item.subtotal)}</p>
                 </div>
-                <p className="font-semibold">{formatPrice(item.subtotal)}</p>
-              </div>
-            ))}
+              );
+            }) || []}
             <div className="pt-3 space-y-2">
               <div className="flex justify-between">
                 <span>Subtotal:</span>

@@ -252,18 +252,22 @@ export default function PaymentInstructionsPage() {
         </Card>
 
         {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <Button
             variant="outline"
             onClick={() => router.push('/')}
-            className="flex-1"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Home
           </Button>
           <Button
+            variant="outline"
+            onClick={() => router.push('/account/orders')}
+          >
+            View Order History
+          </Button>
+          <Button
             onClick={() => router.push(`/orders/${orderNumber}`)}
-            className="flex-1"
           >
             View Order Details
           </Button>

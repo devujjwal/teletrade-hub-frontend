@@ -28,6 +28,7 @@ export interface Order {
   customer_name?: string;
   customer_email?: string;
   customer_phone?: string;
+  guest_email?: string;
   shipping_address: Address;
   billing_address: Address;
   items: OrderItem[];

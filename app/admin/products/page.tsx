@@ -97,9 +97,9 @@ export default function AdminProductsPage() {
       if (featuredFilter !== 'all') filters.is_featured = featuredFilter === 'featured' ? 1 : 0;
 
       const response = await adminApi.getProducts(filters);
-      // API returns { success: true, data: { products: [...], pagination: {...} } }
-      const productsData = response.data?.products || [];
-      const paginationData = response.data?.pagination || {};
+      // adminApi now unwraps response, so we get { products: [...], pagination: {...} } directly
+      const productsData = response.products || [];
+      const paginationData = response.pagination || {};
       
       setProducts(productsData);
       setPagination({
@@ -419,21 +419,21 @@ export default function AdminProductsPage() {
                               href={`/products/${product.slug}`}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="relative w-12 h-12 rounded-md overflow-hidden hover:opacity-80 transition-opacity"
+                              className="relative w-16 h-16 rounded-md overflow-hidden bg-white dark:bg-muted hover:opacity-80 transition-opacity flex-shrink-0"
                             >
                               <Image
                                 src={getProxiedImageUrl(product.primary_image)}
                                 alt={product.name}
                                 fill
-                                className="object-cover"
+                                className="object-contain p-1"
                               />
                             </Link>
-                            <div>
+                            <div className="min-w-0 flex-1">
                               <Link
                                 href={`/products/${product.slug}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="font-medium hover:text-primary hover:underline transition-colors"
+                                className="font-medium hover:text-primary hover:underline transition-colors block truncate"
                               >
                                 {product.name}
                               </Link>

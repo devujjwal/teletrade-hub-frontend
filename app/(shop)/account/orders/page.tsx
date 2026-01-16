@@ -28,6 +28,7 @@ import { useLanguage } from '@/contexts/language-context';
 import { ordersApi } from '@/lib/api/orders';
 import { Order } from '@/types/order';
 import { Skeleton } from '@/components/ui/skeleton';
+import { getProxiedImageUrl } from '@/lib/utils/format';
 
 const statusConfig = {
   pending: { icon: Clock, color: 'text-warning', bg: 'bg-warning/10', label: 'Pending' },
@@ -213,7 +214,7 @@ export default function OrdersPage() {
                       {order.items.slice(0, 3).map((item, i) => (
                         <div key={i} className="w-12 h-12 rounded-lg bg-muted overflow-hidden">
                           <Image 
-                            src={item.product_image || '/placeholder-image.jpg'} 
+                            src={getProxiedImageUrl(item.product_image)} 
                             alt={item.product_name || 'Product'}
                             width={48}
                             height={48}

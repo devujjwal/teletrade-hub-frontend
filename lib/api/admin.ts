@@ -10,18 +10,21 @@ export const adminApi = {
   // Dashboard
   getDashboard: async () => {
     const response = await apiClient.get<any>('/admin/dashboard');
-    return response.data;
+    // Backend returns: { success, data: { stats: {...} } }
+    return response.data?.data || response.data;
   },
 
   // Orders
   getOrders: async (filters?: any) => {
     const response = await apiClient.get<any>('/admin/orders', { params: filters });
-    return response.data;
+    // Backend returns: { success, data: { orders: [...], pagination: {...} } }
+    return response.data?.data || response.data;
   },
 
   getOrder: async (id: number) => {
     const response = await apiClient.get<any>(`/admin/orders/${id}`);
-    return response.data;
+    // Backend returns: { success, data: { order: {...} } }
+    return response.data?.data || response.data;
   },
 
   updateOrderStatus: async (id: number, status: string) => {
@@ -32,12 +35,14 @@ export const adminApi = {
   // Products
   getProducts: async (filters?: any) => {
     const response = await apiClient.get<any>('/admin/products', { params: filters });
-    return response.data;
+    // Backend returns: { success, data: { products: [...], pagination: {...} } }
+    return response.data?.data || response.data;
   },
 
   getProduct: async (id: number) => {
     const response = await apiClient.get<any>(`/admin/products/${id}`);
-    return response.data;
+    // Backend returns: { success, data: { product: {...} } }
+    return response.data?.data || response.data;
   },
 
   createProduct: async (data: any) => {
@@ -81,7 +86,8 @@ export const adminApi = {
   // Pricing
   getPricing: async () => {
     const response = await apiClient.get<any>('/admin/pricing');
-    return response.data;
+    // Backend returns: { success, data: {...} }
+    return response.data?.data || response.data;
   },
 
   updateGlobalMarkup: async (markup: number, recalculate?: boolean) => {
@@ -97,18 +103,21 @@ export const adminApi = {
   // Sync
   syncProducts: async () => {
     const response = await apiClient.post<any>('/admin/sync/products');
-    return response.data;
+    // Backend returns: { success, message, data: {...} }
+    return response.data?.data || response.data;
   },
 
   getSyncStatus: async () => {
     const response = await apiClient.get<any>('/admin/sync/status');
-    return response.data;
+    // Backend returns: { success, data: {...} }
+    return response.data?.data || response.data;
   },
 
   // Categories
   getCategories: async () => {
     const response = await apiClient.get<any>('/admin/categories');
-    return response.data;
+    // Backend returns: { success, data: { categories: [...] } }
+    return response.data?.data || response.data;
   },
 
   createCategory: async (data: any) => {
@@ -129,7 +138,8 @@ export const adminApi = {
   // Brands
   getBrands: async () => {
     const response = await apiClient.get<any>('/admin/brands');
-    return response.data;
+    // Backend returns: { success, data: { brands: [...] } }
+    return response.data?.data || response.data;
   },
 
   createBrand: async (data: any) => {
