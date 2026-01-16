@@ -91,12 +91,12 @@ export const adminApi = {
   },
 
   updateGlobalMarkup: async (markup: number, recalculate?: boolean) => {
-    const response = await apiClient.put<any>('/admin/pricing/global', { markup, recalculate });
+    const response = await apiClient.put<any>('/admin/pricing/global', { markup_value: markup, recalculate });
     return response.data;
   },
 
   updateCategoryMarkup: async (categoryId: number, markup: number) => {
-    const response = await apiClient.put<any>(`/admin/pricing/category/${categoryId}`, { markup });
+    const response = await apiClient.put<any>(`/admin/pricing/category/${categoryId}`, { markup_value: markup });
     return response.data;
   },
 
