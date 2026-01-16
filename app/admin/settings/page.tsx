@@ -15,7 +15,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { adminApi } from '@/lib/api/admin';
-import { Settings, Save, Globe, DollarSign, Truck, RefreshCw, Mail, MapPin, Phone, MessageCircle, Lock, Key, AlertCircle } from 'lucide-react';
+import { Settings, Save, Globe, DollarSign, Truck, RefreshCw, Mail, MapPin, Phone, MessageCircle, Lock, Key, AlertCircle, Landmark } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
@@ -32,6 +32,11 @@ interface SettingsData {
   vendor_sync_enabled: boolean;
   vendor_sync_frequency: string;
   vendor_sales_order_time: string;
+  bank_name: string;
+  account_holder: string;
+  iban: string;
+  bic: string;
+  bank_additional_info: string;
 }
 
 export default function AdminSettingsPage() {
@@ -48,6 +53,11 @@ export default function AdminSettingsPage() {
     vendor_sync_enabled: true,
     vendor_sync_frequency: '86400',
     vendor_sales_order_time: '02:00',
+    bank_name: '',
+    account_holder: '',
+    iban: '',
+    bic: '',
+    bank_additional_info: '',
   });
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -84,6 +94,11 @@ export default function AdminSettingsPage() {
             : true,
           vendor_sync_frequency: apiSettings.vendor_sync_frequency || '86400',
           vendor_sales_order_time: apiSettings.vendor_sales_order_time || '02:00',
+          bank_name: apiSettings.bank_name || '',
+          account_holder: apiSettings.account_holder || '',
+          iban: apiSettings.iban || '',
+          bic: apiSettings.bic || '',
+          bank_additional_info: apiSettings.bank_additional_info || '',
         });
       }
     } catch (error: any) {
@@ -389,6 +404,69 @@ export default function AdminSettingsPage() {
               </div>
             </div>
           )}
+        </CardContent>
+      </Card>
+
+      {/* Bank Details Settings */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Landmark className="h-5 w-5" />
+            Bank Details
+          </CardTitle>
+          <CardDescription>Configure bank account information for customer payments</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="bank_name">Bank Name</Label>
+              <Input
+                id="bank_name"
+                value={settings.bank_name}
+                onChange={(e) => updateSetting('bank_name', e.target.value)}
+                placeholder="e.g., Deutsche Bank"
+              />
+            </div>
+            <div>
+              <Label htmlFor="account_holder">Account Holder Name</Label>
+              <Input
+                id="account_holder"
+                value={settings.account_holder}
+                onChange={(e) => updateSetting('account_holder', e.target.value)}
+                placeholder="e.g., TeleTrade Hub GmbH"
+              />
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="iban">IBAN</Label>
+              <Input
+                id="iban"
+                value={settings.iban}
+                onChange={(e) => updateSetting('iban', e.target.value)}
+                placeholder="e.g., DE89 3704 0044 0532 0130 00"
+              />
+            </div>
+            <div>
+              <Label htmlFor="bic">BIC/SWIFT Code</Label>
+              <Input
+                id="bic"
+                value={settings.bic}
+                onChange={(e) => updateSetting('bic', e.target.value)}
+                placeholder="e.g., COBADEFFXXX"
+              />
+            </div>
+          </div>
+          <div>
+            <Label htmlFor="bank_additional_info">Additional Payment Instructions</Label>
+            <textarea
+              id="bank_additional_info"
+              value={settings.bank_additional_info}
+              onChange={(e) => updateSetting('bank_additional_info', e.target.value)}
+              className="w-full min-h-[80px] px-3 py-2 border border-border rounded-md bg-background"
+              placeholder="Any additional instructions for customers making bank transfers..."
+            />
+          </div>
         </CardContent>
       </Card>
 

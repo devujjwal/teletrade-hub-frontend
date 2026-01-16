@@ -65,7 +65,7 @@ export default function CheckoutPage() {
       const order = await ordersApi.create(orderData);
       clearCart();
       toast.success('Order placed successfully!');
-      router.push(`/orders/${order.order_number}`);
+      router.push(`/checkout/payment-instructions/${order.order_number}`);
     } catch (error: any) {
       toast.error(error.message || 'Failed to place order. Please try again.');
     } finally {
