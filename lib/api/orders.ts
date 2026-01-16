@@ -32,13 +32,17 @@ export const ordersApi = {
   },
 
   create: async (orderData: CreateOrderRequest): Promise<Order> => {
-    const response = await apiClient.post<Order>('/orders', orderData);
-    return response.data;
+    const response = await apiClient.post<any>('/orders', orderData);
+    // Backend returns: { success, message, data: { order_id, order_number, total, status, message } }
+    // Return the data directly which contains order_number needed for redirect
+    return response.data?.data || response.data;
   },
 
   getById: async (orderId: string | number): Promise<Order> => {
-    const response = await apiClient.get<Order>(`/orders/${orderId}`);
-    return response.data;
+    const response = await apiClient.get<any>(`/orders/${orderId}`);
+    // Backend returns: { success, message, data: { order } }
+    const orderData = response.data?.data?.order || response.data?.order || response.data;
+    return orderData;
   },
 
   paymentSuccess: async (orderId: string | number): Promise<void> => {

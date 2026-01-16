@@ -189,7 +189,7 @@ export default function OrdersPage() {
             return (
               <Link
                 key={order.id}
-                href={`/account/orders/${order.id}`}
+                href={`/orders/${order.order_number}`}
                 className="block bg-card border border-border rounded-xl p-6 hover:border-primary transition-colors"
               >
                 <div className="flex flex-col md:flex-row md:items-center gap-4">
@@ -213,7 +213,7 @@ export default function OrdersPage() {
                       {order.items.slice(0, 3).map((item, i) => (
                         <div key={i} className="w-12 h-12 rounded-lg bg-muted overflow-hidden">
                           <Image 
-                            src={item.product_image || '/placeholder.svg'} 
+                            src={item.product_image || '/placeholder-image.jpg'} 
                             alt={item.product_name || 'Product'}
                             width={48}
                             height={48}
