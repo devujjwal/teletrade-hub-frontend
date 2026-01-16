@@ -67,7 +67,7 @@ export default function AdminDashboardPage() {
 
   const loadStats = async () => {
     try {
-      const response = await adminApi.getDashboardStats();
+      const response = await adminApi.getDashboard();
       // Handle different response structures
       const data = response.data || response;
       setStats(data);

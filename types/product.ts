@@ -24,6 +24,7 @@ export interface Product {
   created_at?: string;
   updated_at?: string;
   is_featured?: number;
+  is_available?: number; // 1 = available, 0 = unavailable
   product_source?: 'vendor' | 'own'; // Product source: vendor or own stock
   vendor_article_id?: string; // Vendor SKU (only for vendor products)
 }

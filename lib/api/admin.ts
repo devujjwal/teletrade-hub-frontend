@@ -79,8 +79,8 @@ export const adminApi = {
     return response.data;
   },
 
-  updateGlobalMarkup: async (markup: number) => {
-    const response = await apiClient.put<any>('/admin/pricing/global', { markup });
+  updateGlobalMarkup: async (markup: number, recalculate?: boolean) => {
+    const response = await apiClient.put<any>('/admin/pricing/global', { markup, recalculate });
     return response.data;
   },
 

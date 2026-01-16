@@ -38,7 +38,7 @@ export default function AdminPricingPage() {
     setIsLoading(true);
     try {
       const [pricingResponse, categoriesResponse] = await Promise.all([
-        adminApi.getPricingConfig(),
+        adminApi.getPricing(),
         categoriesApi.list('en'),
       ]);
       

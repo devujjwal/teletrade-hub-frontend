@@ -21,7 +21,7 @@ export default function AdminOrderDetailPage() {
   const loadOrder = useCallback(async () => {
     setIsLoading(true);
     try {
-      const data = await adminApi.getOrder(orderId);
+      const data = await adminApi.getOrder(parseInt(orderId));
       setOrder(data);
     } catch (error) {
       console.error('Error loading order:', error);
@@ -37,7 +37,7 @@ export default function AdminOrderDetailPage() {
 
   const updateStatus = async (status: string) => {
     try {
-      await adminApi.updateOrderStatus(orderId, status);
+      await adminApi.updateOrderStatus(parseInt(orderId), status);
       toast.success('Order status updated');
       loadOrder();
     } catch (error) {
