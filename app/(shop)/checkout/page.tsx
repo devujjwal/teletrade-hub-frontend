@@ -43,7 +43,11 @@ export default function CheckoutPage() {
     },
   });
 
-  const sameAsShipping = watch('billing_address') === undefined;
+  // Determine if billing is same as shipping:
+  // When "same as shipping" is checked, billing_address_id is undefined
+  // and billing_address fields are populated with shipping address data
+  const billingAddressIdValue = watch('billing_address_id');
+  const sameAsShipping = !billingAddressIdValue;
 
   const onSubmit = async (data: CheckoutFormData) => {
     if (items.length === 0) {
@@ -88,7 +92,8 @@ export default function CheckoutPage() {
       if (useShippingAddressId) {
         orderData.shipping_address_id = parseInt(data.shipping_address_id!);
         // DO NOT add shipping_address when using ID
-      } else {
+      } else if (data.shipping_address) {
+        // Only add shipping_address if we have the data and NOT using an ID
         orderData.shipping_address = {
           first_name: firstName,
           last_name: lastName,
@@ -104,19 +109,20 @@ export default function CheckoutPage() {
       }
 
       // Add billing address (either ID or full data, NEVER both)
-      // IMPORTANT: Check for IDs first, before checking form data
-      if (sameAsShipping) {
-        // Billing same as shipping - use same ID or data
-        if (useShippingAddressId) {
-          orderData.billing_address_id = parseInt(data.shipping_address_id!);
-        } else {
-          orderData.billing_address = orderData.shipping_address;
-        }
-      } else if (useBillingAddressId) {
+      // IMPORTANT: Prioritize IDs over form data to avoid duplicates
+      if (sameAsShipping && useShippingAddressId) {
+        // Billing same as shipping - use the shipping address ID
+        orderData.billing_address_id = parseInt(data.shipping_address_id!);
+        // DO NOT add billing_address when using ID
+      } else if (sameAsShipping && orderData.shipping_address) {
+        // Billing same as shipping - reference the shipping address data
+        orderData.billing_address = orderData.shipping_address;
+      } else if (!sameAsShipping && useBillingAddressId) {
         // User selected a different saved billing address
         orderData.billing_address_id = parseInt(data.billing_address_id!);
-      } else if (data.billing_address) {
-        // User manually entered a different billing address
+        // DO NOT add billing_address when using ID
+      } else if (!sameAsShipping && data.billing_address) {
+        // User manually entered a different billing address (not using saved address)
         orderData.billing_address = {
           first_name: firstName,
           last_name: lastName,
