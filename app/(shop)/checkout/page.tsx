@@ -72,7 +72,6 @@ export default function CheckoutPage() {
         payment_method: 'bank_transfer',
         notes: data.notes || '',
         user_id: user?.id,
-        guest_email: !user ? data.customer_email : undefined,
       };
 
       // Add shipping address (either ID or full data)

@@ -182,7 +182,7 @@ export default function AdminOrdersPage() {
                         <TableCell className="font-medium">#{order.order_number}</TableCell>
                         <TableCell>
                           <div>
-                            <div className="font-medium">{order.customer_name || 'Guest'}</div>
+                            <div className="font-medium">{order.customer_name || 'Unknown'}</div>
                             <div className="text-sm text-muted-foreground">
                               {order.customer_email || ''}
                             </div>
@@ -269,7 +269,7 @@ export default function AdminOrdersPage() {
                 <div>
                   <p className="text-sm font-medium">Customer</p>
                   <p className="text-sm text-muted-foreground">
-                    {selectedOrder.customer_name || 'Guest'}
+                    {selectedOrder.customer_name || 'Unknown'}
                   </p>
                 </div>
                 <div>

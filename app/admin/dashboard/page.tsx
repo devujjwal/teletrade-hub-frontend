@@ -238,7 +238,7 @@ export default function AdminDashboardPage() {
                       <Badge className={statusColors[order.status] || ''}>{order.status}</Badge>
                     </div>
                     <p className="text-sm text-muted-foreground mt-1">
-                      {order.customer_name || order.customer_email || 'Guest'}
+                      {order.customer_name || order.customer_email || 'Unknown'}
                     </p>
                   </div>
                   <div className="text-right">

@@ -88,16 +88,6 @@ export default function HowToBuyPage() {
           </Link>
         </Card>
 
-        <Card className="p-6">
-          <h3 className="font-semibold text-lg mb-3">Guest Checkout</h3>
-          <p className="text-sm text-muted-foreground mb-4">
-            You can also checkout as a guest without creating an account. However, creating an account
-            provides additional benefits like order tracking and faster checkout.
-          </p>
-          <Link href="/products" className="inline-block">
-            <Button variant="outline" size="sm">Start Shopping</Button>
-          </Link>
-        </Card>
       </div>
 
       {/* Payment Methods */}

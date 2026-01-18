@@ -140,7 +140,7 @@ export default function AdminOrderDetailPage() {
             </div>
             <div>
               <dt className="text-secondary-600">Email:</dt>
-              <dd>{order.customer_email || order.guest_email || 'N/A'}</dd>
+              <dd>{order.customer_email || 'N/A'}</dd>
             </div>
             {(order.customer_phone || order.shipping_address?.phone) && (
               <div>
