@@ -104,33 +104,31 @@ export default function CheckoutPage() {
       }
 
       // Add billing address (either ID or full data, NEVER both)
-      if (!sameAsShipping && data.billing_address) {
-        // User entered different billing address
-        if (useBillingAddressId) {
-          orderData.billing_address_id = parseInt(data.billing_address_id!);
-          // DO NOT add billing_address when using ID
-        } else {
-          orderData.billing_address = {
-            first_name: firstName,
-            last_name: lastName,
-            company: '',
-            address_line1: data.billing_address.address_line_1,
-            address_line2: data.billing_address.address_line_2 || '',
-            city: data.billing_address.city,
-            state: data.billing_address.state || '',
-            postal_code: data.billing_address.postal_code,
-            country: data.billing_address.country,
-            phone: data.customer_phone || '',
-          };
-        }
-      } else {
-        // Billing same as shipping
+      // IMPORTANT: Check for IDs first, before checking form data
+      if (sameAsShipping) {
+        // Billing same as shipping - use same ID or data
         if (useShippingAddressId) {
           orderData.billing_address_id = parseInt(data.shipping_address_id!);
-          // DO NOT add billing_address when using ID
         } else {
           orderData.billing_address = orderData.shipping_address;
         }
+      } else if (useBillingAddressId) {
+        // User selected a different saved billing address
+        orderData.billing_address_id = parseInt(data.billing_address_id!);
+      } else if (data.billing_address) {
+        // User manually entered a different billing address
+        orderData.billing_address = {
+          first_name: firstName,
+          last_name: lastName,
+          company: '',
+          address_line1: data.billing_address.address_line_1,
+          address_line2: data.billing_address.address_line_2 || '',
+          city: data.billing_address.city,
+          state: data.billing_address.state || '',
+          postal_code: data.billing_address.postal_code,
+          country: data.billing_address.country,
+          phone: data.customer_phone || '',
+        };
       }
 
       // Debug: Log what we're sending to the API
