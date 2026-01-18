@@ -63,6 +63,15 @@ export default function CheckoutPage() {
       const useShippingAddressId = data.shipping_address_id && user;
       const useBillingAddressId = data.billing_address_id && user;
 
+      // Debug logging
+      console.log('Form data:', { 
+        shipping_address_id: data.shipping_address_id, 
+        billing_address_id: data.billing_address_id,
+        useShippingAddressId,
+        useBillingAddressId,
+        user: user?.id
+      });
+
       // Build order data with either address IDs or full address data
       const orderData: any = {
         cart_items: items.map((item) => ({
@@ -72,6 +81,7 @@ export default function CheckoutPage() {
         payment_method: 'bank_transfer',
         notes: data.notes || '',
         user_id: user?.id,
+        guest_email: !user ? data.customer_email : undefined,
       };
 
       // Add shipping address (either ID or full data)
@@ -118,6 +128,9 @@ export default function CheckoutPage() {
           orderData.billing_address = orderData.shipping_address;
         }
       }
+
+      // Debug: Log what we're sending to the API
+      console.log('Sending order data:', JSON.stringify(orderData, null, 2));
 
       const order = await ordersApi.create(orderData);
       
