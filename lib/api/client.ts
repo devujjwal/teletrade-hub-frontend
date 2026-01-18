@@ -1,5 +1,6 @@
 import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 import https from 'https';
+import toast from 'react-hot-toast';
 import { ApiError } from '@/types/api';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
@@ -50,22 +51,23 @@ apiClient.interceptors.response.use(
   (response) => response,
   (error: AxiosError) => {
     if (error.response?.status === 401) {
-      // Handle unauthorized
+      // Handle unauthorized - session expired
       if (typeof window !== 'undefined') {
         const pathname = window.location.pathname;
         const isAdminRoute = pathname.startsWith('/admin');
         const requestUrl = error.config?.url || '';
         
-        // Only force logout and redirect for critical auth endpoints
-        // For example: /auth/me, /auth/profile, admin endpoints
-        // For other endpoints like /auth/addresses, let the page handle it
-        const isCriticalAuthEndpoint = 
-          requestUrl.includes('/auth/me') || 
-          requestUrl.includes('/auth/profile') ||
-          requestUrl.includes('/admin/');
+        // Don't auto-logout for login/register attempts (those 401s are expected)
+        const isLoginAttempt = 
+          requestUrl.includes('/auth/login') || 
+          requestUrl.includes('/auth/register') ||
+          requestUrl.includes('/admin/login');
         
-        if (isCriticalAuthEndpoint) {
-          // Clear auth state from localStorage
+        // Only redirect if not already on a login page (prevents loops)
+        const isAuthPage = pathname.includes('/login') || pathname.includes('/register');
+        
+        if (!isLoginAttempt && !isAuthPage) {
+          // Clear all auth state from localStorage
           localStorage.removeItem('auth_token');
           localStorage.removeItem('user');
           localStorage.removeItem('is_admin');
@@ -73,23 +75,18 @@ apiClient.interceptors.response.use(
           // Also clear Zustand persist storage
           localStorage.removeItem('auth-storage');
           
-          // Only redirect if not already on a login or auth-related page
-          // This prevents redirect loops
-          const isAuthPage = pathname.includes('/login') || pathname.includes('/register');
+          // Show toast notification
+          toast.error('Your session has expired. Please log in again.');
           
-          if (!isAuthPage) {
-            // Use a small delay to prevent race conditions with multiple 401s
-            setTimeout(() => {
-              if (isAdminRoute) {
-                window.location.href = '/admin/login';
-              } else {
-                window.location.href = '/login';
-              }
-            }, 100);
-          }
+          // Use a small delay to prevent race conditions with multiple 401s
+          setTimeout(() => {
+            if (isAdminRoute) {
+              window.location.href = '/admin/login';
+            } else {
+              window.location.href = '/login?redirect=' + encodeURIComponent(pathname);
+            }
+          }, 100);
         }
-        // For non-critical endpoints, just return the error
-        // The page component can decide how to handle it
       }
     }
 

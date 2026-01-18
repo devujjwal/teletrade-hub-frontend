@@ -122,14 +122,11 @@ export default function AddressesPage() {
           if (process.env.NODE_ENV === 'development') {
             console.error('Error fetching addresses:', error);
           }
-          // If 401, token might be expired - redirect to login
-          if (error?.status === 401) {
-            toast.error('Your session has expired. Please log in again.');
-            router.push('/login');
-            return;
-          }
+          // 401 errors are handled automatically by API client interceptor
           // For other errors, just show empty addresses
-          toast.error('Failed to load addresses. Please try again.');
+          if (error?.status !== 401) {
+            toast.error('Failed to load addresses. Please try again.');
+          }
         } finally {
           setIsLoading(false);
         }
