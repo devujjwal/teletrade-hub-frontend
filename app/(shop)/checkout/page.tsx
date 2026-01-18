@@ -84,9 +84,10 @@ export default function CheckoutPage() {
         guest_email: !user ? data.customer_email : undefined,
       };
 
-      // Add shipping address (either ID or full data)
+      // Add shipping address (either ID or full data, NEVER both)
       if (useShippingAddressId) {
         orderData.shipping_address_id = parseInt(data.shipping_address_id!);
+        // DO NOT add shipping_address when using ID
       } else {
         orderData.shipping_address = {
           first_name: firstName,
@@ -102,10 +103,12 @@ export default function CheckoutPage() {
         };
       }
 
-      // Add billing address (either ID, full data, or same as shipping)
+      // Add billing address (either ID or full data, NEVER both)
       if (!sameAsShipping && data.billing_address) {
+        // User entered different billing address
         if (useBillingAddressId) {
           orderData.billing_address_id = parseInt(data.billing_address_id!);
+          // DO NOT add billing_address when using ID
         } else {
           orderData.billing_address = {
             first_name: firstName,
@@ -124,6 +127,7 @@ export default function CheckoutPage() {
         // Billing same as shipping
         if (useShippingAddressId) {
           orderData.billing_address_id = parseInt(data.shipping_address_id!);
+          // DO NOT add billing_address when using ID
         } else {
           orderData.billing_address = orderData.shipping_address;
         }
