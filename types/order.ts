@@ -49,7 +49,9 @@ export interface CreateOrderRequest {
     product_id: number;
     quantity: number;
   }>;
-  billing_address: {
+  // Use either billing_address_id (for saved addresses) OR billing_address (for new addresses)
+  billing_address_id?: number;
+  billing_address?: {
     first_name: string;
     last_name: string;
     company?: string;
@@ -61,6 +63,8 @@ export interface CreateOrderRequest {
     country: string;
     phone: string;
   };
+  // Use either shipping_address_id (for saved addresses) OR shipping_address (for new addresses)
+  shipping_address_id?: number;
   shipping_address?: {
     first_name: string;
     last_name: string;

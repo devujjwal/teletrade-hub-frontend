@@ -59,49 +59,66 @@ export default function CheckoutPage() {
       const firstName = nameParts[0] || '';
       const lastName = nameParts.slice(1).join(' ') || firstName;
 
-      // Prepare shipping address with customer details
-      const shippingAddress = {
-        first_name: firstName,
-        last_name: lastName,
-        company: '',
-        address_line1: data.shipping_address.address_line_1,
-        address_line2: data.shipping_address.address_line_2 || '',
-        city: data.shipping_address.city,
-        state: data.shipping_address.state || '',
-        postal_code: data.shipping_address.postal_code,
-        country: data.shipping_address.country,
-        phone: data.customer_phone || '',
-      };
+      // Check if user selected saved addresses or entered new ones
+      const useShippingAddressId = data.shipping_address_id && user;
+      const useBillingAddressId = data.billing_address_id && user;
 
-      // Prepare billing address (same as shipping if not provided)
-      let billingAddress = shippingAddress;
-      if (!sameAsShipping && data.billing_address) {
-        billingAddress = {
-          first_name: firstName,
-          last_name: lastName,
-          company: '',
-          address_line1: data.billing_address.address_line_1,
-          address_line2: data.billing_address.address_line_2 || '',
-          city: data.billing_address.city,
-          state: data.billing_address.state || '',
-          postal_code: data.billing_address.postal_code,
-          country: data.billing_address.country,
-          phone: data.customer_phone || '',
-        };
-      }
-
-      const orderData = {
+      // Build order data with either address IDs or full address data
+      const orderData: any = {
         cart_items: items.map((item) => ({
           product_id: item.product_id,
           quantity: item.quantity,
         })),
-        billing_address: billingAddress,
-        shipping_address: shippingAddress,
         payment_method: 'bank_transfer',
         notes: data.notes || '',
         user_id: user?.id,
         guest_email: !user ? data.customer_email : undefined,
       };
+
+      // Add shipping address (either ID or full data)
+      if (useShippingAddressId) {
+        orderData.shipping_address_id = parseInt(data.shipping_address_id!);
+      } else {
+        orderData.shipping_address = {
+          first_name: firstName,
+          last_name: lastName,
+          company: '',
+          address_line1: data.shipping_address.address_line_1,
+          address_line2: data.shipping_address.address_line_2 || '',
+          city: data.shipping_address.city,
+          state: data.shipping_address.state || '',
+          postal_code: data.shipping_address.postal_code,
+          country: data.shipping_address.country,
+          phone: data.customer_phone || '',
+        };
+      }
+
+      // Add billing address (either ID, full data, or same as shipping)
+      if (!sameAsShipping && data.billing_address) {
+        if (useBillingAddressId) {
+          orderData.billing_address_id = parseInt(data.billing_address_id!);
+        } else {
+          orderData.billing_address = {
+            first_name: firstName,
+            last_name: lastName,
+            company: '',
+            address_line1: data.billing_address.address_line_1,
+            address_line2: data.billing_address.address_line_2 || '',
+            city: data.billing_address.city,
+            state: data.billing_address.state || '',
+            postal_code: data.billing_address.postal_code,
+            country: data.billing_address.country,
+            phone: data.customer_phone || '',
+          };
+        }
+      } else {
+        // Billing same as shipping
+        if (useShippingAddressId) {
+          orderData.billing_address_id = parseInt(data.shipping_address_id!);
+        } else {
+          orderData.billing_address = orderData.shipping_address;
+        }
+      }
 
       const order = await ordersApi.create(orderData);
       
