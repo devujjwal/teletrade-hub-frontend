@@ -491,7 +491,7 @@ export default function AdminProductsPage() {
                         <TableCell className="font-semibold">
                           {formatPrice(product.merchant_price ?? product.price)}
                           {product.base_price && (product.merchant_price ?? product.price) && (
-                            <div className="text-xs text-info">
+                            <div className="text-xs text-success">
                               +{(((product.merchant_price ?? product.price) - product.base_price) / product.base_price * 100).toFixed(1)}%
                             </div>
                           )}
