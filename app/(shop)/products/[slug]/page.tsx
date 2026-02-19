@@ -148,6 +148,7 @@ export default async function ProductPage({ params, searchParams }: ProductPageP
 
           {/* Price */}
           <ProductPriceSection
+            slug={product.slug}
             price={price}
             originalPrice={originalPrice}
             hasDiscount={hasDiscount}

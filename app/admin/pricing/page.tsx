@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { adminApi } from '@/lib/api/admin';
 import { categoriesApi } from '@/lib/api/categories';
 import Card from '@/components/ui/card';
@@ -21,10 +21,19 @@ import {
 import { DollarSign, Percent, Save, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
+type AccountType = 'customer' | 'merchant';
+
 export default function AdminPricingPage() {
-  const [globalMarkup, setGlobalMarkup] = useState('');
+  const [activeAccountType, setActiveAccountType] = useState<AccountType>('customer');
+  const [globalMarkup, setGlobalMarkup] = useState<Record<AccountType, string>>({
+    customer: '',
+    merchant: '',
+  });
   const [recalculate, setRecalculate] = useState(false);
-  const [categoryMarkups, setCategoryMarkups] = useState<Record<number, string>>({});
+  const [categoryMarkups, setCategoryMarkups] = useState<Record<AccountType, Record<number, string>>>({
+    customer: {},
+    merchant: {},
+  });
   const [pricingData, setPricingData] = useState<any>(null);
   const [categories, setCategories] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -41,50 +50,55 @@ export default function AdminPricingPage() {
         adminApi.getPricing(),
         categoriesApi.list('en'),
       ]);
-      
-      // API now returns pricing data directly
+
       setPricingData(pricingResponse);
-      
-      // Set global markup value
-      const globalMarkupValue = pricingResponse?.global_markup?.value || pricingResponse?.global_markup?.markup_value || 0;
-      setGlobalMarkup(globalMarkupValue.toString());
-      
-      // Initialize category markups from saved rules
-      const rules = pricingResponse?.rules || pricingResponse?.category_markups || [];
-      const initialCategoryMarkups: Record<number, string> = {};
+
+      const customerGlobal = pricingResponse?.global_markup?.customer?.markup_value ?? 0;
+      const merchantGlobal = pricingResponse?.global_markup?.merchant?.markup_value ?? 0;
+      setGlobalMarkup({
+        customer: customerGlobal.toString(),
+        merchant: merchantGlobal.toString(),
+      });
+
+      const initialCategoryMarkups: Record<AccountType, Record<number, string>> = {
+        customer: {},
+        merchant: {},
+      };
+
+      const rules = pricingResponse?.rules || [];
       rules.forEach((rule: any) => {
-        if (rule.rule_type === 'category' && rule.entity_id) {
-          initialCategoryMarkups[rule.entity_id] = (rule.markup_value || rule.value || 0).toString();
+        if (rule.rule_type === 'category' && rule.entity_id && (rule.account_type === 'customer' || rule.account_type === 'merchant')) {
+          const accountType = rule.account_type as AccountType;
+          initialCategoryMarkups[accountType][rule.entity_id] = (rule.markup_value || 0).toString();
         }
       });
       setCategoryMarkups(initialCategoryMarkups);
-      
       setCategories(categoriesResponse.data || []);
     } catch (error) {
-      console.error('Error loading pricing data:', error);
       toast.error('Failed to load pricing configuration');
     } finally {
       setIsLoading(false);
     }
   };
 
+  const currentGlobalMarkup = useMemo(() => globalMarkup[activeAccountType], [globalMarkup, activeAccountType]);
+
   const handleGlobalSave = async () => {
-    const value = parseFloat(globalMarkup);
+    const value = parseFloat(currentGlobalMarkup);
     if (isNaN(value) || value < 0) {
       toast.error('Please enter a valid positive number');
       return;
     }
+
     setIsSaving(true);
     try {
-      const response = await adminApi.updateGlobalMarkup(value, recalculate);
+      const response = await adminApi.updateGlobalMarkup(value, activeAccountType, recalculate);
       toast.success(
         recalculate && response?.data?.products_updated
-          ? `Global markup updated and ${response.data.products_updated} products recalculated`
-          : 'Global markup updated successfully'
+          ? `${activeAccountType} markup updated and ${response.data.products_updated} products recalculated`
+          : `${activeAccountType} global markup updated successfully`
       );
-      // Reset recalculate flag
       setRecalculate(false);
-      // Reload data to show updated values
       await loadData();
     } catch (error: any) {
       toast.error(error.response?.data?.message || error.message || 'Failed to update markup');
@@ -93,22 +107,26 @@ export default function AdminPricingPage() {
     }
   };
 
+  const getCategoryCurrentMarkup = (categoryId: number, accountType: AccountType) => {
+    const categoryRule = pricingData?.rules?.find(
+      (rule: any) => rule.rule_type === 'category' && rule.entity_id === categoryId && rule.account_type === accountType
+    );
+    if (categoryRule) {
+      return Number(categoryRule.markup_value || 0);
+    }
+    return Number(pricingData?.global_markup?.[accountType]?.markup_value || 0);
+  };
+
   const handleCategorySave = async (categoryId: number) => {
-    const value = parseFloat(categoryMarkups[categoryId]);
+    const value = parseFloat(categoryMarkups[activeAccountType][categoryId]);
     if (isNaN(value) || value < 0) {
       toast.error('Please enter a valid positive number');
       return;
     }
+
     try {
-      await adminApi.updateCategoryMarkup(categoryId, value);
-      toast.success('Category markup updated successfully');
-      // Clear the input for this category after saving
-      setCategoryMarkups((prev) => {
-        const updated = { ...prev };
-        delete updated[categoryId];
-        return updated;
-      });
-      // Reload data to show updated values
+      await adminApi.updateCategoryMarkup(categoryId, value, activeAccountType);
+      toast.success(`${activeAccountType} category markup updated successfully`);
       await loadData();
     } catch (error: any) {
       toast.error(error.response?.data?.message || error.message || 'Failed to update category markup');
@@ -129,17 +147,33 @@ export default function AdminPricingPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold">Pricing Management</h1>
-        <p className="text-muted-foreground">Configure global and category-specific markups</p>
+        <p className="text-muted-foreground">Configure separate markups for customers and merchants</p>
       </div>
 
-      {/* Global Markup */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Price Group</CardTitle>
+          <CardDescription>Choose which account type pricing to configure</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex gap-2">
+            <Button variant={activeAccountType === 'customer' ? 'default' : 'outline'} onClick={() => setActiveAccountType('customer')}>
+              Customer
+            </Button>
+            <Button variant={activeAccountType === 'merchant' ? 'default' : 'outline'} onClick={() => setActiveAccountType('merchant')}>
+              Merchant
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Percent className="h-5 w-5" />
-            Global Markup
+            {activeAccountType === 'customer' ? 'Customer' : 'Merchant'} Global Markup
           </CardTitle>
-          <CardDescription>Set a default markup percentage applied to all products</CardDescription>
+          <CardDescription>Set the default markup for this account type</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex flex-col sm:flex-row gap-4">
@@ -151,16 +185,12 @@ export default function AdminPricingPage() {
                   type="number"
                   step="0.1"
                   min="0"
-                  placeholder={pricingData?.global_markup?.value?.toString() || '0'}
-                  value={globalMarkup}
-                  onChange={(e) => setGlobalMarkup(e.target.value)}
+                  value={currentGlobalMarkup}
+                  onChange={(e) => setGlobalMarkup((prev) => ({ ...prev, [activeAccountType]: e.target.value }))}
                   className="pr-10"
                 />
                 <Percent className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               </div>
-              <p className="text-xs text-muted-foreground">
-                Current: {pricingData?.global_markup?.value || 0}%
-              </p>
             </div>
             <div className="flex items-end">
               <Button onClick={handleGlobalSave} disabled={isSaving} className="gap-2">
@@ -179,28 +209,21 @@ export default function AdminPricingPage() {
             </div>
           </div>
           <div className="flex items-center space-x-2">
-            <Switch
-              id="recalculate"
-              checked={recalculate}
-              onCheckedChange={setRecalculate}
-            />
+            <Switch id="recalculate" checked={recalculate} onCheckedChange={setRecalculate} />
             <Label htmlFor="recalculate" className="cursor-pointer">
-              Recalculate prices for all products
+              Recalculate stored customer prices (optional legacy cache refresh)
             </Label>
           </div>
         </CardContent>
       </Card>
 
-      {/* Category Markups */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <DollarSign className="h-5 w-5" />
-            Category-Specific Markups
+            {activeAccountType === 'customer' ? 'Customer' : 'Merchant'} Category Markups
           </CardTitle>
-          <CardDescription>
-            Override global markup for specific categories
-          </CardDescription>
+          <CardDescription>Override global markup for specific categories</CardDescription>
         </CardHeader>
         <CardContent>
           {categories.length === 0 ? (
@@ -218,17 +241,9 @@ export default function AdminPricingPage() {
                 </TableHeader>
                 <TableBody>
                   {categories.map((category) => {
-                    // Find category-specific rule from rules array
-                    const categoryRule = pricingData?.rules?.find(
-                      (rule: any) => rule.rule_type === 'category' && rule.entity_id === category.id
-                    );
-                    const currentMarkup = categoryRule
-                      ? (categoryRule.markup_value || categoryRule.value || 0)
-                      : (pricingData?.global_markup?.value || pricingData?.global_markup?.markup_value || 0);
-                    
-                    // Show input value if editing, otherwise show empty (placeholder shows current)
-                    const inputValue = categoryMarkups[category.id] || '';
-                    
+                    const currentMarkup = getCategoryCurrentMarkup(category.id, activeAccountType);
+                    const inputValue = categoryMarkups[activeAccountType][category.id] || '';
+
                     return (
                       <TableRow key={category.id}>
                         <TableCell className="font-medium">{category.name}</TableCell>
@@ -241,10 +256,13 @@ export default function AdminPricingPage() {
                             placeholder={currentMarkup.toString()}
                             value={inputValue}
                             onChange={(e) =>
-                              setCategoryMarkups({
-                                ...categoryMarkups,
-                                [category.id]: e.target.value,
-                              })
+                              setCategoryMarkups((prev) => ({
+                                ...prev,
+                                [activeAccountType]: {
+                                  ...prev[activeAccountType],
+                                  [category.id]: e.target.value,
+                                },
+                              }))
                             }
                             className="w-32"
                           />
@@ -254,7 +272,7 @@ export default function AdminPricingPage() {
                             variant="outline"
                             size="sm"
                             onClick={() => handleCategorySave(category.id)}
-                            disabled={!categoryMarkups[category.id] || categoryMarkups[category.id] === currentMarkup.toString()}
+                            disabled={!categoryMarkups[activeAccountType][category.id] || categoryMarkups[activeAccountType][category.id] === currentMarkup.toString()}
                           >
                             <Save className="h-4 w-4 mr-1" />
                             Save

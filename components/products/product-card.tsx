@@ -12,6 +12,7 @@ import Button from '@/components/ui/button';
 import Badge from '@/components/ui/badge';
 import { useRouter } from 'next/navigation';
 import { useLanguage } from '@/contexts/language-context';
+import { productsApi } from '@/lib/api/products';
 
 interface ProductCardProps {
   product: Product;
@@ -40,7 +41,7 @@ export default function ProductCard({ product }: ProductCardProps) {
   const cartItem = items.find((item) => item.product_id === product.id);
   const isInCart = !!cartItem;
 
-  const handleAddToCart = (e: React.MouseEvent) => {
+  const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     
@@ -51,11 +52,19 @@ export default function ProductCard({ product }: ProductCardProps) {
     }
     
     if (isInStock) {
+      let latestPrice = product.price;
+      try {
+        const latestProduct = await productsApi.getBySlug(product.slug);
+        latestPrice = latestProduct.price;
+      } catch (error) {
+        // Use current product price if refresh fails
+      }
+
       addItem({
         product_id: product.id,
         product_name: product.name,
         product_image: product.primary_image,
-        price: product.price,
+        price: latestPrice,
         quantity: 1,
         sku: product.sku,
         slug: product.slug,
@@ -229,4 +238,3 @@ export default function ProductCard({ product }: ProductCardProps) {
     </div>
   );
 }
-

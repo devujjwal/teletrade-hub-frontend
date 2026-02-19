@@ -5,6 +5,7 @@ export interface User {
   last_name?: string;
   email: string;
   phone?: string;
+  account_type?: 'customer' | 'merchant';
   role?: 'customer' | 'admin';
 }
 

@@ -6,6 +6,7 @@ import { productsApi } from '@/lib/api/products';
 import { Product } from '@/types/product';
 import ProductGrid from '@/components/products/product-grid';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useAuthStore } from '@/lib/store/auth-store';
 
 interface ProductsClientProps {
   initialProducts: Product[];
@@ -23,16 +24,11 @@ export default function ProductsClient({ initialProducts, initialMeta }: Product
   const [meta, setMeta] = useState(initialMeta);
   const [isLoading, setIsLoading] = useState(false);
   const isInitialMount = useRef(true);
+  const { token, user, _hasHydrated } = useAuthStore();
 
   const searchParamsString = searchParams.toString();
 
   useEffect(() => {
-    // Skip fetch on initial mount since we already have initial data
-    if (isInitialMount.current) {
-      isInitialMount.current = false;
-      return;
-    }
-
     const fetchProducts = async () => {
       setIsLoading(true);
       try {
@@ -63,8 +59,16 @@ export default function ProductsClient({ initialProducts, initialMeta }: Product
       }
     };
 
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      if (_hasHydrated && token && user) {
+        fetchProducts();
+      }
+      return;
+    }
+
     fetchProducts();
-  }, [searchParamsString, searchParams]);
+  }, [searchParamsString, searchParams, _hasHydrated, token, user]);
 
   if (isLoading) {
     return <Skeleton className="h-96 w-full" />;
@@ -89,4 +93,3 @@ export default function ProductsClient({ initialProducts, initialMeta }: Product
     />
   );
 }
-

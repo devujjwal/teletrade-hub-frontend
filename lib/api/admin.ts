@@ -90,13 +90,13 @@ export const adminApi = {
     return response.data?.data || response.data;
   },
 
-  updateGlobalMarkup: async (markup: number, recalculate?: boolean) => {
-    const response = await apiClient.put<any>('/admin/pricing/global', { markup_value: markup, recalculate });
+  updateGlobalMarkup: async (markup: number, accountType: 'customer' | 'merchant', recalculate?: boolean) => {
+    const response = await apiClient.put<any>('/admin/pricing/global', { markup_value: markup, account_type: accountType, recalculate });
     return response.data;
   },
 
-  updateCategoryMarkup: async (categoryId: number, markup: number) => {
-    const response = await apiClient.put<any>(`/admin/pricing/category/${categoryId}`, { markup_value: markup });
+  updateCategoryMarkup: async (categoryId: number, markup: number, accountType: 'customer' | 'merchant') => {
+    const response = await apiClient.put<any>(`/admin/pricing/category/${categoryId}`, { markup_value: markup, account_type: accountType });
     return response.data;
   },
 

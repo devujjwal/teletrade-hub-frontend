@@ -8,6 +8,7 @@ import { useAuthStore } from '@/lib/store/auth-store';
 import Button from '@/components/ui/button';
 import { Minus, Plus, ShoppingCart, Lock } from 'lucide-react';
 import { useLanguage } from '@/contexts/language-context';
+import { productsApi } from '@/lib/api/products';
 
 interface AddToCartButtonProps {
   product: Product;
@@ -41,7 +42,7 @@ export default function AddToCartButton({ product }: AddToCartButtonProps) {
   const availableStock = product.stock_quantity - currentCartQuantity;
   const maxQuantity = cartItem ? product.stock_quantity : availableStock;
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
     // Check if user is logged in
     if (!token || !user) {
       router.push('/login');
@@ -56,12 +57,20 @@ export default function AddToCartButton({ product }: AddToCartButtonProps) {
       // Update existing cart item
       updateQuantity(product.id, quantity);
     } else {
+      let latestPrice = product.price;
+      try {
+        const latestProduct = await productsApi.getBySlug(product.slug);
+        latestPrice = latestProduct.price;
+      } catch (error) {
+        // Use current product price if refresh fails
+      }
+
       // Add new item to cart
       addItem({
         product_id: product.id,
         product_name: product.name,
         product_image: product.primary_image,
-        price: product.price,
+        price: latestPrice,
         quantity,
         sku: product.sku,
         slug: product.slug,

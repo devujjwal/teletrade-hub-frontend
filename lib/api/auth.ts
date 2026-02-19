@@ -21,6 +21,7 @@ export const authApi = {
           last_name: user.last_name,
           email: user.email,
           phone: user.phone,
+          account_type: user.account_type,
           role: 'customer' as const,
         },
       };
@@ -132,6 +133,7 @@ export const authApi = {
         last_name: user.last_name,
         email: user.email,
         phone: user.phone,
+        account_type: user.account_type,
         role: 'customer' as const,
       };
     }
@@ -152,6 +154,7 @@ export const authApi = {
         last_name: user.last_name,
         email: user.email,
         phone: user.phone,
+        account_type: user.account_type,
         role: 'customer' as const,
       };
     }

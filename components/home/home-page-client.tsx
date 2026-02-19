@@ -12,6 +12,7 @@ import { Product } from '@/types/product';
 import { Category } from '@/types/category';
 import { Brand } from '@/types/brand';
 import { productsApi } from '@/lib/api/products';
+import { useAuthStore } from '@/lib/store/auth-store';
 
 interface HomePageClientProps {
   featuredProducts: Product[];
@@ -27,8 +28,10 @@ export default function HomePageClient({
   categoryIcons 
 }: HomePageClientProps) {
   const { t, language } = useLanguage();
+  const { token, user, _hasHydrated } = useAuthStore();
   const langParam = language && language !== 'en' ? `?lang=${language}` : '';
   const [totalProducts, setTotalProducts] = useState(100);
+  const [displayFeaturedProducts, setDisplayFeaturedProducts] = useState<Product[]>(featuredProducts);
 
   useEffect(() => {
     // Fetch total product count for stats
@@ -38,6 +41,29 @@ export default function HomePageClient({
       // Keep default if fetch fails
     });
   }, []);
+
+  useEffect(() => {
+    setDisplayFeaturedProducts(featuredProducts);
+  }, [featuredProducts]);
+
+  useEffect(() => {
+    if (!_hasHydrated || !token || !user) {
+      return;
+    }
+
+    productsApi
+      .list({
+        per_page: 8,
+        lang: language || 'en',
+        is_featured: 1,
+      })
+      .then((response) => {
+        setDisplayFeaturedProducts(Array.isArray(response.data) ? response.data.slice(0, 8) : []);
+      })
+      .catch(() => {
+        // Keep server-provided list as fallback
+      });
+  }, [_hasHydrated, token, user, language]);
 
   return (
     <div>
@@ -156,9 +182,9 @@ export default function HomePageClient({
             </Button>
           </div>
 
-          {featuredProducts.length > 0 ? (
+          {displayFeaturedProducts.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {featuredProducts.map((product) => (
+              {displayFeaturedProducts.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
             </div>
@@ -256,4 +282,3 @@ export default function HomePageClient({
     </div>
   );
 }
-
