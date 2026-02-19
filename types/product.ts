@@ -8,6 +8,8 @@ export interface Product {
   primary_image?: string;
   images?: string[];
   price: number;
+  customer_price?: number;
+  merchant_price?: number;
   base_price?: number; // Vendor price or cost price
   original_price?: number;
   stock_quantity: number;
@@ -65,4 +67,3 @@ export interface ProductListResponse {
   };
   filters?: FilterOptions;
 }
-

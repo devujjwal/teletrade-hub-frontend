@@ -405,6 +405,7 @@ export default function AdminProductsPage() {
                       <TableHead>SKU</TableHead>
                       <TableHead>Vendor Price</TableHead>
                       <TableHead>Customer Price</TableHead>
+                      <TableHead>Merchant Price</TableHead>
                       <TableHead>Stock</TableHead>
                       <TableHead>Featured</TableHead>
                       <TableHead>Actions</TableHead>
@@ -480,10 +481,18 @@ export default function AdminProductsPage() {
                           </div>
                         </TableCell>
                         <TableCell className="font-semibold">
-                          {formatPrice(product.price)}
-                          {product.base_price && product.price && (
+                          {formatPrice(product.customer_price ?? product.price)}
+                          {product.base_price && (product.customer_price ?? product.price) && (
                             <div className="text-xs text-success">
-                              +{((product.price - product.base_price) / product.base_price * 100).toFixed(1)}%
+                              +{(((product.customer_price ?? product.price) - product.base_price) / product.base_price * 100).toFixed(1)}%
+                            </div>
+                          )}
+                        </TableCell>
+                        <TableCell className="font-semibold">
+                          {formatPrice(product.merchant_price ?? product.price)}
+                          {product.base_price && (product.merchant_price ?? product.price) && (
+                            <div className="text-xs text-info">
+                              +{(((product.merchant_price ?? product.price) - product.base_price) / product.base_price * 100).toFixed(1)}%
                             </div>
                           )}
                         </TableCell>
@@ -539,7 +548,7 @@ export default function AdminProductsPage() {
                                 size="sm"
                                 onClick={() => {
                                   setSelectedProduct(product);
-                                  setEditPrice(product.price.toString());
+                                  setEditPrice((product.customer_price ?? product.price).toString());
                                 }}
                               >
                                 <Edit className="h-4 w-4 mr-1" />
@@ -624,12 +633,15 @@ export default function AdminProductsPage() {
                   placeholder="Enter new price"
                 />
                 <p className="text-xs text-muted-foreground mt-1">
-                  Current customer price: {formatPrice(selectedProduct.price)}
+                  Current customer price: {formatPrice(selectedProduct.customer_price ?? selectedProduct.price)}
                   {selectedProduct.base_price && (
                     <span className="ml-2">
-                      (Markup: {((selectedProduct.price - selectedProduct.base_price) / selectedProduct.base_price * 100).toFixed(1)}%)
+                      (Markup: {(((selectedProduct.customer_price ?? selectedProduct.price) - selectedProduct.base_price) / selectedProduct.base_price * 100).toFixed(1)}%)
                     </span>
                   )}
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Current merchant price: {formatPrice(selectedProduct.merchant_price ?? selectedProduct.price)}
                 </p>
               </div>
             </div>
@@ -645,4 +657,3 @@ export default function AdminProductsPage() {
     </div>
   );
 }
-
