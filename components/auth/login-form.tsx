@@ -51,7 +51,7 @@ export default function LoginForm() {
         router.push('/account');
       }
     } catch (error: any) {
-      toast.error(error.response?.data?.message || t('auth.loginFailed') || 'Login failed. Please try again.');
+      toast.error(error.message || t('auth.loginFailed') || 'Login failed. Please try again.');
     } finally {
       setIsLoading(false);
     }

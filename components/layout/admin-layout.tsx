@@ -17,6 +17,7 @@ import {
   Store,
   Tags,
   Award,
+  Users,
 } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import Button from '@/components/ui/button';
@@ -28,6 +29,7 @@ interface AdminLayoutProps {
 const navItems = [
   { label: 'Dashboard', icon: LayoutDashboard, path: '/admin/dashboard' },
   { label: 'Orders', icon: ShoppingCart, path: '/admin/orders' },
+  { label: 'Users', icon: Users, path: '/admin/users' },
   { label: 'Products', icon: Package, path: '/admin/products' },
   { label: 'Categories', icon: Tags, path: '/admin/categories' },
   { label: 'Brands', icon: Award, path: '/admin/brands' },

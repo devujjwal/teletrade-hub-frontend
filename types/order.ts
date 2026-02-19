@@ -27,6 +27,7 @@ export interface Order {
   user_id?: number;
   customer_name?: string;
   customer_email?: string;
+  customer_type?: 'customer' | 'merchant';
   customer_phone?: string;
   shipping_address: Address;
   billing_address: Address;
@@ -90,4 +91,3 @@ export interface OrderListResponse {
     total: number;
   };
 }
-

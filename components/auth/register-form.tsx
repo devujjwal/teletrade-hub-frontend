@@ -7,7 +7,6 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { authApi } from '@/lib/api/auth';
-import { useAuthStore } from '@/lib/store/auth-store';
 import Button from '@/components/ui/button';
 import Input from '@/components/ui/input';
 import Card from '@/components/ui/card';
@@ -105,8 +104,6 @@ export default function RegisterForm() {
     vat_certificate_file: null,
     tax_number_certificate_file: null,
   });
-  const login = useAuthStore((state) => state.login);
-
   const {
     register,
     handleSubmit,
@@ -191,9 +188,8 @@ export default function RegisterForm() {
         tax_number_certificate_file: files.tax_number_certificate_file,
       });
 
-      login(response.token, response.user, false);
-      toast.success('Registration successful.');
-      router.push('/account');
+      toast.success(response?.message || 'Registration submitted. You can login once approved.');
+      router.push('/login');
     } catch (error: any) {
       if (error.errors) {
         const errorMessages = Object.entries(error.errors)

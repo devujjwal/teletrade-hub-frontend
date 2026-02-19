@@ -58,6 +58,7 @@ export default function AdminOrdersPage() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [customerTypeFilter, setCustomerTypeFilter] = useState<string>('all');
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [pagination, setPagination] = useState({
     current_page: 1,
@@ -74,17 +75,23 @@ export default function AdminOrdersPage() {
         limit: 10,
         search: search || undefined,
         status: statusFilter !== 'all' ? statusFilter : undefined,
+        customer_type: customerTypeFilter !== 'all' ? customerTypeFilter : undefined,
       });
       // API now returns { orders: [...], pagination: {...} } directly
       setOrders(response.orders || []);
-      setPagination((prev) => response.pagination || prev);
+      setPagination((prev) => ({
+        current_page: response.pagination?.page || prev.current_page,
+        last_page: response.pagination?.pages || prev.last_page,
+        per_page: response.pagination?.limit || prev.per_page,
+        total: response.pagination?.total || prev.total,
+      }));
     } catch (error) {
       console.error('Error loading orders:', error);
       toast.error('Failed to load orders');
     } finally {
       setIsLoading(false);
     }
-  }, [page, search, statusFilter]);
+  }, [page, search, statusFilter, customerTypeFilter]);
 
   useEffect(() => {
     loadOrders();
@@ -105,7 +112,7 @@ export default function AdminOrdersPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold">Orders</h1>
-        <p className="text-muted-foreground">Manage customer orders</p>
+        <p className="text-muted-foreground">Manage customer and merchant orders</p>
       </div>
 
       {/* Filters */}
@@ -143,6 +150,22 @@ export default function AdminOrdersPage() {
                 <SelectItem value="cancelled">Cancelled</SelectItem>
               </SelectContent>
             </Select>
+            <Select
+              value={customerTypeFilter}
+              onValueChange={(value) => {
+                setCustomerTypeFilter(value);
+                setPage(1);
+              }}
+            >
+              <SelectTrigger className="w-full sm:w-48">
+                <SelectValue placeholder="User type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All User Types</SelectItem>
+                <SelectItem value="customer">Customer</SelectItem>
+                <SelectItem value="merchant">Merchant</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </CardContent>
       </Card>
@@ -170,6 +193,7 @@ export default function AdminOrdersPage() {
                       <TableHead>Order #</TableHead>
                       <TableHead>Customer</TableHead>
                       <TableHead>Date</TableHead>
+                      <TableHead>User Type</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead>Payment</TableHead>
                       <TableHead>Total</TableHead>
@@ -189,6 +213,11 @@ export default function AdminOrdersPage() {
                           </div>
                         </TableCell>
                         <TableCell>{format(new Date(order.created_at), 'MMM dd, yyyy')}</TableCell>
+                        <TableCell>
+                          <Badge className={order.customer_type === 'merchant' ? 'bg-info/20 text-info border-info/30' : ''}>
+                            {order.customer_type || 'customer'}
+                          </Badge>
+                        </TableCell>
                         <TableCell>
                           <Badge className={statusColors[order.status] || ''}>{order.status}</Badge>
                         </TableCell>

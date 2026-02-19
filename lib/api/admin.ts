@@ -21,6 +21,17 @@ export const adminApi = {
     return response.data?.data || response.data;
   },
 
+  // Shop Users
+  getUsers: async (filters?: any) => {
+    const response = await apiClient.get<any>('/admin/users', { params: filters });
+    return response.data?.data || response.data;
+  },
+
+  updateUserApproval: async (id: number, isActive: boolean) => {
+    const response = await apiClient.put<any>(`/admin/users/${id}/approval`, { is_active: isActive });
+    return response.data;
+  },
+
   getOrder: async (id: number) => {
     const response = await apiClient.get<any>(`/admin/orders/${id}`);
     // Backend returns: { success, data: { order: {...} } }

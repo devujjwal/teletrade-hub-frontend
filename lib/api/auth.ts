@@ -31,7 +31,7 @@ export const authApi = {
     return response.data;
   },
 
-  register: async (userData: RegisterRequest): Promise<AuthResponse> => {
+  register: async (userData: RegisterRequest): Promise<any> => {
     const formData = new FormData();
     formData.append('account_type', userData.account_type);
     formData.append('first_name', userData.first_name);
@@ -68,25 +68,7 @@ export const authApi = {
       },
     });
     
-    // Backend returns: { success: true, data: { user: {...} } } but no token
-    // We need to log in after registration to get a token
-    if (response.data?.success && response.data?.data?.user) {
-      const user = response.data.data.user;
-      const fullName = user.first_name && user.last_name 
-        ? `${user.first_name} ${user.last_name}`.trim()
-        : user.first_name || user.last_name || user.email || 'User';
-      
-      // Auto-login after registration
-      const loginResponse = await authApi.login(userData.email, userData.password);
-      // Ensure first_name and last_name are preserved
-      if (loginResponse.user) {
-        loginResponse.user.first_name = user.first_name;
-        loginResponse.user.last_name = user.last_name;
-      }
-      return loginResponse;
-    }
-    
-    // Fallback for direct response
+    // Registration now requires admin approval before login
     return response.data;
   },
 
