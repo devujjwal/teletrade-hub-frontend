@@ -111,6 +111,11 @@ export const adminApi = {
     return response.data;
   },
 
+  updateProductPricing: async (productId: number, data: { customer_price?: number; merchant_price?: number }) => {
+    const response = await apiClient.put<any>(`/admin/pricing/product/${productId}`, data);
+    return response.data;
+  },
+
   // Sync
   syncProducts: async () => {
     const response = await apiClient.post<any>('/admin/sync/products');

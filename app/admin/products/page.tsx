@@ -60,7 +60,8 @@ export default function AdminProductsPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [brands, setBrands] = useState<Brand[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [editPrice, setEditPrice] = useState('');
+  const [editCustomerPrice, setEditCustomerPrice] = useState('');
+  const [editMerchantPrice, setEditMerchantPrice] = useState('');
   const [pagination, setPagination] = useState({
     current_page: 1,
     last_page: 1,
@@ -137,18 +138,20 @@ export default function AdminProductsPage() {
   };
 
   const handleSavePrice = async () => {
-    if (!selectedProduct || !editPrice) return;
+    if (!selectedProduct || (!editCustomerPrice && !editMerchantPrice)) return;
 
     try {
-      await adminApi.updateProduct(selectedProduct.id, {
-        price: parseFloat(editPrice),
+      await adminApi.updateProductPricing(selectedProduct.id, {
+        customer_price: editCustomerPrice ? parseFloat(editCustomerPrice) : undefined,
+        merchant_price: editMerchantPrice ? parseFloat(editMerchantPrice) : undefined,
       });
-      toast.success('Product price updated');
+      toast.success('Product pricing updated');
       loadProducts();
       setSelectedProduct(null);
-      setEditPrice('');
+      setEditCustomerPrice('');
+      setEditMerchantPrice('');
     } catch (error: any) {
-      toast.error(error.message || 'Failed to update price');
+      toast.error(error.message || 'Failed to update pricing');
     }
   };
 
@@ -548,7 +551,8 @@ export default function AdminProductsPage() {
                                 size="sm"
                                 onClick={() => {
                                   setSelectedProduct(product);
-                                  setEditPrice((product.customer_price ?? product.price).toString());
+                                  setEditCustomerPrice((product.customer_price ?? product.price).toString());
+                                  setEditMerchantPrice((product.merchant_price ?? product.price).toString());
                                 }}
                               >
                                 <Edit className="h-4 w-4 mr-1" />
@@ -622,15 +626,15 @@ export default function AdminProductsPage() {
                 </div>
               )}
               <div>
-                <Label htmlFor="price">Customer Price (with markup)</Label>
+                <Label htmlFor="customer_price">Customer Price (with markup)</Label>
                 <Input
-                  id="price"
+                  id="customer_price"
                   type="number"
                   step="0.01"
                   min="0"
-                  value={editPrice}
-                  onChange={(e) => setEditPrice(e.target.value)}
-                  placeholder="Enter new price"
+                  value={editCustomerPrice}
+                  onChange={(e) => setEditCustomerPrice(e.target.value)}
+                  placeholder="Enter customer price"
                 />
                 <p className="text-xs text-muted-foreground mt-1">
                   Current customer price: {formatPrice(selectedProduct.customer_price ?? selectedProduct.price)}
@@ -640,8 +644,25 @@ export default function AdminProductsPage() {
                     </span>
                   )}
                 </p>
+              </div>
+              <div>
+                <Label htmlFor="merchant_price">Merchant Price (with markup)</Label>
+                <Input
+                  id="merchant_price"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={editMerchantPrice}
+                  onChange={(e) => setEditMerchantPrice(e.target.value)}
+                  placeholder="Enter merchant price"
+                />
                 <p className="text-xs text-muted-foreground mt-1">
                   Current merchant price: {formatPrice(selectedProduct.merchant_price ?? selectedProduct.price)}
+                  {selectedProduct.base_price && (
+                    <span className="ml-2">
+                      (Markup: {(((selectedProduct.merchant_price ?? selectedProduct.price) - selectedProduct.base_price) / selectedProduct.base_price * 100).toFixed(1)}%)
+                    </span>
+                  )}
                 </p>
               </div>
             </div>
