@@ -43,8 +43,8 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-hero py-12 px-4">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen flex items-start justify-center bg-gradient-hero py-12 px-4">
+      <div className="w-full max-w-4xl">
         <div className="text-center mb-8">
           <h1 className="font-display text-3xl font-bold mb-2">{t('auth.createAccount') || 'Create Account'}</h1>
           <p className="text-muted-foreground">{t('auth.registerSubtitle') || 'Join TeleTrade Hub and start shopping'}</p>

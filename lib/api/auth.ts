@@ -31,7 +31,41 @@ export const authApi = {
   },
 
   register: async (userData: RegisterRequest): Promise<AuthResponse> => {
-    const response = await apiClient.post<any>('/auth/register', userData);
+    const formData = new FormData();
+    formData.append('account_type', userData.account_type);
+    formData.append('first_name', userData.first_name);
+    formData.append('last_name', userData.last_name);
+    formData.append('address', userData.address);
+    formData.append('postal_code', userData.postal_code);
+    formData.append('city', userData.city);
+    formData.append('country', userData.country);
+    formData.append('phone', userData.phone);
+    formData.append('mobile', userData.mobile);
+    formData.append('email', userData.email);
+    formData.append('password', userData.password);
+
+    if (userData.tax_number) formData.append('tax_number', userData.tax_number);
+    if (userData.vat_number) formData.append('vat_number', userData.vat_number);
+    if (userData.delivery_address) formData.append('delivery_address', userData.delivery_address);
+    if (userData.delivery_postal_code) formData.append('delivery_postal_code', userData.delivery_postal_code);
+    if (userData.delivery_city) formData.append('delivery_city', userData.delivery_city);
+    if (userData.delivery_country) formData.append('delivery_country', userData.delivery_country);
+    if (userData.account_holder) formData.append('account_holder', userData.account_holder);
+    if (userData.bank_name) formData.append('bank_name', userData.bank_name);
+    if (userData.iban) formData.append('iban', userData.iban);
+    if (userData.bic) formData.append('bic', userData.bic);
+
+    if (userData.id_card_file) formData.append('id_card_file', userData.id_card_file);
+    if (userData.passport_file) formData.append('passport_file', userData.passport_file);
+    if (userData.business_registration_certificate_file) formData.append('business_registration_certificate_file', userData.business_registration_certificate_file);
+    if (userData.vat_certificate_file) formData.append('vat_certificate_file', userData.vat_certificate_file);
+    if (userData.tax_number_certificate_file) formData.append('tax_number_certificate_file', userData.tax_number_certificate_file);
+
+    const response = await apiClient.post<any>('/auth/register', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
     
     // Backend returns: { success: true, data: { user: {...} } } but no token
     // We need to log in after registration to get a token
@@ -135,4 +169,3 @@ export const authApi = {
     }
   },
 };
-
