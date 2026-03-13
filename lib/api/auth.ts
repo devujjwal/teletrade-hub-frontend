@@ -62,11 +62,7 @@ export const authApi = {
     if (userData.vat_certificate_file) formData.append('vat_certificate_file', userData.vat_certificate_file);
     if (userData.tax_number_certificate_file) formData.append('tax_number_certificate_file', userData.tax_number_certificate_file);
 
-    const response = await apiClient.post<any>('/auth/register', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
+    const response = await apiClient.post<any>('/auth/register', formData);
     
     // Registration now requires admin approval before login
     return response.data;
