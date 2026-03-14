@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCartStore } from '@/lib/store/cart-store';
 import { useAuthStore } from '@/lib/store/auth-store';
@@ -12,6 +12,7 @@ import Badge from '@/components/ui/badge';
 import LanguageSelector from '@/components/layout/language-selector';
 import MobileSearchOverlay from '@/components/layout/mobile-search-overlay';
 import { useLanguage } from '@/contexts/language-context';
+import { useHydrated } from '@/lib/hooks/use-hydrated';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,15 +30,10 @@ export default function Header() {
   const router = useRouter();
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [isMounted, setIsMounted] = useState(false);
+  const isHydrated = useHydrated();
   const itemCount = useCartStore((state) => state.getItemCount());
   const { user, logout, isAdmin } = useAuthStore();
   const { t, language } = useLanguage();
-
-  // Prevent hydration mismatch by only rendering cart badge after mount
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -140,7 +136,7 @@ export default function Header() {
             <Link href="/cart" className="relative">
               <Button variant="ghost" size="icon">
                 <ShoppingCart className="w-5 h-5" />
-                {isMounted && itemCount > 0 && (
+                {isHydrated && itemCount > 0 && (
                   <Badge className="absolute -top-1 -right-1 w-5 h-5 p-0 flex items-center justify-center text-xs bg-secondary text-secondary-foreground">
                     {itemCount}
                   </Badge>

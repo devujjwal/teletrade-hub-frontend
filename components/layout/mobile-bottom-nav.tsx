@@ -2,25 +2,20 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState, useEffect } from 'react';
 import { Home, ShoppingBag, User, ShoppingCart } from 'lucide-react';
 import { useCartStore } from '@/lib/store/cart-store';
 import { cn } from '@/lib/utils/cn';
+import { useHydrated } from '@/lib/hooks/use-hydrated';
 
 export default function MobileBottomNav() {
   const pathname = usePathname();
-  const [isMounted, setIsMounted] = useState(false);
+  const isHydrated = useHydrated();
   const itemCount = useCartStore((state) => state.getItemCount());
-
-  // Prevent hydration mismatch by only rendering badge after mount
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
 
   const navItems = [
     { href: '/', label: 'Home', icon: Home },
     { href: '/products', label: 'Products', icon: ShoppingBag },
-    { href: '/cart', label: 'Cart', icon: ShoppingCart, badge: isMounted ? itemCount : 0 },
+    { href: '/cart', label: 'Cart', icon: ShoppingCart, badge: isHydrated ? itemCount : 0 },
     { href: '/account', label: 'Account', icon: User },
   ];
 
@@ -59,4 +54,3 @@ export default function MobileBottomNav() {
     </nav>
   );
 }
-

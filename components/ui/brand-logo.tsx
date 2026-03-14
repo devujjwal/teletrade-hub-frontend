@@ -108,6 +108,7 @@ const getBrandDomain = (brandName: string): string => {
     
     // Prepaid SIM & Telecom
     'vodafone': 'vodafone.com',
+    'vodafone callya': 'vodafone.com',
     'callya vodafone': 'vodafone.com',
     'callya': 'vodafone.com',
     't-mobile': 't-mobile.com',
@@ -188,12 +189,22 @@ export default function BrandLogo({
 
   const brandDomain = getBrandDomain(brandName);
   const brandSlug = getBrandSlug(brandName);
+  const normalizedBrandName = brandName.toLowerCase().trim();
+
+  const localLogoAliases: Record<string, string> = {
+    'vodafone-callya': 'vodafone',
+    'vodafone callya': 'vodafone',
+  };
+
+  const resolvedLocalSlug = localLogoAliases[brandSlug]
+    || localLogoAliases[normalizedBrandName]
+    || brandSlug;
 
   // Get logo URL based on current source
   const getLogoUrl = (): string | null => {
     if (currentSource === 'local') {
       // Try local logo - PNG only (we downloaded PNGs)
-      return `/logos/${brandSlug}.png`;
+      return `/logos/${resolvedLocalSlug}.png`;
     } else if (currentSource === 'google') {
       return `https://www.google.com/s2/favicons?domain=${brandDomain}&sz=128`;
     }
@@ -229,16 +240,21 @@ export default function BrandLogo({
 
   // Render image with current source
   return logoUrl ? (
-    <Image
-      key={currentSource} // Force re-render when source changes
-      src={logoUrl}
-      alt={brandName}
-      width={width}
-      height={height}
-      className={className}
-      loading="lazy"
-      onError={handleImageError}
-      unoptimized
-    />
+    <span
+      className="relative block"
+      style={{ width: `${width}px`, height: `${height}px` }}
+    >
+      <Image
+        key={currentSource} // Force re-render when source changes
+        src={logoUrl}
+        alt={brandName}
+        fill
+        sizes={`${width}px`}
+        className={`object-contain ${className}`}
+        loading="lazy"
+        onError={handleImageError}
+        unoptimized
+      />
+    </span>
   ) : null;
 }

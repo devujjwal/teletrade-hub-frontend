@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import { productsApi } from '@/lib/api/products';
 import { Product } from '@/types/product';
 import ProductGrid from '@/components/products/product-grid';
-import { Skeleton } from '@/components/ui/skeleton';
+import ProductsGridLoader from '@/components/products/products-grid-loader';
 import { useAuthStore } from '@/lib/store/auth-store';
 
 interface ProductsClientProps {
@@ -71,7 +71,7 @@ export default function ProductsClient({ initialProducts, initialMeta }: Product
   }, [searchParamsString, searchParams, _hasHydrated, token, user]);
 
   if (isLoading) {
-    return <Skeleton className="h-96 w-full" />;
+    return <ProductsGridLoader />;
   }
 
   const searchParamsObj: Record<string, string | undefined> = {

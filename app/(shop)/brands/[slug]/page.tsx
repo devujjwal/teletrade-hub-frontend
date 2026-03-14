@@ -11,15 +11,18 @@ import { Skeleton } from '@/components/ui/skeleton';
 export const revalidate = 300;
 
 interface BrandPageProps {
-  params: {
+  params: Promise<{
     slug: string;
-  };
-  searchParams: {
+  }>;
+  searchParams: Promise<{
     page?: string;
     sort?: string;
     lang?: string;
-  };
+  }>;
 }
+
+type BrandSearchParams = Awaited<BrandPageProps['searchParams']>;
+type BrandRouteParams = Awaited<BrandPageProps['params']>;
 
 async function getBrand(slug: string, lang?: string) {
   try {
@@ -36,7 +39,7 @@ async function getBrand(slug: string, lang?: string) {
   }
 }
 
-async function getProducts(slug: string, searchParams: BrandPageProps['searchParams']) {
+async function getProducts(slug: string, searchParams: BrandSearchParams) {
   const page = parseInt(searchParams.page || '1', 10);
   try {
     return await brandsApi.getProducts(slug, {
@@ -70,9 +73,11 @@ async function getBrands() {
 }
 
 export default async function BrandPage({ params, searchParams }: BrandPageProps) {
+  const resolvedParams: BrandRouteParams = await params;
+  const resolvedSearchParams = await searchParams;
   const [brand, productsData, categories, brands] = await Promise.all([
-    getBrand(params.slug, searchParams.lang),
-    getProducts(params.slug, searchParams),
+    getBrand(resolvedParams.slug, resolvedSearchParams.lang),
+    getProducts(resolvedParams.slug, resolvedSearchParams),
     getCategories(),
     getBrands(),
   ]);
@@ -115,7 +120,7 @@ export default async function BrandPage({ params, searchParams }: BrandPageProps
             <ProductGrid
               products={productsData.data || []}
               meta={productsData.meta || { current_page: 1, last_page: 1, per_page: 20, total: 0 }}
-              searchParams={{ ...searchParams, brand: params.slug }}
+              searchParams={{ ...resolvedSearchParams, brand: resolvedParams.slug }}
             />
           </Suspense>
         </main>
@@ -123,4 +128,3 @@ export default async function BrandPage({ params, searchParams }: BrandPageProps
     </div>
   );
 }
-

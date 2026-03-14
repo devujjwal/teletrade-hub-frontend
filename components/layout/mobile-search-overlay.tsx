@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, X, Search, MapPin } from 'lucide-react';
 import { useLanguage } from '@/contexts/language-context';
+import { useHydrated } from '@/lib/hooks/use-hydrated';
 
 interface MobileSearchOverlayProps {
   isOpen: boolean;
@@ -14,12 +15,8 @@ interface MobileSearchOverlayProps {
 export default function MobileSearchOverlay({ isOpen, onClose }: MobileSearchOverlayProps) {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
-  const [mounted, setMounted] = useState(false);
+  const isHydrated = useHydrated();
   const { t, language } = useLanguage();
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   // Close on Escape key
   useEffect(() => {
@@ -51,7 +48,7 @@ export default function MobileSearchOverlay({ isOpen, onClose }: MobileSearchOve
     }
   };
 
-  if (!isOpen || !mounted) return null;
+  if (!isOpen || !isHydrated) return null;
 
   const overlayContent = (
     <div 

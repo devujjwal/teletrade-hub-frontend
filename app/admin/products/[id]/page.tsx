@@ -30,6 +30,10 @@ const LANGUAGES = [
   { code: 'pl', name: 'Polish (Polski)' },
 ];
 
+const MAX_PRODUCT_IMAGE_SIZE = 5 * 1024 * 1024;
+const ALLOWED_PRODUCT_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+const PRODUCT_IMAGE_ACCEPT = '.jpg,.jpeg,.png,.webp';
+
 export default function EditProductPage() {
   const router = useRouter();
   const params = useParams();
@@ -178,13 +182,15 @@ export default function EditProductPage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 5 * 1024 * 1024) {
+    if (file.size <= 0 || file.size > MAX_PRODUCT_IMAGE_SIZE) {
       toast.error('Image must be less than 5MB');
+      e.target.value = '';
       return;
     }
 
-    if (!['image/jpeg', 'image/jpg', 'image/png', 'image/webp'].includes(file.type)) {
+    if (!ALLOWED_PRODUCT_IMAGE_TYPES.includes(file.type)) {
       toast.error('Only JPEG, PNG, and WebP images are allowed');
+      e.target.value = '';
       return;
     }
 
@@ -420,7 +426,7 @@ export default function EditProductPage() {
                 <input
                   id="image-upload"
                   type="file"
-                  accept="image/*"
+                  accept={PRODUCT_IMAGE_ACCEPT}
                   onChange={handleImageUpload}
                   className="hidden"
                   disabled={isUploading}
@@ -437,6 +443,7 @@ export default function EditProductPage() {
                         src={getProxiedImageUrl(url)}
                         alt={`Product ${index + 1}`}
                         fill
+                        sizes="(max-width: 768px) 50vw, 25vw"
                         className="object-cover"
                       />
                     </div>

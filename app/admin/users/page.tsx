@@ -116,6 +116,20 @@ export default function AdminUsersPage() {
   };
 
   const fullName = (user: ShopUser) => `${user.first_name || ''} ${user.last_name || ''}`.trim() || 'N/A';
+  const renderDocumentLink = (url?: string, label = 'View Document') => {
+    if (!url) return 'N/A';
+
+    return (
+      <a
+        href={url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-primary underline underline-offset-2 hover:text-primary/80"
+      >
+        {label}
+      </a>
+    );
+  };
 
   return (
     <div className="space-y-6">
@@ -260,11 +274,11 @@ export default function AdminUsersPage() {
               <div><span className="font-medium">Bank:</span> {selectedUser.bank_name || 'N/A'}</div>
               <div><span className="font-medium">IBAN:</span> {selectedUser.iban || 'N/A'}</div>
               <div><span className="font-medium">BIC:</span> {selectedUser.bic || 'N/A'}</div>
-              <div><span className="font-medium">ID card file:</span> {selectedUser.id_card_file || 'N/A'}</div>
-              <div><span className="font-medium">Passport file:</span> {selectedUser.passport_file || 'N/A'}</div>
-              <div><span className="font-medium">Business registration:</span> {selectedUser.business_registration_certificate_file || 'N/A'}</div>
-              <div><span className="font-medium">VAT certificate:</span> {selectedUser.vat_certificate_file || 'N/A'}</div>
-              <div><span className="font-medium">Tax certificate:</span> {selectedUser.tax_number_certificate_file || 'N/A'}</div>
+              <div><span className="font-medium">ID card file:</span> {renderDocumentLink(selectedUser.id_card_file, 'View ID Card')}</div>
+              <div><span className="font-medium">Passport file:</span> {renderDocumentLink(selectedUser.passport_file, 'View Passport')}</div>
+              <div><span className="font-medium">Business registration:</span> {renderDocumentLink(selectedUser.business_registration_certificate_file, 'View Business Registration')}</div>
+              <div><span className="font-medium">VAT certificate:</span> {renderDocumentLink(selectedUser.vat_certificate_file, 'View VAT Certificate')}</div>
+              <div><span className="font-medium">Tax certificate:</span> {renderDocumentLink(selectedUser.tax_number_certificate_file, 'View Tax Certificate')}</div>
             </div>
             <div className="pt-4">
               <Button

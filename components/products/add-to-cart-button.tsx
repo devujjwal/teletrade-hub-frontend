@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Product } from '@/types/product';
 import { useCartStore } from '@/lib/store/cart-store';
@@ -29,14 +29,7 @@ export default function AddToCartButton({ product }: AddToCartButtonProps) {
   const currentCartQuantity = cartItem?.quantity || 0;
   
   // Local quantity state for the selector
-  const [quantity, setQuantity] = useState(1);
-  
-  // Update local quantity when cart changes
-  useEffect(() => {
-    if (cartItem) {
-      setQuantity(cartItem.quantity);
-    }
-  }, [cartItem]);
+  const [quantity, setQuantity] = useState(cartItem?.quantity || 1);
   
   // Calculate available stock
   const availableStock = product.stock_quantity - currentCartQuantity;

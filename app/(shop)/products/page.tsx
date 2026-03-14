@@ -11,7 +11,7 @@ export const revalidate = 0; // Disable caching for dynamic filtering
 export const dynamic = 'force-dynamic'; // Force dynamic rendering
 
 interface ProductsPageProps {
-  searchParams: {
+  searchParams: Promise<{
     category?: string;
     brand?: string;
     min_price?: string;
@@ -23,10 +23,12 @@ interface ProductsPageProps {
     sort?: string;
     page?: string;
     lang?: string;
-  };
+  }>;
 }
 
-async function getProducts(searchParams: ProductsPageProps['searchParams']) {
+type ProductsSearchParams = Awaited<ProductsPageProps['searchParams']>;
+
+async function getProducts(searchParams: ProductsSearchParams) {
   const page = parseInt(searchParams.page || '1', 10);
   const lang = searchParams.lang || 'en';
   const filters: any = {
@@ -74,9 +76,10 @@ async function getBrands(lang: string = 'en') {
 }
 
 export default async function ProductsPage({ searchParams }: ProductsPageProps) {
-  const lang = searchParams.lang || 'en';
+  const resolvedSearchParams = await searchParams;
+  const lang = resolvedSearchParams.lang || 'en';
   const [productsData, categories, brands] = await Promise.all([
-    getProducts(searchParams),
+    getProducts(resolvedSearchParams),
     getCategories(lang),
     getBrands(lang),
   ]);

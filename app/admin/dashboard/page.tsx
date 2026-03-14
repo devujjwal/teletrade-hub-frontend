@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { formatPrice } from '@/lib/utils/format';
 import { formatDistanceToNow } from 'date-fns';
+import AdminPageLoader from '@/components/admin/admin-page-loader';
 
 interface DashboardStats {
   order_stats?: {
@@ -81,20 +82,7 @@ export default function AdminDashboardPage() {
   if (isLoading) {
     return (
       <div className="space-y-6">
-        <div>
-          <Skeleton className="h-10 w-64 mb-2" />
-          <Skeleton className="h-5 w-96" />
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {[...Array(4)].map((_, i) => (
-            <Card key={i}>
-              <CardContent className="p-6">
-                <Skeleton className="h-4 w-24 mb-2" />
-                <Skeleton className="h-8 w-20" />
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        <AdminPageLoader message="Loading dashboard stats..." rows={6} />
       </div>
     );
   }

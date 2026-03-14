@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { 
@@ -12,8 +12,8 @@ import {
   Mail,
   Phone,
   MapPin,
-  Edit2,
-  Save
+  Save,
+  FileText
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Input from '@/components/ui/input';
@@ -28,14 +28,10 @@ export default function AccountPage() {
   const { user, token, _hasHydrated } = useAuthStore();
   const login = useAuthStore((state) => state.login);
   const { t } = useLanguage();
+  const profileHydratedRef = useRef(false);
   
-  const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState({
-    firstName: user?.first_name || user?.name?.split(' ')[0] || '',
-    lastName: user?.last_name || user?.name?.split(' ').slice(1).join(' ') || '',
-    email: user?.email || '',
-    phone: user?.phone || '',
-  });
+  const [isEditingPhone, setIsEditingPhone] = useState(false);
+  const [phoneValue, setPhoneValue] = useState(user?.phone || '');
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
@@ -47,14 +43,34 @@ export default function AccountPage() {
 
   useEffect(() => {
     if (user) {
-      setFormData({
-        firstName: user.first_name || user.name?.split(' ')[0] || '',
-        lastName: user.last_name || user.name?.split(' ').slice(1).join(' ') || '',
-        email: user.email || '',
-        phone: user.phone || '',
-      });
+      setPhoneValue(user.phone || '');
     }
   }, [user]);
+
+  useEffect(() => {
+    if (!_hasHydrated || !token || !user) {
+      profileHydratedRef.current = false;
+      return;
+    }
+
+    if (profileHydratedRef.current) {
+      return;
+    }
+
+    profileHydratedRef.current = true;
+
+    (async () => {
+      try {
+        const latestUser = await authApi.getCurrentUser();
+        login(token, latestUser, false);
+      } catch (error) {
+        profileHydratedRef.current = false;
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Failed to refresh account profile:', error);
+        }
+      }
+    })();
+  }, [_hasHydrated, token, user, login]);
 
   // Show loading while hydrating
   if (!_hasHydrated) {
@@ -110,16 +126,14 @@ export default function AccountPage() {
     setIsSaving(true);
     try {
       const updatedUser = await authApi.updateProfile({
-        first_name: formData.firstName,
-        last_name: formData.lastName,
-        phone: formData.phone || undefined,
+        phone: phoneValue || undefined,
       });
       
       // Update auth store with new user data
       login(useAuthStore.getState().token || '', updatedUser, false);
       
       toast.success(t('account.saveChanges'));
-      setIsEditing(false);
+      setIsEditingPhone(false);
     } catch (error: any) {
       toast.error(error?.response?.data?.message || 'Failed to update profile');
       if (process.env.NODE_ENV === 'development') {
@@ -160,6 +174,30 @@ export default function AccountPage() {
     ? user.name.split(' ').map((n: string) => n[0]).join('').slice(0, 2)
     : user.email?.[0]?.toUpperCase() || 'U';
 
+  const showValue = (value?: string | number | null) => {
+    if (value === null || value === undefined) return t('account.notProvided');
+    const normalized = String(value).trim();
+    return normalized.length > 0 ? normalized : t('account.notProvided');
+  };
+
+  const renderDocumentLink = (url?: string, label = 'View Document') => {
+    if (!url) {
+      return <span>{t('account.notProvided')}</span>;
+    }
+
+    return (
+      <a
+        href={url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex items-center gap-2 text-primary underline underline-offset-2 hover:text-primary/80"
+      >
+        <FileText className="h-4 w-4" />
+        {label}
+      </a>
+    );
+  };
+
   return (
     <div className="container-wide py-8">
       <h1 className="font-display text-3xl font-bold mb-8">{t('account.title')}</h1>
@@ -171,21 +209,18 @@ export default function AccountPage() {
             <div className="flex items-center justify-between mb-6">
               <h2 className="font-display text-xl font-bold">{t('account.profileInformation')}</h2>
               <Button 
-                variant={isEditing ? 'default' : 'outline'} 
+                variant={isEditingPhone ? 'default' : 'outline'} 
                 size="sm"
-                onClick={() => isEditing ? handleSave() : setIsEditing(true)}
+                onClick={() => isEditingPhone ? handleSave() : setIsEditingPhone(true)}
                 disabled={isSaving}
               >
-                {isEditing ? (
+                {isEditingPhone ? (
                   <>
                     <Save className="w-4 h-4 mr-2" />
                     {t('account.saveChanges')}
                   </>
                 ) : (
-                  <>
-                    <Edit2 className="w-4 h-4 mr-2" />
-                    {t('account.editProfile')}
-                  </>
+                  <>Edit Phone</>
                 )}
               </Button>
             </div>
@@ -206,32 +241,18 @@ export default function AccountPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <Label>{t('account.firstName')}</Label>
-                {isEditing ? (
-                  <Input
-                    value={formData.firstName}
-                    onChange={(e) => setFormData(prev => ({ ...prev, firstName: e.target.value }))}
-                  />
-                ) : (
-                  <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
-                    <User className="w-4 h-4 text-muted-foreground" />
-                    <span>{user.first_name || user.name?.split(' ')[0] || t('account.notProvided')}</span>
-                  </div>
-                )}
+                <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
+                  <User className="w-4 h-4 text-muted-foreground" />
+                  <span>{showValue(user.first_name || user.name?.split(' ')[0])}</span>
+                </div>
               </div>
 
               <div className="space-y-2">
                 <Label>{t('account.lastName')}</Label>
-                {isEditing ? (
-                  <Input
-                    value={formData.lastName}
-                    onChange={(e) => setFormData(prev => ({ ...prev, lastName: e.target.value }))}
-                  />
-                ) : (
-                  <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
-                    <User className="w-4 h-4 text-muted-foreground" />
-                    <span>{user.last_name || user.name?.split(' ').slice(1).join(' ') || t('account.notProvided')}</span>
-                  </div>
-                )}
+                <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
+                  <User className="w-4 h-4 text-muted-foreground" />
+                  <span>{showValue(user.last_name || user.name?.split(' ').slice(1).join(' '))}</span>
+                </div>
               </div>
 
               <div className="space-y-2">
@@ -244,24 +265,134 @@ export default function AccountPage() {
 
               <div className="space-y-2">
                 <Label>{t('account.phone')}</Label>
-                {isEditing ? (
+                {isEditingPhone ? (
                   <Input
-                    value={formData.phone}
-                    onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
+                    value={phoneValue}
+                    onChange={(e) => setPhoneValue(e.target.value)}
                     placeholder="+49 123 456 7890"
                   />
                 ) : (
                   <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
                     <Phone className="w-4 h-4 text-muted-foreground" />
-                    <span>{user.phone || t('account.notProvided')}</span>
+                    <span>{showValue(user.phone)}</span>
                   </div>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label>Mobile</Label>
+                <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
+                  <Phone className="w-4 h-4 text-muted-foreground" />
+                  <span>{showValue(user.mobile)}</span>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Account Type</Label>
+                <div className="p-3 bg-muted rounded-lg">
+                  <span className="capitalize">{showValue(user.account_type)}</span>
+                </div>
+              </div>
+              <div className="space-y-2 md:col-span-2">
+                <Label>Address</Label>
+                <div className="p-3 bg-muted rounded-lg">
+                  <span>{showValue(user.address)}</span>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Postal Code</Label>
+                <div className="p-3 bg-muted rounded-lg">
+                  <span>{showValue(user.postal_code)}</span>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>City</Label>
+                <div className="p-3 bg-muted rounded-lg">
+                  <span>{showValue(user.city)}</span>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Country</Label>
+                <div className="p-3 bg-muted rounded-lg">
+                  <span>{showValue(user.country)}</span>
+                </div>
+              </div>
+
+              {user.account_type === 'merchant' && (
+                <>
+                  <div className="space-y-2">
+                    <Label>Tax Number</Label>
+                    <div className="p-3 bg-muted rounded-lg">{showValue(user.tax_number)}</div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>VAT Number</Label>
+                    <div className="p-3 bg-muted rounded-lg">{showValue(user.vat_number)}</div>
+                  </div>
+                  <div className="space-y-2 md:col-span-2">
+                    <Label>Delivery Address</Label>
+                    <div className="p-3 bg-muted rounded-lg">{showValue(user.delivery_address)}</div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Delivery Postal Code</Label>
+                    <div className="p-3 bg-muted rounded-lg">{showValue(user.delivery_postal_code)}</div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Delivery City</Label>
+                    <div className="p-3 bg-muted rounded-lg">{showValue(user.delivery_city)}</div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Delivery Country</Label>
+                    <div className="p-3 bg-muted rounded-lg">{showValue(user.delivery_country)}</div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Account Holder</Label>
+                    <div className="p-3 bg-muted rounded-lg">{showValue(user.account_holder)}</div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Bank Name</Label>
+                    <div className="p-3 bg-muted rounded-lg">{showValue(user.bank_name)}</div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>IBAN</Label>
+                    <div className="p-3 bg-muted rounded-lg">{showValue(user.iban)}</div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>BIC</Label>
+                    <div className="p-3 bg-muted rounded-lg">{showValue(user.bic)}</div>
+                  </div>
+                </>
+              )}
+            </div>
+
+            <div className="mt-8">
+              <h3 className="font-display text-lg font-semibold mb-4">Uploaded Documents</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="p-3 bg-muted rounded-lg">{renderDocumentLink(user.id_card_file, 'View ID Card')}</div>
+                <div className="p-3 bg-muted rounded-lg">{renderDocumentLink(user.passport_file, 'View Passport')}</div>
+                {user.account_type === 'merchant' && (
+                  <>
+                    <div className="p-3 bg-muted rounded-lg">
+                      {renderDocumentLink(user.business_registration_certificate_file, 'View Business Registration')}
+                    </div>
+                    <div className="p-3 bg-muted rounded-lg">
+                      {renderDocumentLink(user.vat_certificate_file, 'View VAT Certificate')}
+                    </div>
+                    <div className="p-3 bg-muted rounded-lg md:col-span-2">
+                      {renderDocumentLink(user.tax_number_certificate_file, 'View Tax Certificate')}
+                    </div>
+                  </>
                 )}
               </div>
             </div>
 
-            {isEditing && (
+            {isEditingPhone && (
               <div className="flex justify-end gap-3 mt-6 pt-6 border-t border-border">
-                <Button variant="outline" onClick={() => setIsEditing(false)}>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setPhoneValue(user.phone || '');
+                    setIsEditingPhone(false);
+                  }}
+                >
                   {t('account.cancel')}
                 </Button>
                 <Button className="btn-shop" onClick={handleSave} disabled={isSaving}>

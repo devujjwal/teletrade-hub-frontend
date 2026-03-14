@@ -10,15 +10,18 @@ import { Skeleton } from '@/components/ui/skeleton';
 export const revalidate = 300;
 
 interface CategoryPageProps {
-  params: {
+  params: Promise<{
     slug: string;
-  };
-  searchParams: {
+  }>;
+  searchParams: Promise<{
     page?: string;
     sort?: string;
     lang?: string;
-  };
+  }>;
 }
+
+type CategorySearchParams = Awaited<CategoryPageProps['searchParams']>;
+type CategoryRouteParams = Awaited<CategoryPageProps['params']>;
 
 async function getCategory(slug: string, lang?: string) {
   try {
@@ -35,7 +38,7 @@ async function getCategory(slug: string, lang?: string) {
   }
 }
 
-async function getProducts(slug: string, searchParams: CategoryPageProps['searchParams']) {
+async function getProducts(slug: string, searchParams: CategorySearchParams) {
   const page = parseInt(searchParams.page || '1', 10);
   try {
     return await categoriesApi.getProducts(slug, {
@@ -69,10 +72,12 @@ async function getBrands(lang: string = 'en') {
 }
 
 export default async function CategoryPage({ params, searchParams }: CategoryPageProps) {
-  const lang = searchParams.lang || 'en';
+  const resolvedParams: CategoryRouteParams = await params;
+  const resolvedSearchParams = await searchParams;
+  const lang = resolvedSearchParams.lang || 'en';
   const [category, productsData, categories, brands] = await Promise.all([
-    getCategory(params.slug, lang),
-    getProducts(params.slug, searchParams),
+    getCategory(resolvedParams.slug, lang),
+    getProducts(resolvedParams.slug, resolvedSearchParams),
     getCategories(lang),
     getBrands(lang),
   ]);
@@ -104,7 +109,7 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
             <ProductGrid
               products={productsData.data || []}
               meta={productsData.meta || { current_page: 1, last_page: 1, per_page: 20, total: 0 }}
-              searchParams={{ ...searchParams, category: params.slug }}
+              searchParams={{ ...resolvedSearchParams, category: resolvedParams.slug }}
             />
           </Suspense>
         </main>
@@ -112,4 +117,3 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
     </div>
   );
 }
-

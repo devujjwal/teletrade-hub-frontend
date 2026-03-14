@@ -5,6 +5,26 @@ export interface User {
   last_name?: string;
   email: string;
   phone?: string;
+  mobile?: string;
+  address?: string;
+  postal_code?: string;
+  city?: string;
+  country?: string;
+  tax_number?: string;
+  vat_number?: string;
+  delivery_address?: string;
+  delivery_postal_code?: string;
+  delivery_city?: string;
+  delivery_country?: string;
+  account_holder?: string;
+  bank_name?: string;
+  iban?: string;
+  bic?: string;
+  id_card_file?: string;
+  passport_file?: string;
+  business_registration_certificate_file?: string;
+  vat_certificate_file?: string;
+  tax_number_certificate_file?: string;
   account_type?: 'customer' | 'merchant';
   role?: 'customer' | 'admin';
 }
@@ -22,7 +42,7 @@ export interface RegisterRequest {
   postal_code: string;
   city: string;
   country: string;
-  phone: string;
+  phone?: string;
   mobile: string;
   email: string;
   password: string;

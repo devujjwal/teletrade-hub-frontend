@@ -57,6 +57,7 @@ export default function ProductGallery({
           src={getProxiedImageUrl(allImages[0])}
           alt={productName}
           fill
+          sizes="(max-width: 1024px) 100vw, 50vw"
           className="object-contain"
           priority
         />
@@ -88,6 +89,7 @@ export default function ProductGallery({
           src={getProxiedImageUrl(allImages[selectedImageIndex])}
           alt={productName}
           fill
+          sizes="(max-width: 1024px) 100vw, 50vw"
           className="object-contain"
           priority
         />
@@ -135,6 +137,7 @@ export default function ProductGallery({
               src={getProxiedImageUrl(image)}
               alt={`${productName} ${index + 1}`}
               fill
+              sizes="80px"
               className="object-cover"
             />
           </button>

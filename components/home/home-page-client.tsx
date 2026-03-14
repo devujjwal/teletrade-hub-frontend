@@ -6,7 +6,7 @@ import Button from '@/components/ui/button';
 import Card from '@/components/ui/card';
 import ProductCard from '@/components/products/product-card';
 import BrandLogo from '@/components/ui/brand-logo';
-import { ArrowRight, ChevronRight, Truck, Shield, CreditCard, Headset, Smartphone } from 'lucide-react';
+import { ArrowRight, ChevronRight, Truck, Shield, CreditCard, Headset, Smartphone, Tablet, Headphones, Watch, Cpu, Cable } from 'lucide-react';
 import { useLanguage } from '@/contexts/language-context';
 import { Product } from '@/types/product';
 import { Category } from '@/types/category';
@@ -18,15 +18,22 @@ interface HomePageClientProps {
   featuredProducts: Product[];
   categories: Category[];
   brands: Brand[];
-  categoryIcons: Record<string, React.ReactNode>;
 }
 
 export default function HomePageClient({ 
   featuredProducts, 
   categories, 
-  brands,
-  categoryIcons 
+  brands
 }: HomePageClientProps) {
+  const categoryIcons: Record<string, React.ReactNode> = {
+    Smartphones: <Smartphone className="w-8 h-8" />,
+    Tablets: <Tablet className="w-8 h-8" />,
+    Headphones: <Headphones className="w-8 h-8" />,
+    Smartwatches: <Watch className="w-8 h-8" />,
+    Accessories: <Cable className="w-8 h-8" />,
+    Components: <Cpu className="w-8 h-8" />,
+  };
+
   const { t, language } = useLanguage();
   const { token, user, _hasHydrated } = useAuthStore();
   const langParam = language && language !== 'en' ? `?lang=${language}` : '';

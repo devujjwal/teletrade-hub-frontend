@@ -72,10 +72,11 @@ async function fetchImage(url: string): Promise<{ buffer: Buffer; contentType: s
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { path: string[] } }
+  { params }: { params: Promise<{ path: string[] }> }
 ) {
   try {
-    const imagePath = params.path.join('/');
+    const { path } = await params;
+    const imagePath = path.join('/');
     const imageUrl = decodeURIComponent(imagePath);
 
     // Validate URL (security check)
@@ -102,4 +103,3 @@ export async function GET(
     return new NextResponse('Error fetching image', { status: 500 });
   }
 }
-

@@ -24,9 +24,6 @@ const nextConfig = {
     ],
     formats: ['image/avif', 'image/webp'],
   },
-  experimental: {
-    optimizePackageImports: ['@heroicons/react', 'lucide-react'],
-  },
   async headers() {
     const isProduction = process.env.NODE_ENV === 'production';
     
@@ -62,14 +59,19 @@ const nextConfig = {
       },
     ];
 
+    const connectSrc = isProduction
+      ? "connect-src 'self' https:"
+      : "connect-src 'self' https: http://localhost:3001 http://127.0.0.1:3001 ws://localhost:3000 ws://127.0.0.1:3000";
+
     // Content Security Policy
     const cspDirectives = [
       "default-src 'self'",
       "script-src 'self' 'unsafe-eval' 'unsafe-inline'", // Next.js requires unsafe-eval for dev
-      "style-src 'self' 'unsafe-inline'", // Tailwind requires unsafe-inline
+      "style-src 'self' 'unsafe-inline'",
+      "style-src-elem 'self' 'unsafe-inline'",
       "img-src 'self' data: https:",
       "font-src 'self' data:",
-      "connect-src 'self' https:",
+      connectSrc,
       "frame-ancestors 'none'",
       "base-uri 'self'",
       "form-action 'self'",
@@ -108,4 +110,3 @@ const nextConfig = {
 };
 
 module.exports = nextConfig;
-

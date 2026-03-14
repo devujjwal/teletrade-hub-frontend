@@ -77,8 +77,12 @@ export default function ProductGrid({ products = [], meta, searchParams }: Produ
 
       {/* Products Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {productsList.map((product) => (
-          <ProductCard key={product.id} product={product} />
+        {productsList.map((product, index) => (
+          <ProductCard
+            key={product.id}
+            product={product}
+            eagerLoadImage={index < 3}
+          />
         ))}
       </div>
 

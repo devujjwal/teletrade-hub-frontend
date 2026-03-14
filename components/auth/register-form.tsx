@@ -10,7 +10,11 @@ import { authApi } from '@/lib/api/auth';
 import Button from '@/components/ui/button';
 import Input from '@/components/ui/input';
 import Card from '@/components/ui/card';
+import { useLanguage } from '@/contexts/language-context';
+import { Briefcase, UserRound } from 'lucide-react';
 import toast from 'react-hot-toast';
+
+const PHONE_PATTERN = /^\+?[0-9][0-9\s()-]{6,19}$/;
 
 const registerSchema = z
   .object({
@@ -21,9 +25,19 @@ const registerSchema = z
     postal_code: z.string().min(2, 'Postal code is required'),
     city: z.string().min(2, 'City is required'),
     country: z.string().min(2, 'Country is required'),
-    phone: z.string().min(5, 'Phone is required'),
-    mobile: z.string().min(5, 'Mobile is required'),
-    email: z.string().email('Invalid email address'),
+    phone: z
+      .string()
+      .trim()
+      .max(50, 'Phone must not exceed 50 characters')
+      .refine((value) => value.length === 0 || PHONE_PATTERN.test(value), 'Enter a valid phone number')
+      .default(''),
+    mobile: z
+      .string()
+      .trim()
+      .min(1, 'Mobile is required')
+      .max(50, 'Mobile must not exceed 50 characters')
+      .refine((value) => PHONE_PATTERN.test(value), 'Enter a valid mobile number'),
+    email: z.string().trim().email('Invalid email address').max(254, 'Email is too long'),
     password: z
       .string()
       .min(8, 'Password must be at least 8 characters')
@@ -93,9 +107,11 @@ type FileState = Record<FileFieldKey, File | null>;
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
 const ALLOWED_MIME_TYPES = ['application/pdf', 'image/jpeg', 'image/png'];
+const ACCEPTED_FILE_INPUT = '.pdf,.jpg,.jpeg,.png';
 
 export default function RegisterForm() {
   const router = useRouter();
+  const { language } = useLanguage();
   const [isLoading, setIsLoading] = useState(false);
   const [files, setFiles] = useState<FileState>({
     id_card_file: null,
@@ -107,6 +123,7 @@ export default function RegisterForm() {
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
     watch,
   } = useForm<RegisterFormData>({
@@ -152,6 +169,31 @@ export default function RegisterForm() {
     }
 
     return true;
+  };
+
+  const handleFileChange = (field: FileFieldKey, file: File | null, inputElement?: HTMLInputElement) => {
+    if (!file) {
+      setFiles((prev) => ({ ...prev, [field]: null }));
+      return;
+    }
+
+    if (!ALLOWED_MIME_TYPES.includes(file.type)) {
+      toast.error(`${file.name}: invalid file type. Allowed: PDF, JPG, PNG.`);
+      if (inputElement) {
+        inputElement.value = '';
+      }
+      return;
+    }
+
+    if (file.size <= 0 || file.size > MAX_FILE_SIZE) {
+      toast.error(`${file.name}: file too large. Max size is 10MB.`);
+      if (inputElement) {
+        inputElement.value = '';
+      }
+      return;
+    }
+
+    setFiles((prev) => ({ ...prev, [field]: file }));
   };
 
   const onSubmit = async (data: RegisterFormData) => {
@@ -205,56 +247,157 @@ export default function RegisterForm() {
   };
 
   const fileLabel = 'Accepted: PDF, JPG, PNG. Max 10MB.';
+  const selectedTabBase =
+    'relative flex flex-1 items-center justify-center gap-2 rounded-xl border px-4 py-3 text-sm font-semibold transition-all';
+  const ui = {
+    en: {
+      accountType: 'Account type *', customer: 'Customer', merchant: 'Merchant',
+      firstName: 'First name *', lastName: 'Last name *', address: 'Address *',
+      postalCode: 'Postal code *', city: 'City *', country: 'Country *',
+      phone: 'Phone', phoneOptional: 'Optional', mobile: 'Mobile *', email: 'Email *',
+      merchantInfo: 'Merchant information', taxNumber: 'Tax number *', vatNumber: 'VAT number *',
+      deliveryAddressTitle: 'Delivery address', bankDetails: 'Bank details',
+      accountHolder: 'Account holder *', bank: 'Bank *', iban: 'IBAN *', bic: 'BIC *',
+      documentUploads: 'Document uploads', businessCertificate: 'Business registration certificate *',
+      idCard: 'ID card (Ausweis) *', passport: 'Passport *', vatCertificate: 'VAT certificate *',
+      taxCertificate: 'Tax number certificate *', password: 'Password *', confirmPassword: 'Confirm password *',
+      createAccount: 'Create Account', hasAccount: 'Already have an account? ', login: 'Login'
+    },
+    de: {
+      accountType: 'Kontotyp *', customer: 'Kunde', merchant: 'Händler',
+      firstName: 'Vorname *', lastName: 'Nachname *', address: 'Adresse *',
+      postalCode: 'Postleitzahl *', city: 'Stadt *', country: 'Land *',
+      phone: 'Telefon', phoneOptional: 'Optional', mobile: 'Mobil *', email: 'E-Mail *',
+      merchantInfo: 'Händlerinformationen', taxNumber: 'Steuernummer *', vatNumber: 'USt-IdNr. *',
+      deliveryAddressTitle: 'Lieferadresse', bankDetails: 'Bankdaten',
+      accountHolder: 'Kontoinhaber *', bank: 'Bank *', iban: 'IBAN *', bic: 'BIC *',
+      documentUploads: 'Dokument-Uploads', businessCertificate: 'Gewerbeanmeldung *',
+      idCard: 'Ausweis *', passport: 'Reisepass *', vatCertificate: 'USt-Zertifikat *',
+      taxCertificate: 'Steuernummer-Zertifikat *', password: 'Passwort *', confirmPassword: 'Passwort bestätigen *',
+      createAccount: 'Konto erstellen', hasAccount: 'Bereits ein Konto? ', login: 'Anmelden'
+    },
+    fr: {
+      accountType: 'Type de compte *', customer: 'Client', merchant: 'Marchand',
+      firstName: 'Prénom *', lastName: 'Nom *', address: 'Adresse *',
+      postalCode: 'Code postal *', city: 'Ville *', country: 'Pays *',
+      phone: 'Téléphone', phoneOptional: 'Optionnel', mobile: 'Mobile *', email: 'E-mail *',
+      merchantInfo: 'Informations marchand', taxNumber: 'Numéro fiscal *', vatNumber: 'Numéro TVA *',
+      deliveryAddressTitle: 'Adresse de livraison', bankDetails: 'Coordonnées bancaires',
+      accountHolder: 'Titulaire du compte *', bank: 'Banque *', iban: 'IBAN *', bic: 'BIC *',
+      documentUploads: 'Téléchargement de documents', businessCertificate: "Certificat d'immatriculation *",
+      idCard: "Carte d'identité *", passport: 'Passeport *', vatCertificate: 'Certificat TVA *',
+      taxCertificate: 'Certificat fiscal *', password: 'Mot de passe *', confirmPassword: 'Confirmer le mot de passe *',
+      createAccount: 'Créer un compte', hasAccount: 'Vous avez déjà un compte ? ', login: 'Connexion'
+    },
+    es: {
+      accountType: 'Tipo de cuenta *', customer: 'Cliente', merchant: 'Comerciante',
+      firstName: 'Nombre *', lastName: 'Apellido *', address: 'Dirección *',
+      postalCode: 'Código postal *', city: 'Ciudad *', country: 'País *',
+      phone: 'Teléfono', phoneOptional: 'Opcional', mobile: 'Móvil *', email: 'Correo electrónico *',
+      merchantInfo: 'Información del comerciante', taxNumber: 'Número fiscal *', vatNumber: 'Número de IVA *',
+      deliveryAddressTitle: 'Dirección de entrega', bankDetails: 'Datos bancarios',
+      accountHolder: 'Titular de la cuenta *', bank: 'Banco *', iban: 'IBAN *', bic: 'BIC *',
+      documentUploads: 'Carga de documentos', businessCertificate: 'Certificado de registro mercantil *',
+      idCard: 'Documento de identidad *', passport: 'Pasaporte *', vatCertificate: 'Certificado de IVA *',
+      taxCertificate: 'Certificado fiscal *', password: 'Contraseña *', confirmPassword: 'Confirmar contraseña *',
+      createAccount: 'Crear cuenta', hasAccount: '¿Ya tienes cuenta? ', login: 'Iniciar sesión'
+    },
+    it: {
+      accountType: 'Tipo di account *', customer: 'Cliente', merchant: 'Commerciante',
+      firstName: 'Nome *', lastName: 'Cognome *', address: 'Indirizzo *',
+      postalCode: 'CAP *', city: 'Città *', country: 'Paese *',
+      phone: 'Telefono', phoneOptional: 'Opzionale', mobile: 'Cellulare *', email: 'Email *',
+      merchantInfo: 'Informazioni commerciante', taxNumber: 'Codice fiscale *', vatNumber: 'Partita IVA *',
+      deliveryAddressTitle: 'Indirizzo di consegna', bankDetails: 'Dati bancari',
+      accountHolder: 'Intestatario conto *', bank: 'Banca *', iban: 'IBAN *', bic: 'BIC *',
+      documentUploads: 'Caricamento documenti', businessCertificate: 'Certificato di registrazione aziendale *',
+      idCard: "Carta d'identità *", passport: 'Passaporto *', vatCertificate: 'Certificato IVA *',
+      taxCertificate: 'Certificato fiscale *', password: 'Password *', confirmPassword: 'Conferma password *',
+      createAccount: 'Crea account', hasAccount: 'Hai già un account? ', login: 'Accedi'
+    },
+    sk: {
+      accountType: 'Typ účtu *', customer: 'Zákazník', merchant: 'Obchodník',
+      firstName: 'Meno *', lastName: 'Priezvisko *', address: 'Adresa *',
+      postalCode: 'PSČ *', city: 'Mesto *', country: 'Krajina *',
+      phone: 'Telefón', phoneOptional: 'Voliteľné', mobile: 'Mobil *', email: 'E-mail *',
+      merchantInfo: 'Informácie o obchodníkovi', taxNumber: 'Daňové číslo *', vatNumber: 'IČ DPH *',
+      deliveryAddressTitle: 'Dodacia adresa', bankDetails: 'Bankové údaje',
+      accountHolder: 'Majiteľ účtu *', bank: 'Banka *', iban: 'IBAN *', bic: 'BIC *',
+      documentUploads: 'Nahranie dokumentov', businessCertificate: 'Osvedčenie o registrácii firmy *',
+      idCard: 'Občiansky preukaz *', passport: 'Pas *', vatCertificate: 'Osvedčenie o DPH *',
+      taxCertificate: 'Osvedčenie o daňovom čísle *', password: 'Heslo *', confirmPassword: 'Potvrďte heslo *',
+      createAccount: 'Vytvoriť účet', hasAccount: 'Už máte účet? ', login: 'Prihlásiť sa'
+    },
+  }[language];
 
   return (
-    <Card className="p-6">
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+    <Card className="border-slate-200/80 bg-gradient-to-b from-white to-slate-50/70 p-6 shadow-sm md:p-8">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
         <div>
-          <label htmlFor="account_type" className="block text-sm font-medium mb-2">
-            Account type *
+          <label htmlFor="account_type" className="mb-3 block text-sm font-medium">
+            {ui.accountType}
           </label>
-          <select
-            id="account_type"
-            {...register('account_type')}
-            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-          >
-            <option value="customer">Customer</option>
-            <option value="merchant">Merchant</option>
-          </select>
+          <input type="hidden" id="account_type" {...register('account_type')} />
+          <div className="grid grid-cols-2 gap-3 rounded-2xl border border-slate-200 bg-slate-100/70 p-2">
+            <button
+              type="button"
+              onClick={() => setValue('account_type', 'customer', { shouldValidate: true })}
+              className={`${selectedTabBase} ${
+                accountType === 'customer'
+                  ? 'border-blue-200 bg-white text-blue-700 shadow-sm'
+                  : 'border-transparent bg-transparent text-slate-600 hover:border-slate-200 hover:bg-white/70'
+              }`}
+            >
+              <UserRound className="h-4 w-4" />
+              <span>{ui.customer}</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setValue('account_type', 'merchant', { shouldValidate: true })}
+              className={`${selectedTabBase} ${
+                accountType === 'merchant'
+                  ? 'border-amber-200 bg-white text-amber-700 shadow-sm'
+                  : 'border-transparent bg-transparent text-slate-600 hover:border-slate-200 hover:bg-white/70'
+              }`}
+            >
+              <Briefcase className="h-4 w-4" />
+              <span>{ui.merchant}</span>
+            </button>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label htmlFor="first_name" className="block text-sm font-medium mb-2">First name *</label>
+            <label htmlFor="first_name" className="block text-sm font-medium mb-2">{ui.firstName}</label>
             <Input id="first_name" {...register('first_name')} className={errors.first_name ? 'border-destructive' : ''} />
             {errors.first_name && <p className="text-destructive text-xs mt-1">{errors.first_name.message}</p>}
           </div>
           <div>
-            <label htmlFor="last_name" className="block text-sm font-medium mb-2">Last name *</label>
+            <label htmlFor="last_name" className="block text-sm font-medium mb-2">{ui.lastName}</label>
             <Input id="last_name" {...register('last_name')} className={errors.last_name ? 'border-destructive' : ''} />
             {errors.last_name && <p className="text-destructive text-xs mt-1">{errors.last_name.message}</p>}
           </div>
         </div>
 
         <div>
-          <label htmlFor="address" className="block text-sm font-medium mb-2">Address *</label>
+          <label htmlFor="address" className="block text-sm font-medium mb-2">{ui.address}</label>
           <Input id="address" {...register('address')} className={errors.address ? 'border-destructive' : ''} />
           {errors.address && <p className="text-destructive text-xs mt-1">{errors.address.message}</p>}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label htmlFor="postal_code" className="block text-sm font-medium mb-2">Postal code *</label>
+            <label htmlFor="postal_code" className="block text-sm font-medium mb-2">{ui.postalCode}</label>
             <Input id="postal_code" {...register('postal_code')} className={errors.postal_code ? 'border-destructive' : ''} />
             {errors.postal_code && <p className="text-destructive text-xs mt-1">{errors.postal_code.message}</p>}
           </div>
           <div>
-            <label htmlFor="city" className="block text-sm font-medium mb-2">City *</label>
+            <label htmlFor="city" className="block text-sm font-medium mb-2">{ui.city}</label>
             <Input id="city" {...register('city')} className={errors.city ? 'border-destructive' : ''} />
             {errors.city && <p className="text-destructive text-xs mt-1">{errors.city.message}</p>}
           </div>
           <div>
-            <label htmlFor="country" className="block text-sm font-medium mb-2">Country *</label>
+            <label htmlFor="country" className="block text-sm font-medium mb-2">{ui.country}</label>
             <Input id="country" {...register('country')} className={errors.country ? 'border-destructive' : ''} />
             {errors.country && <p className="text-destructive text-xs mt-1">{errors.country.message}</p>}
           </div>
@@ -262,40 +405,53 @@ export default function RegisterForm() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label htmlFor="phone" className="block text-sm font-medium mb-2">Phone *</label>
-            <Input id="phone" {...register('phone')} className={errors.phone ? 'border-destructive' : ''} />
+            <label htmlFor="phone" className="block text-sm font-medium mb-2">{ui.phone}</label>
+            <Input
+              id="phone"
+              type="tel"
+              placeholder="+49 123 456789"
+              {...register('phone')}
+              className={errors.phone ? 'border-destructive' : ''}
+            />
+            <p className="mt-1 text-xs text-muted-foreground">{ui.phoneOptional}</p>
             {errors.phone && <p className="text-destructive text-xs mt-1">{errors.phone.message}</p>}
           </div>
           <div>
-            <label htmlFor="mobile" className="block text-sm font-medium mb-2">Mobile *</label>
-            <Input id="mobile" {...register('mobile')} className={errors.mobile ? 'border-destructive' : ''} />
+            <label htmlFor="mobile" className="block text-sm font-medium mb-2">{ui.mobile}</label>
+            <Input
+              id="mobile"
+              type="tel"
+              placeholder="+49 123 456789"
+              {...register('mobile')}
+              className={errors.mobile ? 'border-destructive' : ''}
+            />
             {errors.mobile && <p className="text-destructive text-xs mt-1">{errors.mobile.message}</p>}
           </div>
         </div>
 
         <div>
-          <label htmlFor="email" className="block text-sm font-medium mb-2">Email *</label>
-          <Input id="email" type="email" {...register('email')} className={errors.email ? 'border-destructive' : ''} />
+          <label htmlFor="email" className="block text-sm font-medium mb-2">{ui.email}</label>
+          <Input id="email" type="email" placeholder="name@company.com" {...register('email')} className={errors.email ? 'border-destructive' : ''} />
           {errors.email && <p className="text-destructive text-xs mt-1">{errors.email.message}</p>}
         </div>
 
         {accountType === 'merchant' && (
           <>
-            <h3 className="font-semibold text-sm pt-2">Merchant information</h3>
+            <h3 className="font-semibold text-sm pt-2">{ui.merchantInfo}</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label htmlFor="tax_number" className="block text-sm font-medium mb-2">Tax number *</label>
+                <label htmlFor="tax_number" className="block text-sm font-medium mb-2">{ui.taxNumber}</label>
                 <Input id="tax_number" {...register('tax_number')} className={errors.tax_number ? 'border-destructive' : ''} />
                 {errors.tax_number && <p className="text-destructive text-xs mt-1">{errors.tax_number.message}</p>}
               </div>
               <div>
-                <label htmlFor="vat_number" className="block text-sm font-medium mb-2">VAT number *</label>
+                <label htmlFor="vat_number" className="block text-sm font-medium mb-2">{ui.vatNumber}</label>
                 <Input id="vat_number" {...register('vat_number')} className={errors.vat_number ? 'border-destructive' : ''} />
                 {errors.vat_number && <p className="text-destructive text-xs mt-1">{errors.vat_number.message}</p>}
               </div>
             </div>
 
-            <h3 className="font-semibold text-sm">Delivery address</h3>
+            <h3 className="font-semibold text-sm">{ui.deliveryAddressTitle}</h3>
             <div>
               <label htmlFor="delivery_address" className="block text-sm font-medium mb-2">Address *</label>
               <Input id="delivery_address" {...register('delivery_address')} className={errors.delivery_address ? 'border-destructive' : ''} />
@@ -303,41 +459,41 @@ export default function RegisterForm() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label htmlFor="delivery_postal_code" className="block text-sm font-medium mb-2">Postal code *</label>
+                <label htmlFor="delivery_postal_code" className="block text-sm font-medium mb-2">{ui.postalCode}</label>
                 <Input id="delivery_postal_code" {...register('delivery_postal_code')} className={errors.delivery_postal_code ? 'border-destructive' : ''} />
                 {errors.delivery_postal_code && <p className="text-destructive text-xs mt-1">{errors.delivery_postal_code.message}</p>}
               </div>
               <div>
-                <label htmlFor="delivery_city" className="block text-sm font-medium mb-2">City *</label>
+                <label htmlFor="delivery_city" className="block text-sm font-medium mb-2">{ui.city}</label>
                 <Input id="delivery_city" {...register('delivery_city')} className={errors.delivery_city ? 'border-destructive' : ''} />
                 {errors.delivery_city && <p className="text-destructive text-xs mt-1">{errors.delivery_city.message}</p>}
               </div>
               <div>
-                <label htmlFor="delivery_country" className="block text-sm font-medium mb-2">Country *</label>
+                <label htmlFor="delivery_country" className="block text-sm font-medium mb-2">{ui.country}</label>
                 <Input id="delivery_country" {...register('delivery_country')} className={errors.delivery_country ? 'border-destructive' : ''} />
                 {errors.delivery_country && <p className="text-destructive text-xs mt-1">{errors.delivery_country.message}</p>}
               </div>
             </div>
 
-            <h3 className="font-semibold text-sm">Bank details</h3>
+            <h3 className="font-semibold text-sm">{ui.bankDetails}</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label htmlFor="account_holder" className="block text-sm font-medium mb-2">Account holder *</label>
+                <label htmlFor="account_holder" className="block text-sm font-medium mb-2">{ui.accountHolder}</label>
                 <Input id="account_holder" {...register('account_holder')} className={errors.account_holder ? 'border-destructive' : ''} />
                 {errors.account_holder && <p className="text-destructive text-xs mt-1">{errors.account_holder.message}</p>}
               </div>
               <div>
-                <label htmlFor="bank_name" className="block text-sm font-medium mb-2">Bank *</label>
+                <label htmlFor="bank_name" className="block text-sm font-medium mb-2">{ui.bank}</label>
                 <Input id="bank_name" {...register('bank_name')} className={errors.bank_name ? 'border-destructive' : ''} />
                 {errors.bank_name && <p className="text-destructive text-xs mt-1">{errors.bank_name.message}</p>}
               </div>
               <div>
-                <label htmlFor="iban" className="block text-sm font-medium mb-2">IBAN *</label>
+                <label htmlFor="iban" className="block text-sm font-medium mb-2">{ui.iban}</label>
                 <Input id="iban" {...register('iban')} className={errors.iban ? 'border-destructive' : ''} />
                 {errors.iban && <p className="text-destructive text-xs mt-1">{errors.iban.message}</p>}
               </div>
               <div>
-                <label htmlFor="bic" className="block text-sm font-medium mb-2">BIC *</label>
+                <label htmlFor="bic" className="block text-sm font-medium mb-2">{ui.bic}</label>
                 <Input id="bic" {...register('bic')} className={errors.bic ? 'border-destructive' : ''} />
                 {errors.bic && <p className="text-destructive text-xs mt-1">{errors.bic.message}</p>}
               </div>
@@ -345,15 +501,17 @@ export default function RegisterForm() {
           </>
         )}
 
-        <h3 className="font-semibold text-sm pt-2">Document uploads</h3>
+        <h3 className="font-semibold text-sm pt-2">{ui.documentUploads}</h3>
         {accountType === 'merchant' && (
           <div>
-            <label htmlFor="business_registration_certificate_file" className="block text-sm font-medium mb-2">Business registration certificate *</label>
+            <label htmlFor="business_registration_certificate_file" className="block text-sm font-medium mb-2">{ui.businessCertificate}</label>
             <Input
               id="business_registration_certificate_file"
               type="file"
-              accept=".pdf,.jpg,.jpeg,.png"
-              onChange={(e) => setFiles((prev) => ({ ...prev, business_registration_certificate_file: e.target.files?.[0] || null }))}
+              accept={ACCEPTED_FILE_INPUT}
+              onChange={(e) =>
+                handleFileChange('business_registration_certificate_file', e.target.files?.[0] || null, e.target)
+              }
             />
             <p className="text-xs text-muted-foreground mt-1">{fileLabel}</p>
           </div>
@@ -361,22 +519,22 @@ export default function RegisterForm() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label htmlFor="id_card_file" className="block text-sm font-medium mb-2">ID card (Ausweis) *</label>
+            <label htmlFor="id_card_file" className="block text-sm font-medium mb-2">{ui.idCard}</label>
             <Input
               id="id_card_file"
               type="file"
-              accept=".pdf,.jpg,.jpeg,.png"
-              onChange={(e) => setFiles((prev) => ({ ...prev, id_card_file: e.target.files?.[0] || null }))}
+              accept={ACCEPTED_FILE_INPUT}
+              onChange={(e) => handleFileChange('id_card_file', e.target.files?.[0] || null, e.target)}
             />
             <p className="text-xs text-muted-foreground mt-1">{fileLabel}</p>
           </div>
           <div>
-            <label htmlFor="passport_file" className="block text-sm font-medium mb-2">Passport *</label>
+            <label htmlFor="passport_file" className="block text-sm font-medium mb-2">{ui.passport}</label>
             <Input
               id="passport_file"
               type="file"
-              accept=".pdf,.jpg,.jpeg,.png"
-              onChange={(e) => setFiles((prev) => ({ ...prev, passport_file: e.target.files?.[0] || null }))}
+              accept={ACCEPTED_FILE_INPUT}
+              onChange={(e) => handleFileChange('passport_file', e.target.files?.[0] || null, e.target)}
             />
             <p className="text-xs text-muted-foreground mt-1">{fileLabel}</p>
           </div>
@@ -385,22 +543,24 @@ export default function RegisterForm() {
         {accountType === 'merchant' && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label htmlFor="vat_certificate_file" className="block text-sm font-medium mb-2">VAT certificate *</label>
+              <label htmlFor="vat_certificate_file" className="block text-sm font-medium mb-2">{ui.vatCertificate}</label>
               <Input
                 id="vat_certificate_file"
                 type="file"
-                accept=".pdf,.jpg,.jpeg,.png"
-                onChange={(e) => setFiles((prev) => ({ ...prev, vat_certificate_file: e.target.files?.[0] || null }))}
+                accept={ACCEPTED_FILE_INPUT}
+                onChange={(e) => handleFileChange('vat_certificate_file', e.target.files?.[0] || null, e.target)}
               />
               <p className="text-xs text-muted-foreground mt-1">{fileLabel}</p>
             </div>
             <div>
-              <label htmlFor="tax_number_certificate_file" className="block text-sm font-medium mb-2">Tax number certificate *</label>
+              <label htmlFor="tax_number_certificate_file" className="block text-sm font-medium mb-2">{ui.taxCertificate}</label>
               <Input
                 id="tax_number_certificate_file"
                 type="file"
-                accept=".pdf,.jpg,.jpeg,.png"
-                onChange={(e) => setFiles((prev) => ({ ...prev, tax_number_certificate_file: e.target.files?.[0] || null }))}
+                accept={ACCEPTED_FILE_INPUT}
+                onChange={(e) =>
+                  handleFileChange('tax_number_certificate_file', e.target.files?.[0] || null, e.target)
+                }
               />
               <p className="text-xs text-muted-foreground mt-1">{fileLabel}</p>
             </div>
@@ -409,24 +569,24 @@ export default function RegisterForm() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label htmlFor="password" className="block text-sm font-medium mb-2">Password *</label>
+            <label htmlFor="password" className="block text-sm font-medium mb-2">{ui.password}</label>
             <Input id="password" type="password" {...register('password')} className={errors.password ? 'border-destructive' : ''} />
             {errors.password && <p className="text-destructive text-xs mt-1">{errors.password.message}</p>}
           </div>
           <div>
-            <label htmlFor="confirmPassword" className="block text-sm font-medium mb-2">Confirm password *</label>
+            <label htmlFor="confirmPassword" className="block text-sm font-medium mb-2">{ui.confirmPassword}</label>
             <Input id="confirmPassword" type="password" {...register('confirmPassword')} className={errors.confirmPassword ? 'border-destructive' : ''} />
             {errors.confirmPassword && <p className="text-destructive text-xs mt-1">{errors.confirmPassword.message}</p>}
           </div>
         </div>
 
         <Button type="submit" className="w-full" isLoading={isLoading}>
-          Create Account
+          {ui.createAccount}
         </Button>
 
         <div className="text-center text-sm">
-          <span className="text-muted-foreground">Already have an account? </span>
-          <Link href="/login" className="text-primary font-medium hover:underline">Login</Link>
+          <span className="text-muted-foreground">{ui.hasAccount}</span>
+          <Link href="/login" className="text-primary font-medium hover:underline">{ui.login}</Link>
         </div>
       </form>
     </Card>

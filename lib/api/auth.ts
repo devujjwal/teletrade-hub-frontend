@@ -1,6 +1,43 @@
 import apiClient from './client';
 import { LoginRequest, RegisterRequest, AuthResponse, User } from '@/types/user';
 
+const mapApiUserToUser = (user: any, role: 'customer' | 'admin' = 'customer'): User => {
+  const fullName = user.first_name && user.last_name
+    ? `${user.first_name} ${user.last_name}`.trim()
+    : user.first_name || user.last_name || user.email || 'User';
+
+  return {
+    id: user.id,
+    name: fullName,
+    first_name: user.first_name,
+    last_name: user.last_name,
+    email: user.email,
+    phone: user.phone,
+    mobile: user.mobile,
+    address: user.address,
+    postal_code: user.postal_code,
+    city: user.city,
+    country: user.country,
+    tax_number: user.tax_number,
+    vat_number: user.vat_number,
+    delivery_address: user.delivery_address,
+    delivery_postal_code: user.delivery_postal_code,
+    delivery_city: user.delivery_city,
+    delivery_country: user.delivery_country,
+    account_holder: user.account_holder,
+    bank_name: user.bank_name,
+    iban: user.iban,
+    bic: user.bic,
+    id_card_file: user.id_card_file,
+    passport_file: user.passport_file,
+    business_registration_certificate_file: user.business_registration_certificate_file,
+    vat_certificate_file: user.vat_certificate_file,
+    tax_number_certificate_file: user.tax_number_certificate_file,
+    account_type: user.account_type,
+    role,
+  };
+};
+
 export const authApi = {
   login: async (email: string, password: string): Promise<AuthResponse> => {
     const response = await apiClient.post<any>('/auth/login', { email, password });
@@ -8,22 +45,10 @@ export const authApi = {
     // Backend returns: { success: true, data: { user: {...}, token: "..." } }
     if (response.data?.success && response.data?.data) {
       const { user, token } = response.data.data;
-      const fullName = user.first_name && user.last_name 
-        ? `${user.first_name} ${user.last_name}`.trim()
-        : user.first_name || user.last_name || user.email || 'User';
       
       return {
         token,
-        user: {
-          id: user.id,
-          name: fullName,
-          first_name: user.first_name,
-          last_name: user.last_name,
-          email: user.email,
-          phone: user.phone,
-          account_type: user.account_type,
-          role: 'customer' as const,
-        },
+        user: mapApiUserToUser(user, 'customer'),
       };
     }
     
@@ -40,10 +65,10 @@ export const authApi = {
     formData.append('postal_code', userData.postal_code);
     formData.append('city', userData.city);
     formData.append('country', userData.country);
-    formData.append('phone', userData.phone);
     formData.append('mobile', userData.mobile);
     formData.append('email', userData.email);
     formData.append('password', userData.password);
+    if (userData.phone) formData.append('phone', userData.phone);
 
     if (userData.tax_number) formData.append('tax_number', userData.tax_number);
     if (userData.vat_number) formData.append('vat_number', userData.vat_number);
@@ -62,7 +87,11 @@ export const authApi = {
     if (userData.vat_certificate_file) formData.append('vat_certificate_file', userData.vat_certificate_file);
     if (userData.tax_number_certificate_file) formData.append('tax_number_certificate_file', userData.tax_number_certificate_file);
 
-    const response = await apiClient.post<any>('/auth/register', formData);
+    const response = await apiClient.post<any>('/auth/register', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
     
     // Registration now requires admin approval before login
     return response.data;
@@ -100,41 +129,15 @@ export const authApi = {
   getCurrentUser: async (): Promise<User> => {
     const response = await apiClient.get<any>('/auth/me');
     if (response.data?.success && response.data?.data?.user) {
-      const user = response.data.data.user;
-      const fullName = user.first_name && user.last_name 
-        ? `${user.first_name} ${user.last_name}`.trim()
-        : user.first_name || user.last_name || user.email || 'User';
-      return {
-        id: user.id,
-        name: fullName,
-        first_name: user.first_name,
-        last_name: user.last_name,
-        email: user.email,
-        phone: user.phone,
-        account_type: user.account_type,
-        role: 'customer' as const,
-      };
+      return mapApiUserToUser(response.data.data.user, 'customer');
     }
     return response.data;
   },
 
-  updateProfile: async (data: { first_name?: string; last_name?: string; phone?: string }): Promise<User> => {
+  updateProfile: async (data: { phone?: string }): Promise<User> => {
     const response = await apiClient.put<any>('/auth/profile', data);
     if (response.data?.success && response.data?.data?.user) {
-      const user = response.data.data.user;
-      const fullName = user.first_name && user.last_name 
-        ? `${user.first_name} ${user.last_name}`.trim()
-        : user.first_name || user.last_name || user.email || 'User';
-      return {
-        id: user.id,
-        name: fullName,
-        first_name: user.first_name,
-        last_name: user.last_name,
-        email: user.email,
-        phone: user.phone,
-        account_type: user.account_type,
-        role: 'customer' as const,
-      };
+      return mapApiUserToUser(response.data.data.user, 'customer');
     }
     return response.data;
   },

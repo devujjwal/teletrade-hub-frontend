@@ -27,17 +27,12 @@ export default function ProductPriceSection({
   const router = useRouter();
   const { token, user, _hasHydrated } = useAuthStore();
   const { t } = useLanguage();
-  const [resolvedPrice, setResolvedPrice] = useState(price);
-  const [resolvedOriginalPrice, setResolvedOriginalPrice] = useState(originalPrice);
-  const [resolvedHasDiscount, setResolvedHasDiscount] = useState(hasDiscount);
-  const [resolvedDiscountPercent, setResolvedDiscountPercent] = useState(discountPercent);
-
-  useEffect(() => {
-    setResolvedPrice(price);
-    setResolvedOriginalPrice(originalPrice);
-    setResolvedHasDiscount(hasDiscount);
-    setResolvedDiscountPercent(discountPercent);
-  }, [price, originalPrice, hasDiscount, discountPercent]);
+  const [latestPricing, setLatestPricing] = useState<{
+    price: number;
+    originalPrice?: number;
+    hasDiscount: boolean;
+    discountPercent: number;
+  } | null>(null);
 
   useEffect(() => {
     if (!_hasHydrated || !token || !user) return;
@@ -50,14 +45,21 @@ export default function ProductPriceSection({
         ? Math.round((1 - latestPrice / latestOriginalPrice) * 100)
         : 0;
 
-      setResolvedPrice(latestPrice);
-      setResolvedOriginalPrice(latestOriginalPrice || undefined);
-      setResolvedHasDiscount(latestHasDiscount);
-      setResolvedDiscountPercent(latestDiscountPercent);
+      setLatestPricing({
+        price: latestPrice,
+        originalPrice: latestOriginalPrice || undefined,
+        hasDiscount: latestHasDiscount,
+        discountPercent: latestDiscountPercent,
+      });
     }).catch(() => {
       // Keep server-provided price as fallback
     });
   }, [_hasHydrated, token, user, slug]);
+
+  const resolvedPrice = latestPricing?.price ?? price;
+  const resolvedOriginalPrice = latestPricing?.originalPrice ?? originalPrice;
+  const resolvedHasDiscount = latestPricing?.hasDiscount ?? hasDiscount;
+  const resolvedDiscountPercent = latestPricing?.discountPercent ?? discountPercent;
 
   // If not logged in, show login prompt
   if (!token || !user) {

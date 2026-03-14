@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { adminApi } from '@/lib/api/admin';
 import { categoriesApi } from '@/lib/api/categories';
 import { brandsApi } from '@/lib/api/brands';
@@ -28,13 +29,17 @@ const LANGUAGES = [
   { code: 'pl', name: 'Polish (Polski)' },
 ];
 
+const MAX_PRODUCT_IMAGE_SIZE = 5 * 1024 * 1024;
+const ALLOWED_PRODUCT_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+const PRODUCT_IMAGE_ACCEPT = '.jpg,.jpeg,.png,.webp';
+
 export default function NewProductPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [categories, setCategories] = useState<any[]>([]);
   const [brands, setBrands] = useState<any[]>([]);
-  const [uploadedImages, setUploadedImages] = useState<string[]>([]);
+  const [selectedImages, setSelectedImages] = useState<Array<{ file: File; previewUrl: string }>>([]);
   const [formData, setFormData] = useState({
     // Basic Information
     name: '',
@@ -108,39 +113,46 @@ export default function NewProductPage() {
     loadOptions();
   }, [loadOptions]);
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     // Validate file size (5MB max)
-    if (file.size > 5 * 1024 * 1024) {
+    if (file.size <= 0 || file.size > MAX_PRODUCT_IMAGE_SIZE) {
       toast.error('Image must be less than 5MB');
+      e.target.value = '';
       return;
     }
 
     // Validate file type
-    if (!['image/jpeg', 'image/jpg', 'image/png', 'image/webp'].includes(file.type)) {
+    if (!ALLOWED_PRODUCT_IMAGE_TYPES.includes(file.type)) {
       toast.error('Only JPEG, PNG, and WebP images are allowed');
+      e.target.value = '';
       return;
     }
 
-    setIsUploading(true);
-    try {
-      const result = await adminApi.uploadImage(file);
-      setUploadedImages([...uploadedImages, result.url]);
-      toast.success('Image uploaded successfully');
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to upload image');
-    } finally {
-      setIsUploading(false);
-      // Reset input
-      e.target.value = '';
-    }
+    const previewUrl = URL.createObjectURL(file);
+    setSelectedImages((prev) => [...prev, { file, previewUrl }]);
+    e.target.value = '';
   };
 
   const removeImage = (index: number) => {
-    setUploadedImages(uploadedImages.filter((_, i) => i !== index));
+    setSelectedImages((prev) => {
+      const target = prev[index];
+      if (target?.previewUrl) {
+        URL.revokeObjectURL(target.previewUrl);
+      }
+      return prev.filter((_, i) => i !== index);
+    });
   };
+
+  useEffect(() => {
+    return () => {
+      selectedImages.forEach((item) => {
+        URL.revokeObjectURL(item.previewUrl);
+      });
+    };
+  }, [selectedImages]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -168,7 +180,7 @@ export default function NewProductPage() {
         ram: formData.ram || null,
         is_featured: formData.is_featured ? 1 : 0,
         is_available: formData.is_available ? 1 : 0,
-        images: uploadedImages,
+        images: [],
       };
 
       // Add language-specific fields
@@ -183,13 +195,36 @@ export default function NewProductPage() {
         }
       });
 
-      await adminApi.createProduct(payload);
+      const createResponse = await adminApi.createProduct(payload);
+      const productId =
+        createResponse?.data?.product?.id ??
+        createResponse?.product?.id ??
+        createResponse?.data?.id ??
+        createResponse?.id;
+
+      if (!productId) {
+        throw new Error('Product created but response did not include product id');
+      }
+
+      if (selectedImages.length > 0) {
+        setIsUploading(true);
+        const uploadedUrls: string[] = [];
+
+        for (const selectedImage of selectedImages) {
+          const uploadResult = await adminApi.uploadImage(selectedImage.file);
+          uploadedUrls.push(uploadResult.url);
+        }
+
+        await adminApi.updateProduct(productId, { images: uploadedUrls });
+      }
+
       toast.success('Product created successfully');
       router.push('/admin/products');
     } catch (error: any) {
       console.error('Create product error:', error);
       toast.error(error.response?.data?.message || error.message || 'Failed to create product');
     } finally {
+      setIsUploading(false);
       setIsLoading(false);
     }
   };
@@ -340,21 +375,23 @@ export default function NewProductPage() {
                 <input
                   id="image-upload"
                   type="file"
-                  accept="image/*"
+                  accept={PRODUCT_IMAGE_ACCEPT}
                   onChange={handleImageUpload}
                   className="hidden"
-                  disabled={isUploading}
+                  disabled={isLoading || isUploading}
                 />
               </div>
             </div>
 
-            {uploadedImages.length > 0 && (
+            {selectedImages.length > 0 && (
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {uploadedImages.map((url, index) => (
+                {selectedImages.map((image, index) => (
                   <div key={index} className="relative group">
-                    <img
-                      src={`${process.env.NEXT_PUBLIC_API_URL}${url}`}
+                    <Image
+                      src={image.previewUrl}
                       alt={`Product ${index + 1}`}
+                      width={320}
+                      height={128}
                       className="w-full h-32 object-cover rounded-lg border border-border"
                     />
                     {index === 0 && (
@@ -366,6 +403,7 @@ export default function NewProductPage() {
                       type="button"
                       onClick={() => removeImage(index)}
                       className="absolute top-2 right-2 bg-destructive text-destructive-foreground p-1 rounded opacity-0 group-hover:opacity-100 transition"
+                      disabled={isLoading || isUploading}
                     >
                       <X className="h-4 w-4" />
                     </button>

@@ -1,30 +1,14 @@
-import Link from 'next/link';
 import { productsApi } from '@/lib/api/products';
 import { categoriesApi } from '@/lib/api/categories';
 import { brandsApi } from '@/lib/api/brands';
-import { getProxiedImageUrl } from '@/lib/utils/format';
-import Image from 'next/image';
-import Button from '@/components/ui/button';
-import Card from '@/components/ui/card';
-import ProductCard from '@/components/products/product-card';
 import HomePageClient from '@/components/home/home-page-client';
-import { ArrowRight, ChevronRight, Smartphone, Tablet, Headphones, Watch, Cpu, Cable, Truck, Shield, CreditCard, Headset } from 'lucide-react';
 
 export const revalidate = 300; // Revalidate every 5 minutes
 
-const categoryIcons: Record<string, React.ReactNode> = {
-  'Smartphones': <Smartphone className="w-8 h-8" />,
-  'Tablets': <Tablet className="w-8 h-8" />,
-  'Headphones': <Headphones className="w-8 h-8" />,
-  'Smartwatches': <Watch className="w-8 h-8" />,
-  'Accessories': <Cable className="w-8 h-8" />,
-  'Components': <Cpu className="w-8 h-8" />,
-};
-
 interface HomePageProps {
-  searchParams: {
+  searchParams: Promise<{
     lang?: string;
-  };
+  }>;
 }
 
 async function getFeaturedProducts(lang: string = 'en') {
@@ -62,7 +46,8 @@ async function getBrands(lang: string = 'en') {
 }
 
 export default async function HomePage({ searchParams }: HomePageProps) {
-  const lang = searchParams.lang || 'en';
+  const resolvedSearchParams = await searchParams;
+  const lang = resolvedSearchParams.lang || 'en';
   const [featuredProducts, categories, brands] = await Promise.all([
     getFeaturedProducts(lang),
     getCategories(lang),
@@ -74,7 +59,6 @@ export default async function HomePage({ searchParams }: HomePageProps) {
       featuredProducts={featuredProducts}
       categories={categories}
       brands={brands}
-      categoryIcons={categoryIcons}
     />
   );
 }

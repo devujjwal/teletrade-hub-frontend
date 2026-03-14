@@ -17,13 +17,16 @@ import ProductTrustBadges from '@/components/products/product-trust-badges';
 export const revalidate = 300; // Revalidate every 5 minutes
 
 interface ProductPageProps {
-  params: {
+  params: Promise<{
     slug: string;
-  };
-  searchParams: {
+  }>;
+  searchParams: Promise<{
     lang?: string;
-  };
+  }>;
 }
+
+type ProductSearchParams = Awaited<ProductPageProps['searchParams']>;
+type ProductRouteParams = Awaited<ProductPageProps['params']>;
 
 async function getProduct(slug: string, lang?: string) {
   try {
@@ -54,7 +57,9 @@ export async function generateMetadata({
   params,
   searchParams,
 }: ProductPageProps): Promise<Metadata> {
-  const product = await getProduct(params.slug, searchParams.lang);
+  const resolvedParams: ProductRouteParams = await params;
+  const resolvedSearchParams = await searchParams;
+  const product = await getProduct(resolvedParams.slug, resolvedSearchParams.lang);
 
   if (!product) {
     return {
@@ -74,14 +79,16 @@ export async function generateMetadata({
 }
 
 export default async function ProductPage({ params, searchParams }: ProductPageProps) {
-  const product = await getProduct(params.slug, searchParams.lang);
+  const resolvedParams: ProductRouteParams = await params;
+  const resolvedSearchParams: ProductSearchParams = await searchParams;
+  const product = await getProduct(resolvedParams.slug, resolvedSearchParams.lang);
 
   if (!product) {
     notFound();
   }
 
   const relatedProducts = product.category_id
-    ? await getRelatedProducts(product.category_id, product.id, searchParams.lang)
+    ? await getRelatedProducts(product.category_id, product.id, resolvedSearchParams.lang)
     : [];
 
   const originalPrice = Number(product.original_price) || 0;

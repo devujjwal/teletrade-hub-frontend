@@ -18,6 +18,7 @@ import { adminApi } from '@/lib/api/admin';
 import { Settings, Save, Globe, DollarSign, Truck, RefreshCw, Mail, MapPin, Phone, MessageCircle, Lock, Key, AlertCircle, Landmark } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import AdminPageLoader from '@/components/admin/admin-page-loader';
 
 interface SettingsData {
   site_name: string;
@@ -184,8 +185,7 @@ export default function AdminSettingsPage() {
   if (isLoading) {
     return (
       <div className="space-y-6">
-        <Skeleton className="h-8 w-64" />
-        <Skeleton className="h-96 w-full" />
+        <AdminPageLoader message="Loading settings..." rows={6} />
       </div>
     );
   }
@@ -583,4 +583,3 @@ export default function AdminSettingsPage() {
     </div>
   );
 }
-

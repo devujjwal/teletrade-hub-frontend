@@ -2016,40 +2016,40 @@ const translations: Record<Language, Record<string, string>> = {
 const LanguageContext = createContext<LanguageContextType | null>(null);
 
 const LANGUAGE_KEY = 'teletrade_language';
+const VALID_LANGUAGES: Language[] = ['en', 'de', 'fr', 'es', 'it', 'sk'];
 
-export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const [language, setLanguageState] = useState<Language>('en');
+export function LanguageProvider({
+  children,
+  initialLanguage = 'en',
+}: {
+  children: React.ReactNode;
+  initialLanguage?: Language;
+}) {
+  const [language, setLanguageState] = useState<Language>(initialLanguage);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    
-    const validLanguages: Language[] = ['en', 'de', 'fr', 'es', 'it', 'sk'];
-    
-    // Check URL params first (highest priority)
+
+    // Sync localStorage with active language
+    localStorage.setItem(LANGUAGE_KEY, language);
+    localStorage.setItem('language', language);
+    document.cookie = `${LANGUAGE_KEY}=${language}; path=/; max-age=31536000; samesite=lax`;
+    document.cookie = `language=${language}; path=/; max-age=31536000; samesite=lax`;
+
+    // Ensure URL lang param reflects active language without triggering reload
     const params = new URLSearchParams(window.location.search);
     const urlLang = params.get('lang') as Language;
-    if (urlLang && validLanguages.includes(urlLang)) {
-      setLanguageState(urlLang);
-      localStorage.setItem(LANGUAGE_KEY, urlLang);
-      localStorage.setItem('language', urlLang); // Sync for API client
-      return;
-    }
-    
-    // Check localStorage
-    const savedLang = localStorage.getItem(LANGUAGE_KEY) as Language;
-    if (savedLang && validLanguages.includes(savedLang)) {
-      setLanguageState(savedLang);
-      localStorage.setItem('language', savedLang); // Sync for API client
-      // Update URL if not already set
-      if (!urlLang) {
-        const url = new URL(window.location.href);
-        if (savedLang !== 'en') {
-          url.searchParams.set('lang', savedLang);
-        }
-        window.history.replaceState({}, '', url.toString());
+
+    if ((language === 'en' && urlLang) || (language !== 'en' && urlLang !== language)) {
+      const url = new URL(window.location.href);
+      if (language === 'en') {
+        url.searchParams.delete('lang');
+      } else {
+        url.searchParams.set('lang', language);
       }
+      window.history.replaceState({}, '', url.toString());
     }
-  }, []);
+  }, [language]);
 
   const setLanguage = (lang: Language) => {
     setLanguageState(lang);
@@ -2057,6 +2057,8 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem(LANGUAGE_KEY, lang);
       // Also sync to 'language' key for API client compatibility
       localStorage.setItem('language', lang);
+      document.cookie = `${LANGUAGE_KEY}=${lang}; path=/; max-age=31536000; samesite=lax`;
+      document.cookie = `language=${lang}; path=/; max-age=31536000; samesite=lax`;
       
       // Update URL without reload - preserve current path
       const url = new URL(window.location.href);
@@ -2100,4 +2102,3 @@ export function useLanguage() {
   }
   return context;
 }
-

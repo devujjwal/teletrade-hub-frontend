@@ -45,11 +45,14 @@ import { categoriesApi } from '@/lib/api/categories';
 import { brandsApi } from '@/lib/api/brands';
 import { Category } from '@/types/category';
 import { Brand } from '@/types/brand';
+import AdminLoadingOverlay from '@/components/admin/admin-loading-overlay';
+import AdminPageLoader from '@/components/admin/admin-page-loader';
 
 export default function AdminProductsPage() {
   const router = useRouter();
   const [products, setProducts] = useState<Product[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [sourceFilter, setSourceFilter] = useState<string>('all'); // Filter by product_source
@@ -114,6 +117,7 @@ export default function AdminProductsPage() {
       toast.error('Failed to load products');
     } finally {
       setIsLoading(false);
+      setIsInitialLoading(false);
     }
   }, [page, search, sourceFilter, categoryFilter, brandFilter, availabilityFilter, featuredFilter]);
 
@@ -388,18 +392,15 @@ export default function AdminProductsPage() {
             Product List
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <div className="space-y-4">
-              {[...Array(5)].map((_, i) => (
-                <Skeleton key={i} className="h-16 w-full" />
-              ))}
-            </div>
+        <CardContent className="relative">
+          {!isInitialLoading && isLoading && <AdminLoadingOverlay message="Refreshing products..." />}
+          {isInitialLoading ? (
+            <AdminPageLoader message="Loading products..." rows={6} />
           ) : products.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">No products found</div>
           ) : (
             <>
-              <div className="rounded-md border">
+              <div className="relative rounded-md border">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -429,6 +430,7 @@ export default function AdminProductsPage() {
                                 src={getProxiedImageUrl(product.primary_image)}
                                 alt={product.name}
                                 fill
+                                sizes="64px"
                                 className="object-contain p-1"
                               />
                             </Link>

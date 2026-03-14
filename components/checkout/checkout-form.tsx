@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { UseFormRegister, FieldErrors, UseFormWatch, UseFormSetValue } from 'react-hook-form';
 import { CheckoutFormData } from '@/lib/utils/validation';
@@ -55,6 +55,16 @@ export default function CheckoutForm({ register, errors, watch, setValue, user }
   const shippingAddressId = watch('shipping_address_id');
   const billingAddressId = watch('billing_address_id');
 
+  const fillAddressFromSaved = useCallback((address: Address, type: 'shipping' | 'billing') => {
+    const prefix = type === 'shipping' ? 'shipping_address' : 'billing_address';
+    setValue(`${prefix}.address_line_1`, address.street);
+    setValue(`${prefix}.address_line_2`, address.street2 || '');
+    setValue(`${prefix}.city`, address.city);
+    setValue(`${prefix}.state`, address.state || '');
+    setValue(`${prefix}.postal_code`, address.postal_code);
+    setValue(`${prefix}.country`, address.country);
+  }, [setValue]);
+
   // Auto-fill user data
   useEffect(() => {
     if (user) {
@@ -96,7 +106,7 @@ export default function CheckoutForm({ register, errors, watch, setValue, user }
     };
 
     fetchAddresses();
-  }, [setValue]);
+  }, [setValue, fillAddressFromSaved]);
 
   // Update form when address selection changes
   useEffect(() => {
@@ -109,7 +119,7 @@ export default function CheckoutForm({ register, errors, watch, setValue, user }
         }
       }
     }
-  }, [shippingAddressId, addresses, sameAsShipping, setValue]);
+  }, [shippingAddressId, addresses, sameAsShipping, fillAddressFromSaved]);
 
   useEffect(() => {
     if (billingAddressId && !sameAsShipping) {
@@ -118,17 +128,7 @@ export default function CheckoutForm({ register, errors, watch, setValue, user }
         fillAddressFromSaved(address, 'billing');
       }
     }
-  }, [billingAddressId, addresses, sameAsShipping, setValue]);
-
-  const fillAddressFromSaved = (address: Address, type: 'shipping' | 'billing') => {
-    const prefix = type === 'shipping' ? 'shipping_address' : 'billing_address';
-    setValue(`${prefix}.address_line_1`, address.street);
-    setValue(`${prefix}.address_line_2`, address.street2 || '');
-    setValue(`${prefix}.city`, address.city);
-    setValue(`${prefix}.state`, address.state || '');
-    setValue(`${prefix}.postal_code`, address.postal_code);
-    setValue(`${prefix}.country`, address.country);
-  };
+  }, [billingAddressId, addresses, sameAsShipping, fillAddressFromSaved]);
 
   const handleSameAsShippingChange = (checked: boolean) => {
     setSameAsShipping(checked);

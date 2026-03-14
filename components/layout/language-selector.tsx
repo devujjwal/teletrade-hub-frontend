@@ -12,13 +12,14 @@ import { useLanguage, languageConfig, type Language } from '@/contexts/language-
 
 export default function LanguageSelector() {
   const { language, setLanguage } = useLanguage();
+  const activeLanguage = languageConfig[language] ? language : 'en';
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="sm" className="gap-1.5 px-2">
-          <span className="text-base">{languageConfig[language].flag}</span>
-          <span className="hidden sm:inline text-xs">{language.toUpperCase()}</span>
+          <span className="text-base">{languageConfig[activeLanguage].flag}</span>
+          <span className="hidden sm:inline text-xs">{activeLanguage.toUpperCase()}</span>
           <ChevronDown className="w-3 h-3" />
         </Button>
       </DropdownMenuTrigger>
@@ -37,4 +38,3 @@ export default function LanguageSelector() {
     </DropdownMenu>
   );
 }
-

@@ -35,6 +35,7 @@ export default function OrderSummary({ items, getTotal, isSubmitting }: OrderSum
                   src={getProxiedImageUrl(item.product_image)}
                   alt={item.product_name}
                   fill
+                  sizes="64px"
                   className="object-cover"
                 />
               )}

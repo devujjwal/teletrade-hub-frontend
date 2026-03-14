@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import Button from '@/components/ui/button';
+import { useHydrated } from '@/lib/hooks/use-hydrated';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -43,16 +44,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const router = useRouter();
   const { logout, isAdmin, user, token } = useAuthStore();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [isMounted, setIsMounted] = useState(false);
-
-  // Wait for hydration before checking auth
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
+  const isHydrated = useHydrated();
 
   useEffect(() => {
     // Don't check auth until component is mounted (hydration complete)
-    if (!isMounted) {
+    if (!isHydrated) {
       return;
     }
 
@@ -65,7 +61,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     if (!isAdmin || !token) {
       router.push('/admin/login');
     }
-  }, [isMounted, isAdmin, token, router, pathname]);
+  }, [isHydrated, isAdmin, token, router, pathname]);
 
   const handleLogout = () => {
     logout();
@@ -78,7 +74,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   }
   
   // Show loading state while checking auth (waiting for hydration)
-  if (!isMounted) {
+  if (!isHydrated) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">

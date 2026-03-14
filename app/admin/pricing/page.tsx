@@ -20,6 +20,7 @@ import {
 } from '@/components/ui/table';
 import { DollarSign, Percent, Save, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import AdminPageLoader from '@/components/admin/admin-page-loader';
 
 type AccountType = 'customer' | 'merchant';
 
@@ -136,9 +137,7 @@ export default function AdminPricingPage() {
   if (isLoading) {
     return (
       <div className="space-y-6">
-        <Skeleton className="h-10 w-48" />
-        <Skeleton className="h-48 w-full" />
-        <Skeleton className="h-64 w-full" />
+        <AdminPageLoader message="Loading pricing configuration..." rows={6} />
       </div>
     );
   }

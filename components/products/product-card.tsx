@@ -16,9 +16,10 @@ import { productsApi } from '@/lib/api/products';
 
 interface ProductCardProps {
   product: Product;
+  eagerLoadImage?: boolean;
 }
 
-export default function ProductCard({ product }: ProductCardProps) {
+export default function ProductCard({ product, eagerLoadImage = false }: ProductCardProps) {
   const router = useRouter();
   const addItem = useCartStore((state) => state.addItem);
   const updateQuantity = useCartStore((state) => state.updateQuantity);
@@ -108,7 +109,8 @@ export default function ProductCard({ product }: ProductCardProps) {
             width={300}
             height={300}
             className="max-w-full max-h-full object-contain group-hover:scale-105 transition-transform duration-300"
-            loading="lazy"
+            loading={eagerLoadImage ? 'eager' : 'lazy'}
+            fetchPriority={eagerLoadImage ? 'high' : 'auto'}
           />
         </div>
 

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { checkoutSchema, CheckoutFormData } from '@/lib/utils/validation';
 import { useCartStore } from '@/lib/store/cart-store';
@@ -36,6 +36,7 @@ export default function CheckoutPage() {
     formState: { errors },
     watch,
     setValue,
+    control,
   } = useForm<CheckoutFormData>({
     resolver: zodResolver(checkoutSchema),
     defaultValues: {
@@ -46,7 +47,10 @@ export default function CheckoutPage() {
   // Determine if billing is same as shipping:
   // When "same as shipping" is checked, billing_address_id is undefined
   // and billing_address fields are populated with shipping address data
-  const billingAddressIdValue = watch('billing_address_id');
+  const billingAddressIdValue = useWatch({
+    control,
+    name: 'billing_address_id',
+  });
   const sameAsShipping = !billingAddressIdValue;
 
   const onSubmit = async (data: CheckoutFormData) => {
@@ -233,4 +237,3 @@ export default function CheckoutPage() {
     </div>
   );
 }
-

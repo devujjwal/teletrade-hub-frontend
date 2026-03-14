@@ -75,6 +75,7 @@ export default function CategoriesPage() {
                       src={getProxiedImageUrl(category.image)}
                       alt={category.name}
                       fill
+                      sizes="96px"
                       className="object-cover group-hover:scale-105 transition-transform"
                     />
                   </div>

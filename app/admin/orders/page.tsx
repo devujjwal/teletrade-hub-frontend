@@ -36,6 +36,8 @@ import { Search, Eye, ChevronLeft, ChevronRight } from 'lucide-react';
 import { formatPrice } from '@/lib/utils/format';
 import { format } from 'date-fns';
 import toast from 'react-hot-toast';
+import AdminLoadingOverlay from '@/components/admin/admin-loading-overlay';
+import AdminPageLoader from '@/components/admin/admin-page-loader';
 
 const statusColors: Record<string, string> = {
   pending: 'bg-warning/20 text-warning border-warning/30',
@@ -54,7 +56,8 @@ const paymentStatusColors: Record<string, string> = {
 
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -90,6 +93,7 @@ export default function AdminOrdersPage() {
       toast.error('Failed to load orders');
     } finally {
       setIsLoading(false);
+      setIsInitialLoading(false);
     }
   }, [page, search, statusFilter, customerTypeFilter]);
 
@@ -175,18 +179,15 @@ export default function AdminOrdersPage() {
         <CardHeader>
           <CardTitle>Order List</CardTitle>
         </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <div className="space-y-4">
-              {[...Array(5)].map((_, i) => (
-                <Skeleton key={i} className="h-16 w-full" />
-              ))}
-            </div>
+        <CardContent className="relative">
+          {!isInitialLoading && isLoading && <AdminLoadingOverlay message="Refreshing orders..." />}
+          {isInitialLoading ? (
+            <AdminPageLoader message="Loading orders..." rows={5} />
           ) : orders.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">No orders found</div>
           ) : (
             <>
-              <div className="rounded-md border">
+              <div className="relative rounded-md border">
                 <Table>
                   <TableHeader>
                     <TableRow>

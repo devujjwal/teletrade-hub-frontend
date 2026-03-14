@@ -27,6 +27,7 @@ import {
 } from '@/components/ui/dialog';
 import { Plus, Edit, Package, Save } from 'lucide-react';
 import toast from 'react-hot-toast';
+import AdminPageLoader from '@/components/admin/admin-page-loader';
 
 export default function AdminCategoriesPage() {
   const [categories, setCategories] = useState<any[]>([]);
@@ -121,11 +122,7 @@ export default function AdminCategoriesPage() {
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <div className="space-y-4">
-              {[...Array(5)].map((_, i) => (
-                <Skeleton key={i} className="h-16 w-full" />
-              ))}
-            </div>
+            <AdminPageLoader message="Loading categories..." rows={5} />
           ) : categories.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">No categories found</div>
           ) : (
@@ -217,4 +214,3 @@ export default function AdminCategoriesPage() {
     </div>
   );
 }
-
