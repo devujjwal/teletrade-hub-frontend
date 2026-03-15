@@ -12,6 +12,10 @@ const nextConfig = {
         hostname: 'api.ujjwal.in',
       },
       {
+        protocol: 'https',
+        hostname: 'betkabfvbbfmgnkfvyxp.supabase.co',
+      },
+      {
         protocol: 'http',
         hostname: 'localhost',
         port: '3001',

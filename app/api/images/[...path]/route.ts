@@ -4,6 +4,7 @@ import https from 'https';
 const ALLOWED_DOMAINS = [
   'images.triel.sk',
   'api.ujjwal.in',
+  'supabase.co',
   // Add other vendor image domains here
 ];
 
