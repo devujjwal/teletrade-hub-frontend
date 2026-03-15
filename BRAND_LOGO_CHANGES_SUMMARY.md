@@ -74,7 +74,7 @@ Build completed with no errors. Minor warnings present but non-breaking.
   - Ensures consistent SSL handling and caching
 
 - **`teletrade-hub-frontend/app/api/images/[...path]/route.ts`**
-  - Added `api.vs-mjrinfotech.com` to allowed domains
+  - Added `api.ujjwal.in` to allowed domains
   - Enables proxy to fetch in-house product images
 
 - **`teletrade-hub-frontend/lib/api/admin.ts`**
@@ -188,7 +188,7 @@ Build completed with no errors. Minor warnings present but non-breaking.
 **Production:**
 Set this environment variable:
 ```bash
-NEXT_PUBLIC_API_URL=https://api.vs-mjrinfotech.com
+NEXT_PUBLIC_API_URL=https://api.ujjwal.in
 ```
 
 ---

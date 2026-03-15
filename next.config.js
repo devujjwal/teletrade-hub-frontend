@@ -9,7 +9,7 @@ const nextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'api.vs-mjrinfotech.com',
+        hostname: 'api.ujjwal.in',
       },
       {
         protocol: 'http',

@@ -3,7 +3,7 @@ import https from 'https';
 
 const ALLOWED_DOMAINS = [
   'images.triel.sk',
-  'api.vs-mjrinfotech.com',
+  'api.ujjwal.in',
   // Add other vendor image domains here
 ];
 

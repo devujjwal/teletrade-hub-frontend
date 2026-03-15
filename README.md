@@ -44,7 +44,7 @@ cp .env.local.example .env.local
 
 3. Update `.env.local` with your API URL:
 ```env
-NEXT_PUBLIC_API_URL=https://api.vs-mjrinfotech.com
+NEXT_PUBLIC_API_URL=https://api.ujjwal.in
 ```
 
 4. Run the development server:

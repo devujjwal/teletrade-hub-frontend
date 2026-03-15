@@ -32,7 +32,7 @@ export function getProxiedImageUrl(originalUrl?: string): string {
   // If it's a local upload (starts with /uploads/), construct full URL to production API
   if (originalUrl.startsWith('/uploads/')) {
     // Always use production URL for uploaded images (they're hosted on shared hosting)
-    const API_URL = 'https://api.vs-mjrinfotech.com';
+    const API_URL = 'https://api.ujjwal.in';
     const fullUrl = `${API_URL}${originalUrl}`;
     // Use proxy for in-house images too to handle SSL and caching
     const encoded = encodeURIComponent(fullUrl);

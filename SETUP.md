@@ -15,7 +15,7 @@
    
    Edit `.env.local` and set:
    ```env
-   NEXT_PUBLIC_API_URL=https://api.vs-mjrinfotech.com
+   NEXT_PUBLIC_API_URL=https://api.ujjwal.in
    ```
 
 3. **Run Development Server**
@@ -85,7 +85,7 @@ teletrade-hub-frontend/
 
 ## API Integration
 
-The frontend integrates with the backend API at `https://api.vs-mjrinfotech.com`. All API calls are handled through:
+The frontend integrates with the backend API at `https://api.ujjwal.in`. All API calls are handled through:
 
 - `lib/api/client.ts` - Centralized API client with interceptors
 - `lib/api/products.ts` - Product endpoints
