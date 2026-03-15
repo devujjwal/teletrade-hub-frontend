@@ -1,202 +1,125 @@
 import { Metadata } from 'next';
+import Link from 'next/link';
 import Card from '@/components/ui/card';
-import { Shield, Lock, Eye, User } from 'lucide-react';
+import { ShieldCheck, Database, LockKeyhole, Scale } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'Privacy Policy | TeleTrade Hub',
-  description: 'Learn how TeleTrade Hub protects your privacy and handles your personal information',
+  description: 'Overview of how TeleTrade Hub handles personal data in line with GDPR expectations for EU customers.',
 };
+
+const sections = [
+  {
+    icon: ShieldCheck,
+    title: '1. Controller and scope',
+    body: [
+      'TeleTrade Hub acts as the controller for the personal data processed through this website, customer accounts, order handling, support communication, and merchant onboarding.',
+      'This privacy policy applies to visitors, registered customers, merchant applicants, and business contacts who interact with our shop or support channels.',
+    ],
+  },
+  {
+    icon: Database,
+    title: '2. Categories of data we process',
+    body: [
+      'We process identification and contact data such as name, company name, email address, billing and delivery addresses, phone numbers, tax information, and account credentials.',
+      'For merchant or trade registrations we may also process verification documents, VAT data, bank details, and communications needed for approval and compliance checks.',
+    ],
+  },
+  {
+    icon: Scale,
+    title: '3. Legal bases under GDPR',
+    body: [
+      'We process personal data to perform a contract or to take pre-contractual steps, for example to create accounts, review registrations, process orders, and answer support requests.',
+      'Certain processing is required to comply with legal obligations, including accounting, tax retention, anti-fraud checks, and dispute handling. Where optional cookies or marketing are used, we rely on consent.',
+    ],
+  },
+  {
+    icon: LockKeyhole,
+    title: '4. Data sharing and protection',
+    body: [
+      'We share data only with processors and service providers that support our operations, such as hosting, storage, email delivery, payments, and logistics. They may process data only on our instructions and with appropriate safeguards.',
+      'We apply access controls, encryption in transit, role-based permissions, logging, and retention limits to reduce unnecessary exposure of customer and merchant information.',
+    ],
+  },
+];
 
 export default function PrivacyPage() {
   return (
     <div className="container-wide py-12">
-      <div className="max-w-4xl mx-auto">
-        {/* Hero Section */}
-        <div className="text-center mb-12">
-          <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
-            <Shield className="w-10 h-10 text-primary" />
+      <div className="mx-auto max-w-5xl space-y-8">
+        <div className="rounded-[2rem] border border-slate-200 bg-[linear-gradient(135deg,#eff6ff_0%,#fff7ed_48%,#ffffff_100%)] p-8 shadow-sm md:p-10">
+          <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700">
+            <ShieldCheck className="h-4 w-4 text-primary" />
+            GDPR-focused privacy notice
           </div>
-          <h1 className="font-display text-4xl md:text-5xl font-bold mb-4">Privacy Policy</h1>
-          <p className="text-muted-foreground">Last updated: {new Date().toLocaleDateString()}</p>
+          <h1 className="mt-5 font-display text-4xl font-bold tracking-tight text-slate-950 md:text-5xl">
+            Privacy Policy
+          </h1>
+          <p className="mt-4 max-w-3xl text-base leading-7 text-slate-600 md:text-lg">
+            TeleTrade Hub serves customers with EU and Germany-oriented compliance expectations in mind. This page
+            explains what personal data we process, why we process it, and how data subjects can exercise their rights.
+          </p>
+          <div className="mt-6 flex flex-wrap gap-3 text-sm text-slate-600">
+            <span className="rounded-full bg-white px-3 py-1">Last reviewed: March 15, 2026</span>
+            <Link href="/personal-data-processing" className="rounded-full bg-white px-3 py-1 hover:text-primary">
+              View personal data processing terms
+            </Link>
+            <Link href="/cookies" className="rounded-full bg-white px-3 py-1 hover:text-primary">
+              View cookie policy
+            </Link>
+          </div>
         </div>
 
-        <Card className="p-8 md:p-12">
-          <div className="prose prose-sm max-w-none">
-            <section className="mb-8">
-              <div className="flex items-start gap-3 mb-4">
-                <User className="w-6 h-6 text-primary flex-shrink-0 mt-1" />
-                <div>
-                  <h2 className="font-display text-2xl font-bold mb-3">1. Information We Collect</h2>
-                  <p className="text-muted-foreground leading-relaxed mb-3">
-                    We collect information that you provide directly to us, including:
-                  </p>
-                  <ul className="list-disc list-inside text-muted-foreground space-y-2 ml-4">
-                    <li>Name, email address, phone number, and shipping address</li>
-                    <li>Payment information (processed securely through our payment providers)</li>
-                    <li>Account credentials and preferences</li>
-                    <li>Order history and purchase information</li>
-                    <li>Communications with our customer support team</li>
-                  </ul>
-                  <p className="text-muted-foreground leading-relaxed mt-4">
-                    We also automatically collect certain information when you visit our website, such as
-                    IP address, browser type, device information, and usage patterns through cookies and
-                    similar technologies.
-                  </p>
+        <div className="grid gap-6">
+          {sections.map((section) => {
+            const Icon = section.icon;
+            return (
+              <Card key={section.title} className="border-slate-200 p-6 md:p-8">
+                <div className="flex items-start gap-4">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary/10">
+                    <Icon className="h-6 w-6 text-primary" />
+                  </div>
+                  <div className="space-y-3">
+                    <h2 className="font-display text-2xl font-semibold text-slate-950">{section.title}</h2>
+                    {section.body.map((paragraph) => (
+                      <p key={paragraph} className="text-sm leading-7 text-slate-600 md:text-base">
+                        {paragraph}
+                      </p>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            </section>
+              </Card>
+            );
+          })}
 
-            <section className="mb-8">
-              <div className="flex items-start gap-3 mb-4">
-                <Eye className="w-6 h-6 text-primary flex-shrink-0 mt-1" />
-                <div>
-                  <h2 className="font-display text-2xl font-bold mb-3">2. How We Use Your Information</h2>
-                  <p className="text-muted-foreground leading-relaxed mb-3">
-                    We use the information we collect to:
-                  </p>
-                  <ul className="list-disc list-inside text-muted-foreground space-y-2 ml-4">
-                    <li>Process and fulfill your orders</li>
-                    <li>Send you order confirmations and shipping updates</li>
-                    <li>Respond to your inquiries and provide customer support</li>
-                    <li>Send you marketing communications (with your consent)</li>
-                    <li>Improve our website and services</li>
-                    <li>Detect and prevent fraud</li>
-                    <li>Comply with legal obligations</li>
-                  </ul>
-                </div>
-              </div>
-            </section>
+          <Card className="border-slate-200 p-6 md:p-8">
+            <h2 className="font-display text-2xl font-semibold text-slate-950">5. Data subject rights</h2>
+            <div className="mt-4 grid gap-4 text-sm leading-7 text-slate-600 md:grid-cols-2 md:text-base">
+              <p>
+                Depending on the circumstances, you may have the right to access your data, request correction,
+                object to certain processing, request restriction, request erasure, and receive your data in a
+                portable format.
+              </p>
+              <p>
+                If you believe your data is being processed unlawfully, you may also lodge a complaint with the
+                competent supervisory authority in the EU member state of your residence or place of work.
+              </p>
+            </div>
+          </Card>
 
-            <section className="mb-8">
-              <div className="flex items-start gap-3 mb-4">
-                <Lock className="w-6 h-6 text-primary flex-shrink-0 mt-1" />
-                <div>
-                  <h2 className="font-display text-2xl font-bold mb-3">3. Information Sharing</h2>
-                  <p className="text-muted-foreground leading-relaxed mb-3">
-                    We do not sell your personal information. We may share your information with:
-                  </p>
-                  <ul className="list-disc list-inside text-muted-foreground space-y-2 ml-4">
-                    <li>Service providers who help us operate our business (payment processors, shipping companies)</li>
-                    <li>Legal authorities when required by law or to protect our rights</li>
-                    <li>Business partners with your explicit consent</li>
-                  </ul>
-                  <p className="text-muted-foreground leading-relaxed mt-4">
-                    All third parties are required to maintain the confidentiality of your information and
-                    use it only for the purposes we specify.
-                  </p>
-                </div>
-              </div>
-            </section>
-
-            <section className="mb-8">
-              <h2 className="font-display text-2xl font-bold mb-4">4. Data Security</h2>
-              <p className="text-muted-foreground leading-relaxed mb-4">
-                We implement appropriate technical and organizational security measures to protect your personal
-                information against unauthorized access, alteration, disclosure, or destruction. This includes
-                SSL encryption, secure payment processing, and regular security audits.
-              </p>
-              <p className="text-muted-foreground leading-relaxed">
-                However, no method of transmission over the Internet or electronic storage is 100% secure.
-                While we strive to use commercially acceptable means to protect your information, we cannot
-                guarantee absolute security.
-              </p>
-            </section>
-
-            <section className="mb-8">
-              <h2 className="font-display text-2xl font-bold mb-4">5. Cookies and Tracking</h2>
-              <p className="text-muted-foreground leading-relaxed mb-4">
-                We use cookies and similar tracking technologies to enhance your browsing experience, analyze
-                site traffic, and personalize content. You can control cookies through your browser settings,
-                though this may affect website functionality.
-              </p>
-              <p className="text-muted-foreground leading-relaxed">
-                Types of cookies we use:
-              </p>
-              <ul className="list-disc list-inside text-muted-foreground space-y-2 ml-4">
-                <li>Essential cookies: Required for website functionality</li>
-                <li>Analytics cookies: Help us understand how visitors use our site</li>
-                <li>Marketing cookies: Used to deliver relevant advertisements</li>
-              </ul>
-            </section>
-
-            <section className="mb-8">
-              <h2 className="font-display text-2xl font-bold mb-4">6. Your Rights</h2>
-              <p className="text-muted-foreground leading-relaxed mb-4">
-                Depending on your location, you may have the following rights regarding your personal information:
-              </p>
-              <ul className="list-disc list-inside text-muted-foreground space-y-2 ml-4">
-                <li>Right to access: Request a copy of your personal data</li>
-                <li>Right to rectification: Correct inaccurate or incomplete information</li>
-                <li>Right to erasure: Request deletion of your personal data</li>
-                <li>Right to restrict processing: Limit how we use your data</li>
-                <li>Right to data portability: Receive your data in a structured format</li>
-                <li>Right to object: Object to certain types of processing</li>
-                <li>Right to withdraw consent: Withdraw consent for data processing</li>
-              </ul>
-              <p className="text-muted-foreground leading-relaxed mt-4">
-                To exercise these rights, please contact us at{' '}
-                <a href="mailto:privacy@teletradehub.com" className="text-primary hover:underline">
-                  privacy@teletradehub.com
-                </a>
-              </p>
-            </section>
-
-            <section className="mb-8">
-              <h2 className="font-display text-2xl font-bold mb-4">7. Children's Privacy</h2>
-              <p className="text-muted-foreground leading-relaxed">
-                Our services are not intended for children under the age of 18. We do not knowingly collect
-                personal information from children. If you believe we have collected information from a child,
-                please contact us immediately.
-              </p>
-            </section>
-
-            <section className="mb-8">
-              <h2 className="font-display text-2xl font-bold mb-4">8. Data Retention</h2>
-              <p className="text-muted-foreground leading-relaxed">
-                We retain your personal information for as long as necessary to fulfill the purposes outlined
-                in this policy, unless a longer retention period is required or permitted by law. When we
-                no longer need your information, we will securely delete or anonymize it.
-              </p>
-            </section>
-
-            <section className="mb-8">
-              <h2 className="font-display text-2xl font-bold mb-4">9. International Data Transfers</h2>
-              <p className="text-muted-foreground leading-relaxed">
-                Your information may be transferred to and processed in countries other than your country of
-                residence. These countries may have data protection laws that differ from those in your country.
-                We ensure appropriate safeguards are in place to protect your information.
-              </p>
-            </section>
-
-            <section className="mb-8">
-              <h2 className="font-display text-2xl font-bold mb-4">10. Changes to This Policy</h2>
-              <p className="text-muted-foreground leading-relaxed">
-                We may update this Privacy Policy from time to time. We will notify you of any changes by
-                posting the new policy on this page and updating the "Last updated" date. We encourage you
-                to review this policy periodically.
-              </p>
-            </section>
-
-            <section>
-              <h2 className="font-display text-2xl font-bold mb-4">11. Contact Us</h2>
-              <p className="text-muted-foreground leading-relaxed mb-4">
-                If you have any questions about this Privacy Policy or our data practices, please contact us:
-              </p>
-              <div className="bg-muted p-4 rounded-lg">
-                <p className="text-sm text-muted-foreground">
-                  <strong>Email:</strong>{' '}
-                  <a href="mailto:privacy@teletradehub.com" className="text-primary hover:underline">
-                    privacy@teletradehub.com
-                  </a>
-                  <br />
-                  <strong>Address:</strong> 123 Tech Street, Digital City, DC 12345, United States
-                </p>
-              </div>
-            </section>
-          </div>
-        </Card>
+          <Card className="border-slate-200 p-6 md:p-8">
+            <h2 className="font-display text-2xl font-semibold text-slate-950">6. Contact for privacy requests</h2>
+            <p className="mt-4 text-sm leading-7 text-slate-600 md:text-base">
+              For privacy, data access, rectification, or deletion requests, contact{' '}
+              <a href="mailto:privacy@teletradehub.com" className="font-medium text-primary hover:underline">
+                privacy@teletradehub.com
+              </a>
+              . If your request concerns merchant onboarding documents or business verification, please reference the
+              email address used during registration so we can locate your records safely.
+            </p>
+          </Card>
+        </div>
       </div>
     </div>
   );
 }
-

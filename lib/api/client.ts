@@ -92,15 +92,21 @@ apiClient.interceptors.response.use(
 
     // SECURITY: Sanitize error messages to prevent information disclosure
     const isProduction = process.env.NODE_ENV === 'production';
+    const status = error.response?.status;
+    const backendMessage =
+      error.response?.data && typeof (error.response.data as any).message === 'string'
+        ? (error.response.data as any).message
+        : '';
     let errorMessage = 'An error occurred';
     
     if (!isProduction) {
       // In development, show detailed errors
-      errorMessage = (error.response?.data as any)?.message || error.message || 'An error occurred';
+      errorMessage = backendMessage || error.message || 'An error occurred';
     } else {
       // In production, use generic messages based on status code
-      const status = error.response?.status;
-      if (status === 401) {
+      if (backendMessage && status !== undefined && status < 500) {
+        errorMessage = backendMessage;
+      } else if (status === 401) {
         errorMessage = 'Authentication required';
       } else if (status === 403) {
         errorMessage = 'Access denied';
@@ -110,9 +116,6 @@ apiClient.interceptors.response.use(
         errorMessage = 'Too many requests. Please try again later';
       } else if (status !== undefined && status >= 500) {
         errorMessage = 'Server error. Please try again later';
-      } else if (error.response?.data && typeof (error.response.data as any).message === 'string') {
-        // Use backend message if it's user-friendly (already sanitized)
-        errorMessage = (error.response.data as any).message;
       }
     }
 
@@ -127,4 +130,3 @@ apiClient.interceptors.response.use(
 );
 
 export default apiClient;
-

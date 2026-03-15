@@ -1,7 +1,6 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -11,7 +10,7 @@ import Button from '@/components/ui/button';
 import Input from '@/components/ui/input';
 import Card from '@/components/ui/card';
 import { useLanguage } from '@/contexts/language-context';
-import { Briefcase, UserRound } from 'lucide-react';
+import { Briefcase, CheckCircle2, Clock3, MailCheck, UserRound } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const PHONE_PATTERN = /^\+?[0-9][0-9\s()-]{6,19}$/;
@@ -110,9 +109,13 @@ const ALLOWED_MIME_TYPES = ['application/pdf', 'image/jpeg', 'image/png'];
 const ACCEPTED_FILE_INPUT = '.pdf,.jpg,.jpeg,.png';
 
 export default function RegisterForm() {
-  const router = useRouter();
   const { language } = useLanguage();
   const [isLoading, setIsLoading] = useState(false);
+  const [submittedRegistration, setSubmittedRegistration] = useState<{
+    accountType: 'customer' | 'merchant';
+    email: string;
+    firstName: string;
+  } | null>(null);
   const [files, setFiles] = useState<FileState>({
     id_card_file: null,
     passport_file: null,
@@ -230,8 +233,17 @@ export default function RegisterForm() {
         tax_number_certificate_file: files.tax_number_certificate_file,
       });
 
-      toast.success(response?.message || 'Registration submitted. You can login once approved.');
-      router.push('/login');
+      const firstName = data.first_name.trim();
+      const email = data.email.trim();
+      setSubmittedRegistration({
+        accountType: data.account_type,
+        email,
+        firstName,
+      });
+      toast.success(
+        response?.message ||
+          'Registration submitted successfully. Your account is pending approval and we will notify you by email once it is verified.'
+      );
     } catch (error: any) {
       if (error.errors) {
         const errorMessages = Object.entries(error.errors)
@@ -261,7 +273,19 @@ export default function RegisterForm() {
       documentUploads: 'Document uploads', businessCertificate: 'Business registration certificate *',
       idCard: 'ID card (Ausweis) *', passport: 'Passport *', vatCertificate: 'VAT certificate *',
       taxCertificate: 'Tax number certificate *', password: 'Password *', confirmPassword: 'Confirm password *',
-      createAccount: 'Create Account', hasAccount: 'Already have an account? ', login: 'Login'
+      createAccount: 'Create Account', hasAccount: 'Already have an account? ', login: 'Login',
+      pendingBadge: 'Application received',
+      pendingTitle: 'Your account is pending approval',
+      pendingDescription: 'We have received your registration and sent it to our admin team for verification.',
+      pendingEmailNotice: 'Once the review is complete, we will notify you by email.',
+      pendingEmailLabel: 'Notification email',
+      pendingTimelineTitle: 'What happens next',
+      pendingStepReview: 'Our team verifies your submitted profile and documents.',
+      pendingStepApprove: 'After approval, your account will be activated for login.',
+      pendingStepEmail: 'You will receive an email update at this address.',
+      pendingBackHome: 'Back to home',
+      pendingSecondary: 'Need to register another account?',
+      pendingRestart: 'Submit another application'
     },
     de: {
       accountType: 'Kontotyp *', customer: 'Kunde', merchant: 'Händler',
@@ -274,7 +298,19 @@ export default function RegisterForm() {
       documentUploads: 'Dokument-Uploads', businessCertificate: 'Gewerbeanmeldung *',
       idCard: 'Ausweis *', passport: 'Reisepass *', vatCertificate: 'USt-Zertifikat *',
       taxCertificate: 'Steuernummer-Zertifikat *', password: 'Passwort *', confirmPassword: 'Passwort bestätigen *',
-      createAccount: 'Konto erstellen', hasAccount: 'Bereits ein Konto? ', login: 'Anmelden'
+      createAccount: 'Konto erstellen', hasAccount: 'Bereits ein Konto? ', login: 'Anmelden',
+      pendingBadge: 'Antrag eingegangen',
+      pendingTitle: 'Ihr Konto wartet auf Freigabe',
+      pendingDescription: 'Wir haben Ihre Registrierung erhalten und an unser Admin-Team zur Prüfung weitergeleitet.',
+      pendingEmailNotice: 'Sobald die Prüfung abgeschlossen ist, benachrichtigen wir Sie per E-Mail.',
+      pendingEmailLabel: 'Benachrichtigungs-E-Mail',
+      pendingTimelineTitle: 'So geht es weiter',
+      pendingStepReview: 'Unser Team prüft Ihr Profil und die eingereichten Dokumente.',
+      pendingStepApprove: 'Nach der Freigabe wird Ihr Konto für die Anmeldung aktiviert.',
+      pendingStepEmail: 'Sie erhalten ein Update per E-Mail an diese Adresse.',
+      pendingBackHome: 'Zur Startseite',
+      pendingSecondary: 'Möchten Sie ein weiteres Konto registrieren?',
+      pendingRestart: 'Neue Registrierung starten'
     },
     fr: {
       accountType: 'Type de compte *', customer: 'Client', merchant: 'Marchand',
@@ -287,7 +323,19 @@ export default function RegisterForm() {
       documentUploads: 'Téléchargement de documents', businessCertificate: "Certificat d'immatriculation *",
       idCard: "Carte d'identité *", passport: 'Passeport *', vatCertificate: 'Certificat TVA *',
       taxCertificate: 'Certificat fiscal *', password: 'Mot de passe *', confirmPassword: 'Confirmer le mot de passe *',
-      createAccount: 'Créer un compte', hasAccount: 'Vous avez déjà un compte ? ', login: 'Connexion'
+      createAccount: 'Créer un compte', hasAccount: 'Vous avez déjà un compte ? ', login: 'Connexion',
+      pendingBadge: 'Demande reçue',
+      pendingTitle: 'Votre compte est en attente d’approbation',
+      pendingDescription: 'Nous avons bien reçu votre inscription et l’avons transmise à notre équipe admin pour vérification.',
+      pendingEmailNotice: 'Une fois la vérification terminée, nous vous informerons par e-mail.',
+      pendingEmailLabel: 'E-mail de notification',
+      pendingTimelineTitle: 'Étapes suivantes',
+      pendingStepReview: 'Notre équipe vérifie votre profil et vos documents.',
+      pendingStepApprove: 'Après validation, votre compte sera activé pour la connexion.',
+      pendingStepEmail: 'Vous recevrez une mise à jour à cette adresse e-mail.',
+      pendingBackHome: 'Retour à l’accueil',
+      pendingSecondary: 'Besoin d’enregistrer un autre compte ?',
+      pendingRestart: 'Soumettre une autre demande'
     },
     es: {
       accountType: 'Tipo de cuenta *', customer: 'Cliente', merchant: 'Comerciante',
@@ -300,7 +348,19 @@ export default function RegisterForm() {
       documentUploads: 'Carga de documentos', businessCertificate: 'Certificado de registro mercantil *',
       idCard: 'Documento de identidad *', passport: 'Pasaporte *', vatCertificate: 'Certificado de IVA *',
       taxCertificate: 'Certificado fiscal *', password: 'Contraseña *', confirmPassword: 'Confirmar contraseña *',
-      createAccount: 'Crear cuenta', hasAccount: '¿Ya tienes cuenta? ', login: 'Iniciar sesión'
+      createAccount: 'Crear cuenta', hasAccount: '¿Ya tienes cuenta? ', login: 'Iniciar sesión',
+      pendingBadge: 'Solicitud recibida',
+      pendingTitle: 'Tu cuenta está pendiente de aprobación',
+      pendingDescription: 'Hemos recibido tu registro y lo hemos enviado a nuestro equipo administrador para verificación.',
+      pendingEmailNotice: 'Cuando la revisión termine, te notificaremos por correo electrónico.',
+      pendingEmailLabel: 'Correo de notificación',
+      pendingTimelineTitle: 'Qué sigue',
+      pendingStepReview: 'Nuestro equipo verifica tu perfil y los documentos enviados.',
+      pendingStepApprove: 'Después de aprobarla, tu cuenta quedará activada para iniciar sesión.',
+      pendingStepEmail: 'Recibirás una actualización en esta dirección de correo.',
+      pendingBackHome: 'Volver al inicio',
+      pendingSecondary: '¿Necesitas registrar otra cuenta?',
+      pendingRestart: 'Enviar otra solicitud'
     },
     it: {
       accountType: 'Tipo di account *', customer: 'Cliente', merchant: 'Commerciante',
@@ -313,7 +373,19 @@ export default function RegisterForm() {
       documentUploads: 'Caricamento documenti', businessCertificate: 'Certificato di registrazione aziendale *',
       idCard: "Carta d'identità *", passport: 'Passaporto *', vatCertificate: 'Certificato IVA *',
       taxCertificate: 'Certificato fiscale *', password: 'Password *', confirmPassword: 'Conferma password *',
-      createAccount: 'Crea account', hasAccount: 'Hai già un account? ', login: 'Accedi'
+      createAccount: 'Crea account', hasAccount: 'Hai già un account? ', login: 'Accedi',
+      pendingBadge: 'Richiesta ricevuta',
+      pendingTitle: 'Il tuo account è in attesa di approvazione',
+      pendingDescription: 'Abbiamo ricevuto la tua registrazione e l’abbiamo inviata al nostro team admin per la verifica.',
+      pendingEmailNotice: 'Quando la revisione sarà completata, ti avviseremo via email.',
+      pendingEmailLabel: 'Email di notifica',
+      pendingTimelineTitle: 'Cosa succede ora',
+      pendingStepReview: 'Il nostro team verifica il tuo profilo e i documenti inviati.',
+      pendingStepApprove: 'Dopo l’approvazione, il tuo account sarà attivato per l’accesso.',
+      pendingStepEmail: 'Riceverai un aggiornamento a questo indirizzo email.',
+      pendingBackHome: 'Torna alla home',
+      pendingSecondary: 'Vuoi registrare un altro account?',
+      pendingRestart: 'Invia un’altra richiesta'
     },
     sk: {
       accountType: 'Typ účtu *', customer: 'Zákazník', merchant: 'Obchodník',
@@ -326,9 +398,92 @@ export default function RegisterForm() {
       documentUploads: 'Nahranie dokumentov', businessCertificate: 'Osvedčenie o registrácii firmy *',
       idCard: 'Občiansky preukaz *', passport: 'Pas *', vatCertificate: 'Osvedčenie o DPH *',
       taxCertificate: 'Osvedčenie o daňovom čísle *', password: 'Heslo *', confirmPassword: 'Potvrďte heslo *',
-      createAccount: 'Vytvoriť účet', hasAccount: 'Už máte účet? ', login: 'Prihlásiť sa'
+      createAccount: 'Vytvoriť účet', hasAccount: 'Už máte účet? ', login: 'Prihlásiť sa',
+      pendingBadge: 'Žiadosť prijatá',
+      pendingTitle: 'Váš účet čaká na schválenie',
+      pendingDescription: 'Vašu registráciu sme prijali a odoslali nášmu admin tímu na overenie.',
+      pendingEmailNotice: 'Po dokončení kontroly vás budeme informovať e-mailom.',
+      pendingEmailLabel: 'Notifikačný e-mail',
+      pendingTimelineTitle: 'Čo bude nasledovať',
+      pendingStepReview: 'Náš tím overí váš profil a nahrané dokumenty.',
+      pendingStepApprove: 'Po schválení bude váš účet aktivovaný na prihlásenie.',
+      pendingStepEmail: 'Aktualizáciu dostanete na túto e-mailovú adresu.',
+      pendingBackHome: 'Späť na domovskú stránku',
+      pendingSecondary: 'Potrebujete zaregistrovať ďalší účet?',
+      pendingRestart: 'Odoslať ďalšiu žiadosť'
     },
   }[language];
+
+  if (submittedRegistration) {
+    return (
+      <Card className="overflow-hidden border-0 bg-[radial-gradient(circle_at_top,_rgba(250,204,21,0.25),_transparent_45%),linear-gradient(135deg,#082f49_0%,#0f172a_52%,#111827_100%)] p-0 text-white shadow-2xl">
+        <div className="grid gap-0 lg:grid-cols-[1.3fr_0.9fr]">
+          <div className="space-y-6 p-8 md:p-10">
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold text-amber-200 backdrop-blur">
+              <CheckCircle2 className="h-4 w-4" />
+              {ui.pendingBadge}
+            </div>
+
+            <div className="space-y-3">
+              <h2 className="text-3xl font-bold tracking-tight md:text-4xl">{ui.pendingTitle}</h2>
+              <p className="max-w-2xl text-base leading-7 text-slate-200 md:text-lg">
+                {submittedRegistration.firstName}, {ui.pendingDescription}
+              </p>
+              <p className="max-w-2xl text-sm leading-6 text-slate-300">{ui.pendingEmailNotice}</p>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="rounded-2xl border border-white/10 bg-white/10 p-4 backdrop-blur">
+                <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-slate-100">
+                  <MailCheck className="h-4 w-4 text-amber-300" />
+                  {ui.pendingEmailLabel}
+                </div>
+                <p className="break-all text-sm text-slate-200">{submittedRegistration.email}</p>
+              </div>
+              <div className="rounded-2xl border border-white/10 bg-white/10 p-4 backdrop-blur">
+                <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-slate-100">
+                  <Clock3 className="h-4 w-4 text-amber-300" />
+                  {ui.accountType}
+                </div>
+                <p className="text-sm capitalize text-slate-200">{submittedRegistration.accountType}</p>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <Link
+                href="/"
+                className="inline-flex min-h-11 items-center justify-center rounded-xl bg-amber-400 px-5 text-sm font-semibold text-slate-950 transition hover:bg-amber-300"
+              >
+                {ui.pendingBackHome}
+              </Link>
+              <button
+                type="button"
+                onClick={() => setSubmittedRegistration(null)}
+                className="inline-flex min-h-11 items-center justify-center rounded-xl border border-white/20 bg-white/5 px-5 text-sm font-semibold text-white transition hover:bg-white/10"
+              >
+                {ui.pendingRestart}
+              </button>
+            </div>
+          </div>
+
+          <div className="border-t border-white/10 bg-slate-950/20 p-8 backdrop-blur lg:border-l lg:border-t-0">
+            <h3 className="mb-5 text-lg font-semibold text-white">{ui.pendingTimelineTitle}</h3>
+            <div className="space-y-4">
+              {[ui.pendingStepReview, ui.pendingStepApprove, ui.pendingStepEmail].map((step, index) => (
+                <div key={step} className="flex items-start gap-3 rounded-2xl border border-white/10 bg-white/5 p-4">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-300 font-semibold text-slate-950">
+                    {index + 1}
+                  </div>
+                  <p className="text-sm leading-6 text-slate-200">{step}</p>
+                </div>
+              ))}
+            </div>
+            <p className="mt-6 text-sm text-slate-300">{ui.pendingSecondary}</p>
+          </div>
+        </div>
+      </Card>
+    );
+  }
 
   return (
     <Card className="border-slate-200/80 bg-gradient-to-b from-white to-slate-50/70 p-6 shadow-sm md:p-8">

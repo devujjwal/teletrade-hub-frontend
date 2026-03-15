@@ -1,5 +1,6 @@
 import Header from '@/components/layout/header';
 import Footer from '@/components/layout/footer';
+import CookieConsentBanner from '@/components/layout/cookie-consent-banner';
 import MobileBottomNav from '@/components/layout/mobile-bottom-nav';
 import { LanguageProvider, type Language } from '@/contexts/language-context';
 import { SettingsProvider } from '@/contexts/settings-context';
@@ -24,6 +25,7 @@ export default async function ShopLayout({
         <Header />
         <main className="min-h-screen pb-mobile-nav">{children}</main>
         <Footer />
+        <CookieConsentBanner />
         <MobileBottomNav />
       </LanguageProvider>
     </SettingsProvider>

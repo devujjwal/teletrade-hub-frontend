@@ -241,7 +241,7 @@ export default function BrandLogo({
   // Render image with current source
   return logoUrl ? (
     <span
-      className="relative block"
+      className="relative inline-flex items-center justify-center overflow-hidden"
       style={{ width: `${width}px`, height: `${height}px` }}
     >
       <Image
@@ -250,7 +250,7 @@ export default function BrandLogo({
         alt={brandName}
         fill
         sizes={`${width}px`}
-        className={`object-contain ${className}`}
+        className={`object-contain object-center ${className}`}
         loading="lazy"
         onError={handleImageError}
         unoptimized

@@ -126,6 +126,22 @@ export default function Footer() {
                   {t('footer.privacy')}
                 </Link>
               </li>
+              <li>
+                <Link
+                  href="/personal-data-processing"
+                  className="text-primary-foreground/70 hover:text-secondary transition-colors text-sm"
+                >
+                  Personal Data Processing
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/cookies"
+                  className="text-primary-foreground/70 hover:text-secondary transition-colors text-sm"
+                >
+                  Cookie Policy
+                </Link>
+              </li>
             </ul>
           </div>
 

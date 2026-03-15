@@ -17,6 +17,12 @@ import toast from 'react-hot-toast';
 const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
+  legalAcceptance: z.literal(true, {
+    errorMap: () => ({
+      message:
+        'Please confirm that you accept the Terms & Conditions and the General Terms and Conditions of processing personal data.',
+    }),
+  }),
 });
 
 type LoginFormData = z.infer<typeof loginSchema>;
@@ -100,6 +106,34 @@ export default function LoginForm() {
           <Link href="/forgot-password" className="text-sm text-primary hover:underline">
             {t('auth.forgotPassword')}
           </Link>
+        </div>
+
+        <div className="rounded-xl border border-slate-200 bg-slate-50/80 p-4">
+          <label className="flex items-start gap-3">
+            <input
+              type="checkbox"
+              {...register('legalAcceptance')}
+              className="mt-1 rounded border-input"
+            />
+            <span className="text-sm leading-6 text-slate-700">
+              By logging in, I confirm that I have read and accept the{' '}
+              <Link href="/terms" className="font-medium text-primary hover:underline">
+                Terms &amp; Conditions
+              </Link>{' '}
+              and the{' '}
+              <Link href="/personal-data-processing" className="font-medium text-primary hover:underline">
+                General Terms and Conditions of processing personal data
+              </Link>
+              . Details about site cookies are available in the{' '}
+              <Link href="/cookies" className="font-medium text-primary hover:underline">
+                Cookie Policy
+              </Link>
+              .
+            </span>
+          </label>
+          {errors.legalAcceptance && (
+            <p className="mt-2 text-xs text-destructive">{errors.legalAcceptance.message}</p>
+          )}
         </div>
 
         <Button type="submit" className="w-full" isLoading={isLoading}>
