@@ -231,6 +231,6 @@ export const adminApi = {
 
   resetPasswordToDefault: async () => {
     const response = await apiClient.post<any>('/admin/reset-password');
-    return response.data;
+    return response.data?.data || response.data;
   },
 };

@@ -161,14 +161,20 @@ export default function AdminSettingsPage() {
   };
 
   const handleResetToDefault = async () => {
-    if (!confirm('Are you sure you want to reset your password to the default password (Ujjwal@2026)? This will immediately change your password.')) {
+    if (!confirm('Are you sure you want to reset your password? This will generate a new temporary password and immediately sign out other sessions that use the old password.')) {
       return;
     }
 
     setIsResettingPassword(true);
     try {
-      await adminApi.resetPasswordToDefault();
-      toast.success('Password reset to default: Ujjwal@2026');
+      const result = await adminApi.resetPasswordToDefault();
+      const temporaryPassword = result?.temporary_password;
+      if (temporaryPassword) {
+        alert(`Temporary password generated:\n\n${temporaryPassword}\n\nStore it securely and change it after logging in.`);
+        toast.success('Temporary password generated successfully');
+      } else {
+        toast.success('Password reset successfully');
+      }
     } catch (error: any) {
       toast.error(error.response?.data?.message || error.message || 'Failed to reset password');
     } finally {
@@ -422,14 +428,14 @@ export default function AdminSettingsPage() {
           <CardDescription>Change your admin password</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Default Password Note */}
+          {/* Password Reset Note */}
           <Alert>
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              <strong>Default Password:</strong> Ujjwal@2026
+              <strong>Password Reset:</strong> Generates a one-time temporary password
               <br />
               <span className="text-xs text-muted-foreground">
-                If you forget your password, you can reset it to the default using the button below.
+                Use the reset button only for account recovery, then change the password immediately after logging in.
               </span>
             </AlertDescription>
           </Alert>
