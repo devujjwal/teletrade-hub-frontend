@@ -12,10 +12,10 @@ export const metadata: Metadata = {
   keywords: 'electronics, smartphones, tablets, telecommunications',
   icons: {
     icon: [
-      { url: '/icon.svg', type: 'image/svg+xml' },
+      { url: '/images/favicon.ico', type: 'image/x-icon' },
     ],
-    shortcut: '/icon.svg',
-    apple: '/icon.svg',
+    shortcut: '/images/favicon.ico',
+    apple: '/images/favicon.ico',
   },
 };
 
