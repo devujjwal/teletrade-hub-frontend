@@ -152,4 +152,31 @@ export const authApi = {
       throw new Error(response.data?.message || 'Failed to change password');
     }
   },
+
+  forgotPassword: async (email: string): Promise<{ message: string }> => {
+    const response = await apiClient.post<any>('/auth/forgot-password', { email });
+    if (!response.data?.success) {
+      throw new Error(response.data?.message || 'Failed to process forgot password request');
+    }
+    return { message: response.data?.message || '' };
+  },
+
+  verifyResetPasswordToken: async (token: string): Promise<void> => {
+    const response = await apiClient.post<any>('/auth/reset-password/verify', { token });
+    if (!response.data?.success) {
+      throw new Error(response.data?.message || 'Invalid reset token');
+    }
+  },
+
+  resetPasswordWithToken: async (data: {
+    token: string;
+    new_password: string;
+    confirm_password: string;
+  }): Promise<{ message: string }> => {
+    const response = await apiClient.post<any>('/auth/reset-password', data);
+    if (!response.data?.success) {
+      throw new Error(response.data?.message || 'Failed to reset password');
+    }
+    return { message: response.data?.message || 'Password has been reset successfully.' };
+  },
 };

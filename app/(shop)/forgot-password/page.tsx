@@ -9,7 +9,7 @@ import Card from '@/components/ui/card';
 import Input from '@/components/ui/input';
 import Button from '@/components/ui/button';
 import { Mail, ArrowLeft, CheckCircle } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { authApi } from '@/lib/api/auth';
 
 const forgotPasswordSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -20,6 +20,8 @@ type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
 export default function ForgotPasswordPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [serverError, setServerError] = useState('');
   const {
     register,
     handleSubmit,
@@ -30,13 +32,13 @@ export default function ForgotPasswordPage() {
 
   const onSubmit = async (data: ForgotPasswordFormData) => {
     setIsLoading(true);
+    setServerError('');
     try {
-      // TODO: Implement forgot password API endpoint
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const response = await authApi.forgotPassword(data.email);
+      setSuccessMessage(response.message);
       setIsSubmitted(true);
-      toast.success('Password reset link sent to your email!');
-    } catch (error) {
-      toast.error('Failed to send reset link. Please try again.');
+    } catch (error: any) {
+      setServerError(error?.message || 'Unable to process your request. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -52,8 +54,7 @@ export default function ForgotPasswordPage() {
             </div>
             <h1 className="font-display text-2xl font-bold mb-4">Check Your Email</h1>
             <p className="text-muted-foreground mb-6">
-              We've sent a password reset link to your email address. Please check your inbox and follow
-              the instructions to reset your password.
+              {successMessage || "We've sent a password reset link to your email address. Please check your inbox and follow the instructions to reset your password."}
             </p>
             <p className="text-sm text-muted-foreground mb-6">
               If you don't see the email, please check your spam folder or try again.
@@ -84,6 +85,12 @@ export default function ForgotPasswordPage() {
 
         <Card className="p-6">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            {serverError && (
+              <div className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                {serverError}
+              </div>
+            )}
+
             <div>
               <label htmlFor="email" className="block text-sm font-medium mb-2">
                 Email Address
@@ -128,4 +135,3 @@ export default function ForgotPasswordPage() {
     </div>
   );
 }
-
