@@ -26,6 +26,10 @@ interface SettingsData {
   address: string;
   contact_number: string;
   whatsapp_number: string;
+  facebook_url: string;
+  twitter_url: string;
+  instagram_url: string;
+  youtube_url: string;
   currency: string;
   tax_rate: string;
   vendor_sync_enabled: boolean;
@@ -45,6 +49,10 @@ export default function AdminSettingsPage() {
     address: '',
     contact_number: '',
     whatsapp_number: '',
+    facebook_url: '',
+    twitter_url: '',
+    instagram_url: '',
+    youtube_url: '',
     currency: 'EUR',
     tax_rate: '19.00',
     vendor_sync_enabled: true,
@@ -82,6 +90,10 @@ export default function AdminSettingsPage() {
           address: apiSettings.address || '',
           contact_number: apiSettings.contact_number || '',
           whatsapp_number: apiSettings.whatsapp_number || '',
+          facebook_url: apiSettings.facebook_url || '',
+          twitter_url: apiSettings.twitter_url || '',
+          instagram_url: apiSettings.instagram_url || '',
+          youtube_url: apiSettings.youtube_url || '',
           currency: apiSettings.currency || 'EUR',
           tax_rate: apiSettings.tax_rate || '19.00',
           vendor_sync_enabled: apiSettings.vendor_sync_enabled !== undefined 
@@ -111,7 +123,37 @@ export default function AdminSettingsPage() {
     loadSettings();
   }, [loadSettings]);
 
+  const isValidOptionalUrl = (value: string) => {
+    const trimmed = (value || '').trim();
+    if (!trimmed) {
+      return true;
+    }
+
+    const withProtocol = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+    try {
+      const parsed = new URL(withProtocol);
+      return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+    } catch {
+      return false;
+    }
+  };
+
   const handleSave = async () => {
+    const socialUrlFields: Array<{ key: keyof SettingsData; label: string }> = [
+      { key: 'facebook_url', label: 'Facebook URL' },
+      { key: 'twitter_url', label: 'Twitter/X URL' },
+      { key: 'instagram_url', label: 'Instagram URL' },
+      { key: 'youtube_url', label: 'YouTube URL' },
+    ];
+
+    for (const field of socialUrlFields) {
+      const value = (settings[field.key] as string) || '';
+      if (!isValidOptionalUrl(value)) {
+        toast.error(`Invalid ${field.label}. Please enter a valid URL.`);
+        return;
+      }
+    }
+
     setIsSaving(true);
     try {
       await adminApi.updateSettings(settings);
@@ -286,6 +328,48 @@ export default function AdminSettingsPage() {
                 value={settings.tax_rate}
                 onChange={(e) => updateSetting('tax_rate', e.target.value)}
                 placeholder="19.00"
+              />
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="facebook_url">Facebook URL</Label>
+              <Input
+                id="facebook_url"
+                type="url"
+                value={settings.facebook_url}
+                onChange={(e) => updateSetting('facebook_url', e.target.value)}
+                placeholder="https://facebook.com/your-page"
+              />
+            </div>
+            <div>
+              <Label htmlFor="twitter_url">Twitter/X URL</Label>
+              <Input
+                id="twitter_url"
+                type="url"
+                value={settings.twitter_url}
+                onChange={(e) => updateSetting('twitter_url', e.target.value)}
+                placeholder="https://x.com/your-handle"
+              />
+            </div>
+            <div>
+              <Label htmlFor="instagram_url">Instagram URL</Label>
+              <Input
+                id="instagram_url"
+                type="url"
+                value={settings.instagram_url}
+                onChange={(e) => updateSetting('instagram_url', e.target.value)}
+                placeholder="https://instagram.com/your-handle"
+              />
+            </div>
+            <div>
+              <Label htmlFor="youtube_url">YouTube URL</Label>
+              <Input
+                id="youtube_url"
+                type="url"
+                value={settings.youtube_url}
+                onChange={(e) => updateSetting('youtube_url', e.target.value)}
+                placeholder="https://youtube.com/@your-channel"
               />
             </div>
           </div>

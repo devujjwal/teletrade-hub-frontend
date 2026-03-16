@@ -6,6 +6,10 @@ export interface PublicSettings {
   address: string;
   contact_number: string;
   whatsapp_number: string;
+  facebook_url: string;
+  twitter_url: string;
+  instagram_url: string;
+  youtube_url: string;
 }
 
 export const settingsApi = {
@@ -24,7 +28,10 @@ export const settingsApi = {
       address: '',
       contact_number: '',
       whatsapp_number: '',
+      facebook_url: '',
+      twitter_url: '',
+      instagram_url: '',
+      youtube_url: '',
     };
   },
 };
-

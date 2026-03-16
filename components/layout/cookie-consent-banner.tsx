@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import Button from '@/components/ui/button';
 
@@ -9,12 +9,13 @@ const COOKIE_CONSENT_KEY = 'teletrade_cookie_consent';
 type ConsentMode = 'essential' | 'all';
 
 export default function CookieConsentBanner() {
-  const [isVisible, setIsVisible] = useState(false);
-
-  useEffect(() => {
+  const [isVisible, setIsVisible] = useState(() => {
+    if (typeof window === 'undefined') {
+      return false;
+    }
     const savedConsent = window.localStorage.getItem(COOKIE_CONSENT_KEY);
-    setIsVisible(!savedConsent);
-  }, []);
+    return !savedConsent;
+  });
 
   const saveConsent = (mode: ConsentMode) => {
     window.localStorage.setItem(COOKIE_CONSENT_KEY, mode);

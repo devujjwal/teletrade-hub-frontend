@@ -15,7 +15,20 @@ export default function Footer() {
     address: '',
     contact_number: '',
     whatsapp_number: '',
+    facebook_url: '',
+    twitter_url: '',
+    instagram_url: '',
+    youtube_url: '',
   });
+
+  const normalizeSocialUrl = (url?: string) => {
+    const raw = (url || '').trim();
+    if (!raw) return '';
+    if (raw.startsWith('http://') || raw.startsWith('https://')) {
+      return raw;
+    }
+    return `https://${raw}`;
+  };
 
   useEffect(() => {
     const loadSettings = async () => {
@@ -47,20 +60,33 @@ export default function Footer() {
             <p className="text-primary-foreground/70 text-sm mb-4">
               {t('footer.description') || 'Your trusted partner for premium telecommunication products. Quality devices from the world\'s top brands.'}
             </p>
-            <div className="flex gap-4">
-              <a href="#" className="text-primary-foreground/70 hover:text-secondary transition-colors">
-                <Facebook className="w-5 h-5" />
-              </a>
-              <a href="#" className="text-primary-foreground/70 hover:text-secondary transition-colors">
-                <Twitter className="w-5 h-5" />
-              </a>
-              <a href="#" className="text-primary-foreground/70 hover:text-secondary transition-colors">
-                <Instagram className="w-5 h-5" />
-              </a>
-              <a href="#" className="text-primary-foreground/70 hover:text-secondary transition-colors">
-                <Youtube className="w-5 h-5" />
-              </a>
-            </div>
+            {(() => {
+              const socialLinks = [
+                { href: normalizeSocialUrl(settings.facebook_url), Icon: Facebook, label: 'Facebook' },
+                { href: normalizeSocialUrl(settings.twitter_url), Icon: Twitter, label: 'Twitter' },
+                { href: normalizeSocialUrl(settings.instagram_url), Icon: Instagram, label: 'Instagram' },
+                { href: normalizeSocialUrl(settings.youtube_url), Icon: Youtube, label: 'YouTube' },
+              ].filter((item) => item.href);
+
+              if (socialLinks.length === 0) return null;
+
+              return (
+                <div className="flex gap-4">
+                  {socialLinks.map(({ href, Icon, label }) => (
+                    <a
+                      key={label}
+                      href={href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={label}
+                      className="text-primary-foreground/70 hover:text-secondary transition-colors"
+                    >
+                      <Icon className="w-5 h-5" />
+                    </a>
+                  ))}
+                </div>
+              );
+            })()}
           </div>
 
           {/* Company Links */}

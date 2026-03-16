@@ -8,6 +8,7 @@ import Badge from '@/components/ui/badge';
 import Button from '@/components/ui/button';
 import Input from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Switch } from '@/components/ui/switch';
 import {
   Table,
   TableBody,
@@ -29,7 +30,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Search } from 'lucide-react';
+import { Copy, KeyRound, RefreshCw, Search } from 'lucide-react';
 import { format } from 'date-fns';
 import toast from 'react-hot-toast';
 
@@ -73,6 +74,13 @@ export default function AdminUsersPage() {
   const [accountTypeFilter, setAccountTypeFilter] = useState<string>('all');
   const [approvalFilter, setApprovalFilter] = useState<string>('all');
   const [selectedUser, setSelectedUser] = useState<ShopUser | null>(null);
+  const [passwordUser, setPasswordUser] = useState<ShopUser | null>(null);
+  const [passwordData, setPasswordData] = useState({
+    new_password: '',
+    confirm_password: '',
+  });
+  const [sendResetNotificationEmail, setSendResetNotificationEmail] = useState(false);
+  const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
   const [pagination, setPagination] = useState({
     page: 1,
     pages: 1,
@@ -129,6 +137,95 @@ export default function AdminUsersPage() {
   const getApprovalStatus = (user: ShopUser) => user.approval_status || (user.is_active ? 'approved' : 'pending');
 
   const fullName = (user: ShopUser) => `${user.first_name || ''} ${user.last_name || ''}`.trim() || 'N/A';
+  const openPasswordDialog = (user: ShopUser) => {
+    setPasswordUser(user);
+    setPasswordData({ new_password: '', confirm_password: '' });
+    setSendResetNotificationEmail(false);
+  };
+
+  const closePasswordDialog = () => {
+    setPasswordUser(null);
+    setPasswordData({ new_password: '', confirm_password: '' });
+    setSendResetNotificationEmail(false);
+  };
+
+  const generateStrongPassword = () => {
+    const upper = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+    const lower = 'abcdefghijkmnopqrstuvwxyz';
+    const digits = '23456789';
+    const special = '!@#$%^&*()-_=+';
+    const all = upper + lower + digits + special;
+    const length = 14;
+
+    const picks = [
+      upper[Math.floor(Math.random() * upper.length)],
+      lower[Math.floor(Math.random() * lower.length)],
+      digits[Math.floor(Math.random() * digits.length)],
+      special[Math.floor(Math.random() * special.length)],
+    ];
+
+    for (let i = picks.length; i < length; i += 1) {
+      picks.push(all[Math.floor(Math.random() * all.length)]);
+    }
+
+    const generated = picks.sort(() => Math.random() - 0.5).join('');
+    setPasswordData({
+      new_password: generated,
+      confirm_password: generated,
+    });
+  };
+
+  const copyPasswordToClipboard = async () => {
+    if (!passwordData.new_password) {
+      toast.error('Enter or generate a password first');
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(passwordData.new_password);
+      toast.success('Password copied to clipboard');
+    } catch (error) {
+      toast.error('Failed to copy password');
+    }
+  };
+
+  const handleUpdateUserPassword = async () => {
+    if (!passwordUser) return;
+
+    if (!passwordData.new_password || !passwordData.confirm_password) {
+      toast.error('Please fill both password fields');
+      return;
+    }
+
+    if (passwordData.new_password !== passwordData.confirm_password) {
+      toast.error('Passwords do not match');
+      return;
+    }
+
+    if (passwordData.new_password.length < 8) {
+      toast.error('Password must be at least 8 characters long');
+      return;
+    }
+
+    setIsUpdatingPassword(true);
+    try {
+      const response = await adminApi.updateUserPassword(passwordUser.id, {
+        ...passwordData,
+        send_notification_email: sendResetNotificationEmail,
+      });
+      if (sendResetNotificationEmail && response?.data?.notification_email_sent === false) {
+        toast.success('Password updated, but notification email could not be sent.');
+      } else {
+        toast.success('User password updated. Share it securely with the user.');
+      }
+      closePasswordDialog();
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || error.message || 'Failed to update user password');
+    } finally {
+      setIsUpdatingPassword(false);
+    }
+  };
+
   const renderDocumentLink = (url?: string, label = 'View Document') => {
     if (!url) return 'N/A';
 
@@ -263,6 +360,10 @@ export default function AdminUsersPage() {
                           >
                             Reject
                           </Button>
+                          <Button size="sm" variant="outline" onClick={() => openPasswordDialog(user)}>
+                            <KeyRound className="h-4 w-4 mr-1" />
+                            Set Password
+                          </Button>
                         </div>
                       </TableCell>
                     </TableRow>
@@ -321,6 +422,76 @@ export default function AdminUsersPage() {
               >
                 Reject User
               </Button>
+              <Button onClick={() => openPasswordDialog(selectedUser)} variant="outline" className="ml-2">
+                <KeyRound className="h-4 w-4 mr-2" />
+                Set Password
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {passwordUser && (
+        <Dialog open={!!passwordUser} onOpenChange={closePasswordDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Set User Password</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                Set a new login password for <span className="font-medium text-foreground">{fullName(passwordUser)}</span> ({passwordUser.email}).
+              </p>
+              <div className="grid gap-2">
+                <label className="text-sm font-medium">New Password</label>
+                <Input
+                  type="text"
+                  value={passwordData.new_password}
+                  onChange={(e) => setPasswordData((prev) => ({ ...prev, new_password: e.target.value }))}
+                  placeholder="Enter strong password"
+                />
+              </div>
+              <div className="grid gap-2">
+                <label className="text-sm font-medium">Confirm Password</label>
+                <Input
+                  type="text"
+                  value={passwordData.confirm_password}
+                  onChange={(e) => setPasswordData((prev) => ({ ...prev, confirm_password: e.target.value }))}
+                  placeholder="Re-enter password"
+                />
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Use at least 8 characters with uppercase, lowercase, number, and special character.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <Button type="button" variant="outline" onClick={generateStrongPassword}>
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Generate Strong Password
+                </Button>
+                <Button type="button" variant="outline" onClick={copyPasswordToClipboard}>
+                  <Copy className="h-4 w-4 mr-2" />
+                  Copy Password
+                </Button>
+              </div>
+              <div className="flex items-center justify-between rounded-md border p-3">
+                <div className="space-y-0.5">
+                  <p className="text-sm font-medium">Send password reset notification email</p>
+                  <p className="text-xs text-muted-foreground">
+                    If enabled, the same password will be emailed to this user.
+                  </p>
+                </div>
+                <Switch
+                  checked={sendResetNotificationEmail}
+                  onCheckedChange={setSendResetNotificationEmail}
+                />
+              </div>
+              <div className="flex justify-end gap-2 pt-2">
+                <Button type="button" variant="outline" onClick={closePasswordDialog}>
+                  Cancel
+                </Button>
+                <Button type="button" onClick={handleUpdateUserPassword} disabled={isUpdatingPassword}>
+                  {isUpdatingPassword ? 'Updating...' : 'Update Password'}
+                </Button>
+              </div>
             </div>
           </DialogContent>
         </Dialog>

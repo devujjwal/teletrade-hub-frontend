@@ -32,6 +32,11 @@ export const adminApi = {
     return response.data;
   },
 
+  updateUserPassword: async (id: number, data: { new_password: string; confirm_password: string; send_notification_email?: boolean }) => {
+    const response = await apiClient.put<any>(`/admin/users/${id}/password`, data);
+    return response.data;
+  },
+
   getOrder: async (id: number) => {
     const response = await apiClient.get<any>(`/admin/orders/${id}`);
     // Backend returns: { success, data: { order: {...} } }

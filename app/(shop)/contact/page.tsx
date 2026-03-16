@@ -29,6 +29,10 @@ export default function ContactPage() {
     address: '',
     contact_number: '',
     whatsapp_number: '',
+    facebook_url: '',
+    twitter_url: '',
+    instagram_url: '',
+    youtube_url: '',
   });
   const {
     register,
