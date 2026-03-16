@@ -229,16 +229,18 @@ export default function HomePageClient({
             <Link
               key={brand.id}
               href={`/brands/${brand.slug}${langParam}`}
-              className="flex-shrink-0 group"
+              className="flex-shrink-0 group block"
             >
-              <div className="w-32 h-16 bg-card border border-border rounded-lg flex items-center justify-center group-hover:border-primary transition-colors px-2">
-                <BrandLogo
-                  brandName={brand.name}
-                  height={60}
-                  width={96}
-                  className="max-w-24 max-h-12 object-contain transition-all font-semibold text-muted-foreground group-hover:text-primary"
-                  showFallbackText={true}
-                />
+              <div className="w-32 h-16 bg-card border border-border rounded-lg grid place-items-center group-hover:border-primary transition-colors px-2 overflow-hidden">
+                <div className="w-full h-full flex items-center justify-center">
+                  <BrandLogo
+                    brandName={brand.name}
+                    height={48}
+                    width={104}
+                    className="object-contain object-center transition-all font-semibold text-muted-foreground group-hover:text-primary"
+                    showFallbackText={true}
+                  />
+                </div>
               </div>
             </Link>
           ))}
