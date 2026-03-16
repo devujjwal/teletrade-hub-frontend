@@ -29,6 +29,7 @@ import { ordersApi } from '@/lib/api/orders';
 import { Order } from '@/types/order';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getProxiedImageUrl } from '@/lib/utils/format';
+import { formatPrice } from '@/lib/utils/format';
 
 const statusConfig = {
   pending: { icon: Clock, color: 'text-warning', bg: 'bg-warning/10', label: 'Pending' },
@@ -206,6 +207,11 @@ export default function OrdersPage() {
                     <p className="text-sm text-muted-foreground">
                       {t('orders.placedOn')} {orderDate}
                     </p>
+                    <div className="mt-3 flex flex-wrap gap-4 text-xs text-muted-foreground">
+                      <span>Shipping: {typeof order.shipping_cost === 'number' || order.final_order_price !== null ? formatPrice(order.shipping_cost || 0) : 'Pending'}</span>
+                      <span>Final: {order.final_order_price !== null && order.final_order_price !== undefined ? formatPrice(order.final_order_price) : 'Pending'}</span>
+                      <span>Invoice: {order.invoice?.signed_url ? 'Available' : 'Pending'}</span>
+                    </div>
                   </div>
 
                   {/* Items Preview */}
@@ -233,7 +239,7 @@ export default function OrdersPage() {
                   {/* Price & Arrow */}
                   <div className="flex items-center gap-4">
                     <div className="text-right">
-                      <p className="font-bold text-lg">€{Number(order.total || 0).toFixed(2)}</p>
+                      <p className="font-bold text-lg">{formatPrice(order.final_order_price ?? order.total ?? 0)}</p>
                       <p className="text-xs text-muted-foreground">
                         {order.items?.length || 0} {t('orders.items')}
                       </p>

@@ -19,9 +19,8 @@ export default function OrderSummary({ items, getTotal, isSubmitting }: OrderSum
   const { t } = useLanguage();
   const { settings } = useSettings();
   const subtotal = getTotal();
-  const shipping = subtotal >= settings.free_shipping_threshold ? 0 : settings.shipping_cost;
   const tax = subtotal * settings.tax_rate;
-  const total = subtotal + shipping + tax;
+  const total = subtotal + tax;
 
   return (
     <Card className="p-6 sticky top-4">
@@ -57,13 +56,7 @@ export default function OrderSummary({ items, getTotal, isSubmitting }: OrderSum
         </div>
         <div className="flex justify-between text-sm">
           <span className="text-muted-foreground">{t('cart.shipping')}</span>
-          <span className="font-medium">
-            {shipping === 0 ? (
-              <span className="text-success">Free</span>
-            ) : (
-              formatPrice(shipping)
-            )}
-          </span>
+          <span className="font-medium text-right">Added to proforma invoice later</span>
         </div>
         <div className="flex justify-between text-sm">
           <span className="text-muted-foreground">{t('checkout.taxVat')}</span>
@@ -74,11 +67,9 @@ export default function OrderSummary({ items, getTotal, isSubmitting }: OrderSum
           <span>{formatPrice(total)}</span>
         </div>
       </div>
-      {subtotal < settings.free_shipping_threshold && (
-        <p className="text-xs text-muted-foreground mt-4 text-center">
-          Add {formatPrice(settings.free_shipping_threshold - subtotal)} more for free shipping
-        </p>
-      )}
+      <p className="text-xs text-muted-foreground mt-4 text-center">
+        The final invoice will include confirmed shipping charges after our team reviews the order.
+      </p>
       <Button
         type="submit"
         size="lg"

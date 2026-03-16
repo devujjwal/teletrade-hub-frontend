@@ -15,7 +15,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { adminApi } from '@/lib/api/admin';
-import { Settings, Save, Globe, DollarSign, Truck, RefreshCw, Mail, MapPin, Phone, MessageCircle, Lock, Key, AlertCircle, Landmark } from 'lucide-react';
+import { Settings, Save, Globe, DollarSign, RefreshCw, Mail, MapPin, Phone, MessageCircle, Lock, Key, AlertCircle, Landmark } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import AdminPageLoader from '@/components/admin/admin-page-loader';
@@ -28,8 +28,6 @@ interface SettingsData {
   whatsapp_number: string;
   currency: string;
   tax_rate: string;
-  shipping_cost: string;
-  free_shipping_threshold: string;
   vendor_sync_enabled: boolean;
   vendor_sync_frequency: string;
   vendor_sales_order_time: string;
@@ -49,8 +47,6 @@ export default function AdminSettingsPage() {
     whatsapp_number: '',
     currency: 'EUR',
     tax_rate: '19.00',
-    shipping_cost: '9.99',
-    free_shipping_threshold: '100.00',
     vendor_sync_enabled: true,
     vendor_sync_frequency: '86400',
     vendor_sales_order_time: '02:00',
@@ -88,8 +84,6 @@ export default function AdminSettingsPage() {
           whatsapp_number: apiSettings.whatsapp_number || '',
           currency: apiSettings.currency || 'EUR',
           tax_rate: apiSettings.tax_rate || '19.00',
-          shipping_cost: apiSettings.shipping_cost || '9.99',
-          free_shipping_threshold: apiSettings.free_shipping_threshold || '100.00',
           vendor_sync_enabled: apiSettings.vendor_sync_enabled !== undefined 
             ? apiSettings.vendor_sync_enabled === true || apiSettings.vendor_sync_enabled === 'true'
             : true,
@@ -287,58 +281,6 @@ export default function AdminSettingsPage() {
                 onChange={(e) => updateSetting('tax_rate', e.target.value)}
                 placeholder="19.00"
               />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Shipping Settings */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Truck className="h-5 w-5" />
-            Shipping Settings
-          </CardTitle>
-          <CardDescription>Configure shipping costs and thresholds</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="shipping_cost">Default Shipping Cost</Label>
-              <div className="relative">
-                <Input
-                  id="shipping_cost"
-                  type="number"
-                  step="0.01"
-                  value={settings.shipping_cost}
-                  onChange={(e) => updateSetting('shipping_cost', e.target.value)}
-                  placeholder="9.99"
-                  className="pr-10"
-                />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                  {settings.currency}
-                </span>
-              </div>
-            </div>
-            <div>
-              <Label htmlFor="free_shipping_threshold">Free Shipping Threshold</Label>
-              <div className="relative">
-                <Input
-                  id="free_shipping_threshold"
-                  type="number"
-                  step="0.01"
-                  value={settings.free_shipping_threshold}
-                  onChange={(e) => updateSetting('free_shipping_threshold', e.target.value)}
-                  placeholder="100.00"
-                  className="pr-10"
-                />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                  {settings.currency}
-                </span>
-              </div>
-              <p className="text-xs text-muted-foreground mt-1">
-                Orders above this amount qualify for free shipping
-              </p>
             </div>
           </div>
         </CardContent>

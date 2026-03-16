@@ -27,8 +27,8 @@ export const adminApi = {
     return response.data?.data || response.data;
   },
 
-  updateUserApproval: async (id: number, isActive: boolean) => {
-    const response = await apiClient.put<any>(`/admin/users/${id}/approval`, { is_active: isActive });
+  updateUserApproval: async (id: number, approvalStatus: 'approved' | 'pending' | 'rejected') => {
+    const response = await apiClient.put<any>(`/admin/users/${id}/approval`, { approval_status: approvalStatus });
     return response.data;
   },
 
@@ -41,6 +41,34 @@ export const adminApi = {
   updateOrderStatus: async (id: number, status: string) => {
     const response = await apiClient.put<any>(`/admin/orders/${id}/status`, { status });
     return response.data;
+  },
+
+  updateOrderFinancials: async (id: number, data: { shipping_cost: number; final_order_price: number }) => {
+    const response = await apiClient.put<any>(`/admin/orders/${id}/financials`, data);
+    return response.data;
+  },
+
+  uploadOrderInvoice: async (id: number, file: File) => {
+    const formData = new FormData();
+    formData.append('invoice', file);
+
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+    const token = typeof window !== 'undefined' ? localStorage.getItem('admin_token') || localStorage.getItem('auth_token') : '';
+
+    const response = await fetch(`${API_URL}/api/admin/orders/${id}/invoice`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: formData,
+    });
+
+    const data = await response.json();
+    if (!response.ok || !data.success) {
+      throw new Error(data.message || 'Invoice upload failed');
+    }
+
+    return data;
   },
 
   // Products

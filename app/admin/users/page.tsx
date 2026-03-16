@@ -61,6 +61,7 @@ interface ShopUser {
   vat_certificate_file?: string;
   tax_number_certificate_file?: string;
   is_active: number;
+  approval_status?: 'approved' | 'pending' | 'rejected';
   created_at: string;
 }
 
@@ -102,18 +103,30 @@ export default function AdminUsersPage() {
     loadUsers();
   }, [loadUsers]);
 
-  const toggleApproval = async (user: ShopUser, isActive: boolean) => {
+  const updateApproval = async (user: ShopUser, approvalStatus: 'approved' | 'pending' | 'rejected') => {
     try {
-      await adminApi.updateUserApproval(user.id, isActive);
-      toast.success(isActive ? 'User approved' : 'User moved to pending');
+      await adminApi.updateUserApproval(user.id, approvalStatus);
+      toast.success(
+        approvalStatus === 'approved'
+          ? 'User approved'
+          : approvalStatus === 'rejected'
+          ? 'User rejected'
+          : 'User moved to pending'
+      );
       loadUsers();
       if (selectedUser && selectedUser.id === user.id) {
-        setSelectedUser({ ...selectedUser, is_active: isActive ? 1 : 0 });
+        setSelectedUser({
+          ...selectedUser,
+          approval_status: approvalStatus,
+          is_active: approvalStatus === 'approved' ? 1 : 0,
+        });
       }
     } catch (error: any) {
       toast.error(error.message || 'Failed to update approval');
     }
   };
+
+  const getApprovalStatus = (user: ShopUser) => user.approval_status || (user.is_active ? 'approved' : 'pending');
 
   const fullName = (user: ShopUser) => `${user.first_name || ''} ${user.last_name || ''}`.trim() || 'N/A';
   const renderDocumentLink = (url?: string, label = 'View Document') => {
@@ -171,6 +184,7 @@ export default function AdminUsersPage() {
                 <SelectItem value="all">All Statuses</SelectItem>
                 <SelectItem value="approved">Approved</SelectItem>
                 <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="rejected">Rejected</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -219,8 +233,14 @@ export default function AdminUsersPage() {
                       </TableCell>
                       <TableCell>{user.phone || user.mobile || 'N/A'}</TableCell>
                       <TableCell>
-                        <Badge className={user.is_active ? 'bg-success/20 text-success border-success/30' : 'bg-warning/20 text-warning border-warning/30'}>
-                          {user.is_active ? 'Approved' : 'Pending'}
+                        <Badge className={
+                          getApprovalStatus(user) === 'approved'
+                            ? 'bg-success/20 text-success border-success/30'
+                            : getApprovalStatus(user) === 'rejected'
+                            ? 'bg-destructive/20 text-destructive border-destructive/30'
+                            : 'bg-warning/20 text-warning border-warning/30'
+                        }>
+                          {getApprovalStatus(user).charAt(0).toUpperCase() + getApprovalStatus(user).slice(1)}
                         </Badge>
                       </TableCell>
                       <TableCell>{format(new Date(user.created_at), 'MMM dd, yyyy')}</TableCell>
@@ -231,10 +251,17 @@ export default function AdminUsersPage() {
                           </Button>
                           <Button
                             size="sm"
-                            variant={user.is_active ? 'outline' : 'default'}
-                            onClick={() => toggleApproval(user, !user.is_active)}
+                            variant={getApprovalStatus(user) === 'approved' ? 'outline' : 'default'}
+                            onClick={() => updateApproval(user, getApprovalStatus(user) === 'approved' ? 'pending' : 'approved')}
                           >
-                            {user.is_active ? 'Set Pending' : 'Approve'}
+                            {getApprovalStatus(user) === 'approved' ? 'Set Pending' : 'Approve'}
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => updateApproval(user, 'rejected')}
+                          >
+                            Reject
                           </Button>
                         </div>
                       </TableCell>
@@ -257,7 +284,7 @@ export default function AdminUsersPage() {
               <div><span className="font-medium">Name:</span> {fullName(selectedUser)}</div>
               <div><span className="font-medium">Email:</span> {selectedUser.email}</div>
               <div><span className="font-medium">Account type:</span> {selectedUser.account_type}</div>
-              <div><span className="font-medium">Status:</span> {selectedUser.is_active ? 'Approved' : 'Pending'}</div>
+              <div><span className="font-medium">Status:</span> {getApprovalStatus(selectedUser)}</div>
               <div><span className="font-medium">Phone:</span> {selectedUser.phone || 'N/A'}</div>
               <div><span className="font-medium">Mobile:</span> {selectedUser.mobile || 'N/A'}</div>
               <div><span className="font-medium">Address:</span> {selectedUser.address || 'N/A'}</div>
@@ -282,10 +309,17 @@ export default function AdminUsersPage() {
             </div>
             <div className="pt-4">
               <Button
-                onClick={() => toggleApproval(selectedUser, !selectedUser.is_active)}
-                variant={selectedUser.is_active ? 'outline' : 'default'}
+                onClick={() => updateApproval(selectedUser, getApprovalStatus(selectedUser) === 'approved' ? 'pending' : 'approved')}
+                variant={getApprovalStatus(selectedUser) === 'approved' ? 'outline' : 'default'}
               >
-                {selectedUser.is_active ? 'Set Pending' : 'Approve User'}
+                {getApprovalStatus(selectedUser) === 'approved' ? 'Set Pending' : 'Approve User'}
+              </Button>
+              <Button
+                onClick={() => updateApproval(selectedUser, 'rejected')}
+                variant="outline"
+                className="ml-2"
+              >
+                Reject User
               </Button>
             </div>
           </DialogContent>

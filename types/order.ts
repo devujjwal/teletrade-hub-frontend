@@ -34,12 +34,20 @@ export interface Order {
   items: OrderItem[];
   subtotal: number;
   shipping_cost?: number;
+  final_order_price?: number | null;
   tax?: number;
   total: number;
   status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
   payment_status: 'pending' | 'paid' | 'failed' | 'refunded' | 'unpaid';
   payment_method?: string;
   notes?: string;
+  invoice?: {
+    id: number;
+    invoice_url: string;
+    signed_url?: string | null;
+    uploaded_at: string;
+    uploaded_by_admin?: number | null;
+  } | null;
   created_at: string;
   updated_at: string;
 }

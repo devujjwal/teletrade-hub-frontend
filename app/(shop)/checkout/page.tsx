@@ -205,7 +205,7 @@ export default function CheckoutPage() {
         <div className="max-w-md mx-auto">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
           <h2 className="text-xl font-semibold mb-2">Processing Your Order...</h2>
-          <p className="text-muted-foreground">Please wait while we redirect you to payment instructions.</p>
+          <p className="text-muted-foreground">Please wait while we prepare your order confirmation.</p>
         </div>
       </div>
     );

@@ -12,7 +12,7 @@ import Badge from '@/components/ui/badge';
 import Button from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { CheckCircle, ArrowRight, Package, Printer, Copy, Mail, MessageCircle, Landmark, Info, ShoppingBag } from 'lucide-react';
+import { CheckCircle, Package, Printer, Mail, MessageCircle, Info, ShoppingBag, FileText } from 'lucide-react';
 import { Order } from '@/types/order';
 import { getProxiedImageUrl } from '@/lib/utils/format';
 import toast from 'react-hot-toast';
@@ -79,23 +79,18 @@ export default function OrderPage() {
     window.print();
   };
 
-  const copyToClipboard = (text: string, label: string) => {
-    navigator.clipboard.writeText(text);
-    toast.success(`${label} copied to clipboard`);
-  };
-
   const openWhatsApp = () => {
     if (settings?.whatsapp_number) {
       const phoneNumber = settings.whatsapp_number.replace(/[^0-9]/g, '');
-      const message = encodeURIComponent(`Hello, I have a question about my order ${orderNumber}.`);
+      const message = encodeURIComponent(`Hello, I am following up on order ${orderNumber}.`);
       window.open(`https://wa.me/${phoneNumber}?text=${message}`, '_blank');
     }
   };
 
   const sendEmail = () => {
     if (settings?.site_email) {
-      const subject = encodeURIComponent(`Order Inquiry - ${orderNumber}`);
-      const body = encodeURIComponent(`Hello,\n\nI have a question about my order ${orderNumber}.\n\nThank you.`);
+      const subject = encodeURIComponent(`Order Follow-up - ${orderNumber}`);
+      const body = encodeURIComponent(`Hello,\n\nI am following up on order ${orderNumber}.\n\nThank you.`);
       window.location.href = `mailto:${settings.site_email}?subject=${subject}&body=${body}`;
     }
   };
@@ -131,6 +126,8 @@ export default function OrderPage() {
   const isShipped = order?.status === 'shipped';
   const isDelivered = order?.status === 'delivered';
   const isCancelled = order?.status === 'cancelled';
+  const invoiceReady = !!order?.invoice?.signed_url;
+  const finalPrice = order?.final_order_price ?? null;
 
   return (
     <div className="container-wide py-8">
@@ -154,24 +151,24 @@ export default function OrderPage() {
            isDelivered ? 'Order Delivered!' :
            isShipped ? 'Order Shipped!' :
            isProcessing ? 'Order Processing' :
-           'Order Confirmed!'}
+           invoiceReady ? 'Invoice Ready' : 'Order Received'}
         </h1>
         <p className="text-muted-foreground">
           {isCancelled ? 'This order has been cancelled. If you have any questions, please contact us.' :
            isDelivered ? 'Your order has been delivered. Thank you for shopping with us!' :
-           isShipped ? 'Your order is on its way! We\'ve sent tracking information to ' + order.customer_email :
-           isProcessing ? 'Your order is being processed. We\'ll notify you once it ships.' :
-           'Thank you for your order. We\'ve sent a confirmation email to ' + order.customer_email}
+           isShipped ? 'Your order is on its way. We will keep you informed until delivery.' :
+           isProcessing ? 'Your order is being processed after payment confirmation.' :
+           invoiceReady ? 'Your proforma invoice is available below.' :
+           'We are preparing your proforma invoice with final shipping charges.'}
         </p>
       </div>
 
-      {/* Payment Pending Notice - Only show for pending orders */}
-      {isPending && order?.status === 'pending' && (
+      {order?.status === 'pending' && !invoiceReady && (
         <div className="max-w-4xl mx-auto mb-6">
           <Alert>
             <Info className="h-4 w-4" />
             <AlertDescription>
-              <strong>Payment Required:</strong> Your order is pending payment. Please complete the bank transfer to process your order.
+              <strong>Invoice pending:</strong> A final Proforma Invoice including shipping charges will be sent to your email and WhatsApp (if available) shortly.
             </AlertDescription>
           </Alert>
         </div>
@@ -250,22 +247,55 @@ export default function OrderPage() {
               <span className="text-muted-foreground">Subtotal</span>
               <span className="font-medium">{formatPrice(order.subtotal)}</span>
             </div>
-            {order.shipping_cost && (
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Shipping</span>
-                <span className="font-medium">{formatPrice(order.shipping_cost)}</span>
-              </div>
-            )}
-            {order.tax && (
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Shipping charges</span>
+              <span className="font-medium">
+                {typeof order.shipping_cost === 'number' && order.shipping_cost > 0
+                  ? formatPrice(order.shipping_cost)
+                  : invoiceReady || finalPrice !== null
+                  ? formatPrice(order.shipping_cost || 0)
+                  : 'Pending on invoice'}
+              </span>
+            </div>
+            {order.tax ? (
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Tax (VAT)</span>
                 <span className="font-medium">{formatPrice(order.tax)}</span>
               </div>
-            )}
+            ) : null}
             <div className="flex justify-between font-semibold text-lg pt-2 border-t border-border">
-              <span>Total</span>
+              <span>Base price</span>
               <span>{formatPrice(order.total)}</span>
             </div>
+            <div className="flex justify-between font-semibold text-lg">
+              <span>Final price</span>
+              <span>{finalPrice !== null ? formatPrice(finalPrice) : 'Pending on invoice'}</span>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="p-6">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div>
+              <h3 className="font-semibold text-lg mb-1">Proforma Invoice</h3>
+              <p className="text-sm text-muted-foreground">
+                {invoiceReady
+                  ? 'Please clear the invoice within 24 hours and confirm payment via email or WhatsApp.'
+                  : 'We will upload the final invoice here as soon as it is ready.'}
+              </p>
+            </div>
+            {invoiceReady ? (
+              <Button asChild>
+                <a href={order.invoice?.signed_url || '#'} target="_blank" rel="noopener noreferrer">
+                  <FileText className="w-4 h-4 mr-2" />
+                  Download Invoice
+                </a>
+              </Button>
+            ) : (
+              <div className="rounded-full bg-muted px-4 py-2 text-sm text-muted-foreground">
+                Invoice pending
+              </div>
+            )}
           </div>
         </Card>
 
@@ -326,134 +356,27 @@ export default function OrderPage() {
           </Card>
         </div>
 
-        {/* Bank Details - Only show if payment is pending AND order status is pending */}
-        {isPending && order?.status === 'pending' && !isLoadingSettings && settings && (
+        {!isLoadingSettings && settings && (
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Landmark className="h-5 w-5" />
-                Bank Transfer Details
-              </CardTitle>
-              <CardDescription>
-                Please use the following information to complete your payment
-              </CardDescription>
+              <CardTitle>Contact TeleTrade Hub</CardTitle>
+              <CardDescription>Use email or WhatsApp to confirm payment after the invoice is cleared.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {settings.bank_name && (
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-muted-foreground">Bank Name</label>
-                  <div className="flex items-center justify-between p-3 border rounded-lg bg-muted/50">
-                    <span className="font-medium">{settings.bank_name}</span>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => copyToClipboard(settings.bank_name, 'Bank name')}
-                    >
-                      <Copy className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              )}
-
-              {settings.account_holder && (
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-muted-foreground">Account Holder</label>
-                  <div className="flex items-center justify-between p-3 border rounded-lg bg-muted/50">
-                    <span className="font-medium">{settings.account_holder}</span>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => copyToClipboard(settings.account_holder, 'Account holder')}
-                    >
-                      <Copy className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              )}
-
-              {settings.iban && (
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-muted-foreground">IBAN</label>
-                  <div className="flex items-center justify-between p-3 border rounded-lg bg-muted/50">
-                    <span className="font-mono font-medium">{settings.iban}</span>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => copyToClipboard(settings.iban, 'IBAN')}
-                    >
-                      <Copy className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              )}
-
-              {settings.bic && (
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-muted-foreground">BIC/SWIFT Code</label>
-                  <div className="flex items-center justify-between p-3 border rounded-lg bg-muted/50">
-                    <span className="font-mono font-medium">{settings.bic}</span>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => copyToClipboard(settings.bic, 'BIC')}
-                    >
-                      <Copy className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              )}
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-muted-foreground">Payment Reference</label>
-                <div className="flex items-center justify-between p-3 border rounded-lg bg-muted/50">
-                  <span className="font-medium">Order #{orderNumber}</span>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => copyToClipboard(`Order #${orderNumber}`, 'Reference')}
-                  >
-                    <Copy className="h-4 w-4" />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {settings.site_email && (
+                  <Button onClick={sendEmail} variant="outline" size="sm">
+                    <Mail className="h-4 w-4 mr-2" />
+                    Email Support
                   </Button>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Please include this reference in your bank transfer
-                </p>
-              </div>
+                )}
 
-              {settings.bank_additional_info && (
-                <div className="p-3 border rounded-lg bg-blue-50 dark:bg-blue-900/10 border-blue-200 dark:border-blue-800">
-                  <p className="text-sm text-blue-900 dark:text-blue-100 whitespace-pre-line">
-                    {settings.bank_additional_info}
-                  </p>
-                </div>
-              )}
-
-              {/* Contact Options */}
-              <div className="pt-4 border-t">
-                <p className="text-sm font-medium mb-3">Send Payment Confirmation</p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {settings.site_email && (
-                    <Button
-                      onClick={sendEmail}
-                      variant="outline"
-                      size="sm"
-                    >
-                      <Mail className="h-4 w-4 mr-2" />
-                      Email Screenshot
-                    </Button>
-                  )}
-                  
-                  {settings.whatsapp_number && (
-                    <Button
-                      onClick={openWhatsApp}
-                      variant="outline"
-                      size="sm"
-                    >
-                      <MessageCircle className="h-4 w-4 mr-2" />
-                      WhatsApp
-                    </Button>
-                  )}
-                </div>
+                {settings.whatsapp_number && (
+                  <Button onClick={openWhatsApp} variant="outline" size="sm">
+                    <MessageCircle className="h-4 w-4 mr-2" />
+                    WhatsApp Support
+                  </Button>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -475,14 +398,6 @@ export default function OrderPage() {
               View All Orders
             </Link>
           </Button>
-          {isPending && order?.status === 'pending' && (
-            <Button variant="default" asChild>
-              <Link href={`/checkout/payment-instructions/${orderNumber}`}>
-                <Landmark className="w-4 h-4 mr-2" />
-                Payment Instructions
-              </Link>
-            </Button>
-          )}
           <Button variant="outline" onClick={handlePrint} className="print:hidden">
             <Printer className="w-4 h-4 mr-2" />
             Print Order
@@ -492,4 +407,3 @@ export default function OrderPage() {
     </div>
   );
 }
-

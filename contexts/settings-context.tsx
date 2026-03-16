@@ -11,8 +11,6 @@ interface Settings {
   whatsapp_number: string;
   currency: string;
   tax_rate: number;
-  shipping_cost: number;
-  free_shipping_threshold: number;
 }
 
 interface SettingsContextType {
@@ -29,8 +27,6 @@ const defaultSettings: Settings = {
   whatsapp_number: '',
   currency: 'EUR',
   tax_rate: 0.19, // 19%
-  shipping_cost: 9.99,
-  free_shipping_threshold: 100,
 };
 
 const SettingsContext = createContext<SettingsContextType>({
@@ -57,8 +53,6 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
           whatsapp_number: data.whatsapp_number || defaultSettings.whatsapp_number,
           currency: data.currency || defaultSettings.currency,
           tax_rate: parseFloat(data.tax_rate) / 100 || defaultSettings.tax_rate,
-          shipping_cost: parseFloat(data.shipping_cost) || defaultSettings.shipping_cost,
-          free_shipping_threshold: parseFloat(data.free_shipping_threshold) || defaultSettings.free_shipping_threshold,
         });
       }
     } catch (error) {

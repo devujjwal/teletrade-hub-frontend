@@ -16,8 +16,7 @@ export default function CartSummary() {
 
   const subtotal = getTotal();
   const tax = subtotal * settings.tax_rate;
-  const shipping = subtotal >= settings.free_shipping_threshold ? 0 : settings.shipping_cost;
-  const total = subtotal + tax + shipping;
+  const total = subtotal + tax;
 
   return (
     <Card className="p-6 sticky top-4">
@@ -30,13 +29,7 @@ export default function CartSummary() {
         </div>
         <div className="flex justify-between text-sm">
           <span className="text-muted-foreground">{t('cart.shipping')}</span>
-          <span className="font-medium">
-            {shipping === 0 ? (
-              <span className="text-success">Free</span>
-            ) : (
-              formatPrice(shipping)
-            )}
-          </span>
+          <span className="font-medium text-right">Shared later on proforma invoice</span>
         </div>
         <div className="flex justify-between text-sm">
           <span className="text-muted-foreground">{t('checkout.taxVat')}</span>
@@ -48,11 +41,9 @@ export default function CartSummary() {
         </div>
       </div>
 
-      {subtotal < settings.free_shipping_threshold && (
-        <p className="text-xs text-muted-foreground mb-4 text-center">
-          Add {formatPrice(settings.free_shipping_threshold - subtotal)} more for free shipping
-        </p>
-      )}
+      <p className="text-xs text-muted-foreground mb-4 text-center">
+        Shipping charges are confirmed manually and added to your proforma invoice after order placement.
+      </p>
 
       <Button size="lg" className="w-full btn-shop mb-4" asChild>
         <Link href="/checkout">{t('cart.checkout')}</Link>
