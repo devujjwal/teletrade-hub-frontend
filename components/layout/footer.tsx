@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Mail, Phone, MapPin, Facebook, Twitter, Instagram, Youtube, MessageCircle } from 'lucide-react';
 import { settingsApi, PublicSettings } from '@/lib/api/settings';
 import { useLanguage } from '@/contexts/language-context';
+import SiteLogo from '@/components/layout/site-logo';
 
 export default function Footer() {
   const { t } = useLanguage();
@@ -34,11 +35,14 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Brand */}
           <div>
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center">
-                <span className="text-secondary-foreground font-bold text-lg">TT</span>
-              </div>
-              <span className="font-display font-bold text-xl">{settings.site_name || 'TeleTrade Hub'}</span>
+            <div className="mb-4">
+              <SiteLogo
+                href="/"
+                background="dark"
+                width={410}
+                height={120}
+                imageClassName="h-14 w-auto"
+              />
             </div>
             <p className="text-primary-foreground/70 text-sm mb-4">
               {t('footer.description') || 'Your trusted partner for premium telecommunication products. Quality devices from the world\'s top brands.'}

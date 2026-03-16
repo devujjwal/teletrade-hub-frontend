@@ -14,7 +14,6 @@ import {
   LogOut,
   Menu,
   X,
-  Store,
   Tags,
   Award,
   Users,
@@ -22,6 +21,7 @@ import {
 import { cn } from '@/lib/utils/cn';
 import Button from '@/components/ui/button';
 import { useHydrated } from '@/lib/hooks/use-hydrated';
+import SiteLogo from '@/components/layout/site-logo';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -102,9 +102,14 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         >
           <Menu className="h-6 w-6" />
         </Button>
-        <div className="flex items-center gap-2 ml-4">
-          <Store className="h-6 w-6" />
-          <span className="font-bold text-lg">Admin Panel</span>
+        <div className="ml-4">
+          <SiteLogo
+            href="/admin/dashboard"
+            background="dark"
+            width={320}
+            height={92}
+            imageClassName="h-9 w-auto"
+          />
         </div>
       </header>
 
@@ -124,10 +129,13 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         )}
       >
         <div className="flex items-center justify-between h-16 px-4 border-b border-primary-foreground/10">
-          <div className="flex items-center gap-2">
-            <Store className="h-6 w-6" />
-            <span className="font-bold text-lg">TeleTrade Hub</span>
-          </div>
+          <SiteLogo
+            href="/admin/dashboard"
+            background="dark"
+            width={320}
+            height={92}
+            imageClassName="h-9 w-auto"
+          />
           <Button
             variant="ghost"
             size="icon"

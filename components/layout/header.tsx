@@ -13,6 +13,7 @@ import LanguageSelector from '@/components/layout/language-selector';
 import MobileSearchOverlay from '@/components/layout/mobile-search-overlay';
 import { useLanguage } from '@/contexts/language-context';
 import { useHydrated } from '@/lib/hooks/use-hydrated';
+import SiteLogo from '@/components/layout/site-logo';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -59,12 +60,14 @@ export default function Header() {
       <div className="container-wide">
         {/* Top Bar */}
         <div className="flex items-center justify-between py-3 border-b border-border">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-lg">TT</span>
-            </div>
-            <span className="font-display font-bold text-xl hidden sm:block">TeleTrade Hub</span>
-          </Link>
+          <SiteLogo
+            href="/"
+            background="light"
+            width={410}
+            height={120}
+            imageClassName="h-11 sm:h-12 w-auto"
+            priority
+          />
 
           {/* Search Bar - Desktop */}
           <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-xl mx-8">
