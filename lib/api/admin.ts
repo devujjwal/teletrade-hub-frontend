@@ -55,7 +55,7 @@ export const adminApi = {
     const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
     const token = typeof window !== 'undefined' ? localStorage.getItem('admin_token') || localStorage.getItem('auth_token') : '';
 
-    const response = await fetch(`${API_URL}/api/admin/orders/${id}/invoice`, {
+    const response = await fetch(`${API_URL}/admin/orders/${id}/invoice`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
