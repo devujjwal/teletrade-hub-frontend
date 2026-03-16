@@ -1,12 +1,12 @@
 import { Metadata } from 'next';
 import Card from '@/components/ui/card';
-import { ShoppingCart, CreditCard, Truck, CheckCircle } from 'lucide-react';
+import { ShoppingCart, FileText, MessageCircle, CheckCircle, Package } from 'lucide-react';
 import Link from 'next/link';
 import Button from '@/components/ui/button';
 
 export const metadata: Metadata = {
   title: 'How to Buy | TeleTrade Hub',
-  description: 'Learn how to purchase products from TeleTrade Hub - Simple steps to get your favorite products',
+  description: 'Learn the TeleTrade Hub order flow: place order, receive proforma invoice with shipping, clear payment within 24 hours, and track delivery.',
 };
 
 export default function HowToBuyPage() {
@@ -14,27 +14,27 @@ export default function HowToBuyPage() {
     {
       icon: ShoppingCart,
       title: 'Browse & Select',
-      description: 'Browse our extensive catalog of products. Use filters to find exactly what you need, read product descriptions, check specifications, and compare prices.',
+      description: 'Browse our catalog, compare specifications, and add the products you need to your cart.',
     },
     {
       icon: ShoppingCart,
-      title: 'Add to Cart',
-      description: 'Click "Add to Cart" on any product you want to purchase. You can add multiple items and adjust quantities before checkout.',
+      title: 'Place Your Order',
+      description: 'Complete checkout with your delivery and billing details. Shipping is not calculated automatically at checkout.',
     },
     {
-      icon: CreditCard,
-      title: 'Checkout',
-      description: 'Review your cart, enter your shipping and billing information, and choose your preferred payment method. We accept all major credit cards and secure payment methods.',
+      icon: FileText,
+      title: 'Receive Proforma Invoice',
+      description: 'After order placement, we send a final Proforma Invoice to your email and WhatsApp (if available), including confirmed shipping charges.',
     },
     {
-      icon: Truck,
-      title: 'Order Confirmation',
-      description: 'After placing your order, you\'ll receive an email confirmation with your order number and tracking information. You can track your order status in your account.',
+      icon: MessageCircle,
+      title: 'Clear Payment Within 24 Hours',
+      description: 'Please clear the invoice within 24 hours and confirm payment via email or WhatsApp. If not cleared in time, reserved articles are automatically unreserved.',
     },
     {
-      icon: CheckCircle,
-      title: 'Receive Your Order',
-      description: 'Your order will be carefully packaged and shipped to your address. You\'ll receive updates via email as your order is processed and shipped.',
+      icon: Package,
+      title: 'Processing & Delivery',
+      description: 'Once payment is confirmed, your order is processed. You can track status updates from your account until delivery.',
     },
   ];
 
@@ -44,7 +44,7 @@ export default function HowToBuyPage() {
       <div className="text-center mb-12">
         <h1 className="font-display text-4xl md:text-5xl font-bold mb-4">How to Buy</h1>
         <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-          Shopping at TeleTrade Hub is simple and secure. Follow these easy steps to get your favorite products.
+          TeleTrade Hub follows a proforma-invoice workflow. Place your order first, then clear the final invoice with confirmed shipping charges.
         </p>
       </div>
 
@@ -80,35 +80,40 @@ export default function HowToBuyPage() {
             <li>• Track your orders easily</li>
             <li>• Save your shipping addresses</li>
             <li>• View order history</li>
-            <li>• Faster checkout process</li>
-            <li>• Exclusive member discounts</li>
+            <li>• Access invoice links from order details</li>
+            <li>• Faster repeat checkout</li>
           </ul>
           <Link href="/register" className="inline-block mt-4">
             <Button variant="outline" size="sm">Create Account</Button>
           </Link>
         </Card>
 
+        <Card className="p-6">
+          <h3 className="font-semibold text-lg mb-3">Important Policy</h3>
+          <ul className="space-y-2 text-sm text-muted-foreground">
+            <li>• Shipping is finalized manually and added to the invoice.</li>
+            <li>• Invoice is shared by email and WhatsApp (if available).</li>
+            <li>• Payment confirmation is required within 24 hours.</li>
+            <li>• Unpaid invoices may release reserved stock automatically.</li>
+          </ul>
+        </Card>
       </div>
 
-      {/* Payment Methods */}
+      {/* Payment Process */}
       <Card className="p-8">
-        <h2 className="font-display text-2xl font-bold mb-6">Accepted Payment Methods</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <h2 className="font-display text-2xl font-bold mb-6">Payment Process</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="text-center p-4 border border-border rounded-lg">
-            <p className="font-semibold">Credit Cards</p>
-            <p className="text-xs text-muted-foreground mt-1">Visa, Mastercard, Amex</p>
+            <p className="font-semibold">Step 1</p>
+            <p className="text-xs text-muted-foreground mt-1">Receive your Proforma Invoice</p>
           </div>
           <div className="text-center p-4 border border-border rounded-lg">
-            <p className="font-semibold">Debit Cards</p>
-            <p className="text-xs text-muted-foreground mt-1">All major banks</p>
+            <p className="font-semibold">Step 2</p>
+            <p className="text-xs text-muted-foreground mt-1">Clear payment within 24 hours</p>
           </div>
           <div className="text-center p-4 border border-border rounded-lg">
-            <p className="font-semibold">PayPal</p>
-            <p className="text-xs text-muted-foreground mt-1">Secure payments</p>
-          </div>
-          <div className="text-center p-4 border border-border rounded-lg">
-            <p className="font-semibold">Bank Transfer</p>
-            <p className="text-xs text-muted-foreground mt-1">Direct transfer</p>
+            <p className="font-semibold">Step 3</p>
+            <p className="text-xs text-muted-foreground mt-1">Confirm payment via email or WhatsApp</p>
           </div>
         </div>
       </Card>
@@ -124,4 +129,3 @@ export default function HowToBuyPage() {
     </div>
   );
 }
-
