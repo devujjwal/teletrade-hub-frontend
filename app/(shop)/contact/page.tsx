@@ -1,7 +1,6 @@
 'use client';
 
-import { Metadata } from 'next';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -10,6 +9,7 @@ import Input from '@/components/ui/input';
 import Button from '@/components/ui/button';
 import { Mail, Phone, MapPin, Clock, Send } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { settingsApi, PublicSettings } from '@/lib/api/settings';
 
 const contactSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
@@ -23,6 +23,13 @@ type ContactFormData = z.infer<typeof contactSchema>;
 
 export default function ContactPage() {
   const [isLoading, setIsLoading] = useState(false);
+  const [settings, setSettings] = useState<PublicSettings>({
+    site_name: 'TeleTrade Hub',
+    site_email: '',
+    address: '',
+    contact_number: '',
+    whatsapp_number: '',
+  });
   const {
     register,
     handleSubmit,
@@ -31,6 +38,18 @@ export default function ContactPage() {
   } = useForm<ContactFormData>({
     resolver: zodResolver(contactSchema),
   });
+
+  useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        const publicSettings = await settingsApi.getPublic();
+        setSettings(publicSettings);
+      } catch (error) {
+        console.error('Failed to load contact settings:', error);
+      }
+    };
+    loadSettings();
+  }, []);
 
   const onSubmit = async (data: ContactFormData) => {
     setIsLoading(true);
@@ -66,8 +85,13 @@ export default function ContactPage() {
               </div>
               <div>
                 <h3 className="font-semibold mb-1">Email</h3>
-                <p className="text-sm text-muted-foreground">support@teletradehub.com</p>
-                <p className="text-sm text-muted-foreground">sales@teletradehub.com</p>
+                {settings.site_email ? (
+                  <a href={`mailto:${settings.site_email}`} className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                    {settings.site_email}
+                  </a>
+                ) : (
+                  <p className="text-sm text-muted-foreground">Email not available</p>
+                )}
               </div>
             </div>
           </Card>
@@ -79,8 +103,16 @@ export default function ContactPage() {
               </div>
               <div>
                 <h3 className="font-semibold mb-1">Phone</h3>
-                <p className="text-sm text-muted-foreground">+1 (555) 123-4567</p>
-                <p className="text-sm text-muted-foreground">Mon-Fri: 9AM - 6PM</p>
+                {settings.contact_number ? (
+                  <a
+                    href={`tel:${settings.contact_number.replace(/\s/g, '')}`}
+                    className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    {settings.contact_number}
+                  </a>
+                ) : (
+                  <p className="text-sm text-muted-foreground">Phone not available</p>
+                )}
               </div>
             </div>
           </Card>
@@ -92,11 +124,11 @@ export default function ContactPage() {
               </div>
               <div>
                 <h3 className="font-semibold mb-1">Address</h3>
-                <p className="text-sm text-muted-foreground">
-                  123 Tech Street<br />
-                  Digital City, DC 12345<br />
-                  United States
-                </p>
+                {settings.address ? (
+                  <p className="text-sm text-muted-foreground whitespace-pre-line">{settings.address}</p>
+                ) : (
+                  <p className="text-sm text-muted-foreground">Address not available</p>
+                )}
               </div>
             </div>
           </Card>
@@ -207,4 +239,3 @@ export default function ContactPage() {
     </div>
   );
 }
-
