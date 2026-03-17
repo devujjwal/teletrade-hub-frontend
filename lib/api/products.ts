@@ -4,38 +4,12 @@ import { mapProduct } from '@/lib/utils/mappers';
 
 export const productsApi = {
   list: async (filters?: ProductFilters): Promise<ProductListResponse> => {
-    // The backend only accepts category_id and brand_id (not slugs)
-    // We need to convert slugs to IDs if provided
     const params: any = { ...filters };
-    
-    // Convert category slug to category_id
-    if (params.category && !params.category_id) {
-      try {
-        const { categoriesApi } = await import('./categories');
-        const categoriesResponse = await categoriesApi.list(params.lang);
-        const category = categoriesResponse.data.find((c) => c.slug === params.category);
-        if (category) {
-          params.category_id = category.id;
-        }
-        delete params.category; // Remove slug
-      } catch (error) {
-        console.error('Error fetching category for filter:', error);
-      }
-    }
-    
-    // Convert brand slug to brand_id
-    if (params.brand && !params.brand_id) {
-      try {
-        const { brandsApi } = await import('./brands');
-        const brandsResponse = await brandsApi.list(params.lang);
-        const brand = brandsResponse.data.find((b) => b.slug === params.brand);
-        if (brand) {
-          params.brand_id = brand.id;
-        }
-        delete params.brand; // Remove slug
-      } catch (error) {
-        console.error('Error fetching brand for filter:', error);
-      }
+
+    // Normalize pagination parameter to backend shape.
+    if (params.per_page && !params.limit) {
+      params.limit = params.per_page;
+      delete params.per_page;
     }
     
     const response = await apiClient.get<any>('/products', {
@@ -120,4 +94,3 @@ export const productsApi = {
     return response.data;
   },
 };
-
