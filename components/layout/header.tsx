@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCartStore } from '@/lib/store/cart-store';
 import { useAuthStore } from '@/lib/store/auth-store';
@@ -14,6 +14,8 @@ import MobileSearchOverlay from '@/components/layout/mobile-search-overlay';
 import { useLanguage } from '@/contexts/language-context';
 import { useHydrated } from '@/lib/hooks/use-hydrated';
 import SiteLogo from '@/components/layout/site-logo';
+import { productsApi } from '@/lib/api/products';
+import { Product } from '@/types/product';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -31,6 +33,11 @@ export default function Header() {
   const router = useRouter();
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [suggestions, setSuggestions] = useState<Product[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const searchRequestRef = useRef(0);
+  const searchContainerRef = useRef<HTMLDivElement | null>(null);
   const isHydrated = useHydrated();
   const itemCount = useCartStore((state) => state.getItemCount());
   const { user, logout, isAdmin } = useAuthStore();
@@ -44,8 +51,64 @@ export default function Header() {
       const langParam = language && language !== 'en' ? `&lang=${language}` : '';
       // Use Next.js router for better security and performance
       router.push(`/products?search=${encodedQuery}${langParam}`);
+      setShowSuggestions(false);
     }
   };
+
+  useEffect(() => {
+    const query = searchQuery.trim();
+    if (query.length < 2) {
+      setSuggestions([]);
+      setIsSearching(false);
+      return;
+    }
+
+    const currentRequestId = ++searchRequestRef.current;
+    const debounceTimer = setTimeout(async () => {
+      try {
+        setIsSearching(true);
+        const response = await productsApi.list({
+          search: query,
+          page: 1,
+          per_page: 6,
+          include_total: 0,
+          include_filters: 0,
+          lang: language || 'en',
+        });
+
+        if (searchRequestRef.current !== currentRequestId) {
+          return;
+        }
+
+        setSuggestions(Array.isArray(response.data) ? response.data.slice(0, 6) : []);
+      } catch (error) {
+        if (searchRequestRef.current !== currentRequestId) {
+          return;
+        }
+        setSuggestions([]);
+      } finally {
+        if (searchRequestRef.current === currentRequestId) {
+          setIsSearching(false);
+        }
+      }
+    }, 280);
+
+    return () => clearTimeout(debounceTimer);
+  }, [searchQuery, language]);
+
+  useEffect(() => {
+    const handleDocumentClick = (event: MouseEvent) => {
+      if (!searchContainerRef.current) {
+        return;
+      }
+      if (!searchContainerRef.current.contains(event.target as Node)) {
+        setShowSuggestions(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleDocumentClick);
+    return () => document.removeEventListener('mousedown', handleDocumentClick);
+  }, []);
 
   const langParam = language && language !== 'en' ? `?lang=${language}` : '';
   const navLinks = [
@@ -71,15 +134,50 @@ export default function Header() {
 
           {/* Search Bar - Desktop */}
           <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-xl mx-8">
-            <div className="relative w-full">
+            <div className="relative w-full" ref={searchContainerRef}>
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
                 type="text"
                 placeholder={t('products.search')}
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setShowSuggestions(true);
+                }}
+                onFocus={() => {
+                  if (searchQuery.trim().length >= 2) {
+                    setShowSuggestions(true);
+                  }
+                }}
                 className="pl-10 pr-4 w-full"
               />
+              {showSuggestions && searchQuery.trim().length >= 2 && (
+                <div className="absolute top-full mt-2 left-0 right-0 bg-background border border-border rounded-md shadow-lg z-50 max-h-96 overflow-y-auto">
+                  {isSearching ? (
+                    <div className="p-3 text-sm text-muted-foreground">Searching...</div>
+                  ) : suggestions.length > 0 ? (
+                    suggestions.map((product) => {
+                      const langParam = language && language !== 'en' ? `?lang=${language}` : '';
+                      return (
+                        <Link
+                          key={product.id}
+                          href={`/products/${product.slug}${langParam}`}
+                          prefetch={false}
+                          className="block px-3 py-2 hover:bg-muted transition-colors"
+                          onClick={() => {
+                            setShowSuggestions(false);
+                            setSearchQuery('');
+                          }}
+                        >
+                          <p className="text-sm font-medium line-clamp-1">{product.name}</p>
+                        </Link>
+                      );
+                    })
+                  ) : (
+                    <div className="p-3 text-sm text-muted-foreground">No products found</div>
+                  )}
+                </div>
+              )}
             </div>
           </form>
 
