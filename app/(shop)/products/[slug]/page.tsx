@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import { cache } from 'react';
 import { productsApi } from '@/lib/api/products';
 import ProductGallery from '@/components/products/product-gallery';
 import AddToCartButton from '@/components/products/add-to-cart-button';
@@ -28,7 +29,7 @@ interface ProductPageProps {
 type ProductSearchParams = Awaited<ProductPageProps['searchParams']>;
 type ProductRouteParams = Awaited<ProductPageProps['params']>;
 
-async function getProduct(slug: string, lang?: string) {
+const getProduct = cache(async (slug: string, lang?: string) => {
   try {
     return await productsApi.getBySlug(slug, lang);
   } catch (error) {
@@ -38,7 +39,7 @@ async function getProduct(slug: string, lang?: string) {
     }
     return null;
   }
-}
+});
 
 async function getRelatedProducts(categoryId: number, excludeId: number, lang?: string) {
   try {
