@@ -110,14 +110,14 @@ export default function Header() {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem asChild>
-                    <Link href="/account">{t('account.title')}</Link>
+                    <Link prefetch={false} href="/account">{t('account.title')}</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/account/orders">{t('nav.myOrders')}</Link>
+                    <Link prefetch={false} href="/account/orders">{t('nav.myOrders')}</Link>
                   </DropdownMenuItem>
                   {isAdmin && (
                     <DropdownMenuItem asChild>
-                      <Link href="/admin/dashboard">Admin Panel</Link>
+                      <Link prefetch={false} href="/admin/dashboard">Admin Panel</Link>
                     </DropdownMenuItem>
                   )}
                   <DropdownMenuSeparator />
@@ -127,16 +127,16 @@ export default function Header() {
             ) : (
               <div className="hidden sm:flex items-center gap-2">
                 <Button variant="ghost" size="sm" asChild>
-                  <Link href="/login">{t('nav.login')}</Link>
+                  <Link prefetch={false} href="/login">{t('nav.login')}</Link>
                 </Button>
                 <Button size="sm" className="bg-secondary text-secondary-foreground hover:bg-secondary/90" asChild>
-                  <Link href="/register">{t('nav.register')}</Link>
+                  <Link prefetch={false} href="/register">{t('nav.register')}</Link>
                 </Button>
               </div>
             )}
 
             {/* Cart */}
-            <Link href="/cart" className="relative">
+            <Link prefetch={false} href="/cart" className="relative">
               <Button variant="ghost" size="icon">
                 <ShoppingCart className="w-5 h-5" />
                 {isHydrated && itemCount > 0 && (
@@ -159,6 +159,7 @@ export default function Header() {
                   {navLinks.map((link) => (
                     <Link
                       key={link.href}
+                      prefetch={false}
                       href={link.href}
                       className="text-lg font-medium hover:text-primary transition-colors py-2"
                     >
@@ -168,10 +169,10 @@ export default function Header() {
                   <hr className="my-2" />
                   {!user && (
                     <>
-                      <Link href="/login" className="text-lg font-medium py-2">
+                      <Link prefetch={false} href="/login" className="text-lg font-medium py-2">
                         {t('nav.login')}
                       </Link>
-                      <Link href="/register" className="text-lg font-medium py-2">
+                      <Link prefetch={false} href="/register" className="text-lg font-medium py-2">
                         {t('nav.register')}
                       </Link>
                     </>
@@ -187,6 +188,7 @@ export default function Header() {
           {navLinks.map((link) => (
             <Link
               key={link.href}
+              prefetch={false}
               href={link.href}
               className="nav-link text-sm"
             >

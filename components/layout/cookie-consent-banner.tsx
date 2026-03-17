@@ -35,11 +35,11 @@ export default function CookieConsentBanner() {
           <p className="mt-1 text-sm leading-6 text-slate-600">
             We use essential cookies to keep TeleTrade Hub secure and functional, and optional cookies to improve
             performance and user experience. You can review the details in our{' '}
-            <Link href="/cookies" className="font-medium text-primary hover:underline">
+            <Link prefetch={false} href="/cookies" className="font-medium text-primary hover:underline">
               Cookie Policy
             </Link>{' '}
             and{' '}
-            <Link href="/privacy" className="font-medium text-primary hover:underline">
+            <Link prefetch={false} href="/privacy" className="font-medium text-primary hover:underline">
               Privacy Policy
             </Link>
             .
