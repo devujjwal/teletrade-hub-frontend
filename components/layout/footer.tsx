@@ -8,7 +8,7 @@ import { useLanguage } from '@/contexts/language-context';
 import SiteLogo from '@/components/layout/site-logo';
 
 export default function Footer() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [settings, setSettings] = useState<PublicSettings>({
     site_name: 'TeleTrade Hub',
     site_email: '',
@@ -28,6 +28,16 @@ export default function Footer() {
       return raw;
     }
     return `https://${raw}`;
+  };
+
+  const withLanguage = (path: string) => {
+    if (!language || language === 'en') return path;
+
+    const [pathname, query = ''] = path.split('?');
+    const params = new URLSearchParams(query);
+    params.set('lang', language);
+
+    return `${pathname}?${params.toString()}`;
   };
 
   useEffect(() => {
@@ -50,7 +60,7 @@ export default function Footer() {
           <div>
             <div className="mb-4">
               <SiteLogo
-                href="/"
+                href={withLanguage('/')}
                 background="dark"
                 width={410}
                 height={120}
@@ -95,7 +105,7 @@ export default function Footer() {
             <ul className="space-y-2">
               <li>
                 <Link
-                  href="/about"
+                  href={withLanguage('/about')}
                   className="text-primary-foreground/70 hover:text-secondary transition-colors text-sm"
                 >
                   {t('footer.about')}
@@ -103,7 +113,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  href="/contact"
+                  href={withLanguage('/contact')}
                   className="text-primary-foreground/70 hover:text-secondary transition-colors text-sm"
                 >
                   {t('footer.contact')}
@@ -111,7 +121,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  href="/how-to-buy"
+                  href={withLanguage('/how-to-buy')}
                   className="text-primary-foreground/70 hover:text-secondary transition-colors text-sm"
                 >
                   {t('footer.howToBuy')}
@@ -126,23 +136,7 @@ export default function Footer() {
             <ul className="space-y-2">
               <li>
                 <Link
-                  href="/shipping"
-                  className="text-primary-foreground/70 hover:text-secondary transition-colors text-sm"
-                >
-                  {t('footer.shipping')}
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/returns"
-                  className="text-primary-foreground/70 hover:text-secondary transition-colors text-sm"
-                >
-                  {t('footer.returns')}
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/terms"
+                  href={withLanguage('/terms')}
                   className="text-primary-foreground/70 hover:text-secondary transition-colors text-sm"
                 >
                   {t('footer.terms')}
@@ -150,7 +144,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  href="/privacy"
+                  href={withLanguage('/privacy')}
                   className="text-primary-foreground/70 hover:text-secondary transition-colors text-sm"
                 >
                   {t('footer.privacy')}
@@ -158,18 +152,18 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  href="/personal-data-processing"
+                  href={withLanguage('/personal-data-processing')}
                   className="text-primary-foreground/70 hover:text-secondary transition-colors text-sm"
                 >
-                  Personal Data Processing
+                  {t('footer.personalDataProcessing')}
                 </Link>
               </li>
               <li>
                 <Link
-                  href="/cookies"
+                  href={withLanguage('/cookies')}
                   className="text-primary-foreground/70 hover:text-secondary transition-colors text-sm"
                 >
-                  Cookie Policy
+                  {t('footer.cookiePolicy')}
                 </Link>
               </li>
             </ul>
