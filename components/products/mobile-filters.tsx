@@ -29,6 +29,8 @@ export default function MobileFilters({
   const colors = filterOptions?.colors || [];
   const storageOptions = filterOptions?.storage || [];
   const ramOptions = filterOptions?.ram || [];
+  const toInputId = (prefix: string, value: string | number) =>
+    `${prefix}-${String(value).toLowerCase().replace(/[^a-z0-9_-]/g, '-')}`;
 
   const updateFilter = (key: string, value: string | null) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -96,27 +98,28 @@ export default function MobileFilters({
             <div className="px-6 py-4">
               <h3 className="text-sm font-semibold text-gray-500 mb-3">CATEGORY</h3>
               <div className="space-y-3">
-                {categoriesList.map((category) => (
-                  <label
-                    key={category.id}
-                    className="flex items-center space-x-3 cursor-pointer"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={activeCategory === category.slug}
-                      onChange={(e) =>
-                        updateFilter('category', e.target.checked ? category.slug : null)
-                      }
-                      className="w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary"
-                    />
-                    <span className="text-base text-gray-900">
-                      {category.name}
-                      {category.products_count !== undefined && (
-                        <span className="text-gray-500 ml-1">({category.products_count})</span>
-                      )}
-                    </span>
-                  </label>
-                ))}
+                {categoriesList.map((category) => {
+                  const inputId = toInputId('mobile-category', category.id);
+                  return (
+                    <div key={category.id} className="flex items-center space-x-3">
+                      <input
+                        id={inputId}
+                        type="checkbox"
+                        checked={activeCategory === category.slug}
+                        onChange={(e) =>
+                          updateFilter('category', e.target.checked ? category.slug : null)
+                        }
+                        className="w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary"
+                      />
+                      <label htmlFor={inputId} className="text-base text-gray-900 cursor-pointer">
+                        {category.name}
+                        {category.products_count !== undefined && (
+                          <span className="text-gray-500 ml-1">({category.products_count})</span>
+                        )}
+                      </label>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -128,27 +131,28 @@ export default function MobileFilters({
             <div className="px-6 py-4">
               <h3 className="text-sm font-semibold text-gray-500 mb-3">BRAND</h3>
               <div className="space-y-3">
-                {brandsList.map((brand) => (
-                  <label
-                    key={brand.id}
-                    className="flex items-center space-x-3 cursor-pointer"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={activeBrand === brand.slug}
-                      onChange={(e) =>
-                        updateFilter('brand', e.target.checked ? brand.slug : null)
-                      }
-                      className="w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary"
-                    />
-                    <span className="text-base text-gray-900">
-                      {brand.name}
-                      {brand.products_count !== undefined && (
-                        <span className="text-gray-500 ml-1">({brand.products_count})</span>
-                      )}
-                    </span>
-                  </label>
-                ))}
+                {brandsList.map((brand) => {
+                  const inputId = toInputId('mobile-brand', brand.id);
+                  return (
+                    <div key={brand.id} className="flex items-center space-x-3">
+                      <input
+                        id={inputId}
+                        type="checkbox"
+                        checked={activeBrand === brand.slug}
+                        onChange={(e) =>
+                          updateFilter('brand', e.target.checked ? brand.slug : null)
+                        }
+                        className="w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary"
+                      />
+                      <label htmlFor={inputId} className="text-base text-gray-900 cursor-pointer">
+                        {brand.name}
+                        {brand.products_count !== undefined && (
+                          <span className="text-gray-500 ml-1">({brand.products_count})</span>
+                        )}
+                      </label>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -183,21 +187,22 @@ export default function MobileFilters({
             <div className="px-6 py-4">
               <h3 className="text-sm font-semibold text-gray-500 mb-3">COLOR</h3>
               <div className="space-y-3">
-                {colors.map((color) => (
-                  <label
-                    key={color}
-                    className="flex items-center space-x-3 cursor-pointer"
-                  >
-                    <input
-                      type="radio"
-                      name="color"
-                      checked={activeColor === color}
-                      onChange={() => updateFilter('color', activeColor === color ? null : color)}
-                      className="w-5 h-5 border-gray-300 text-primary focus:ring-primary"
-                    />
-                    <span className="text-base text-gray-900 capitalize">{color}</span>
-                  </label>
-                ))}
+                {colors.map((color) => {
+                  const inputId = toInputId('mobile-color', color);
+                  return (
+                    <div key={color} className="flex items-center space-x-3">
+                      <input
+                        id={inputId}
+                        type="radio"
+                        name="color"
+                        checked={activeColor === color}
+                        onChange={() => updateFilter('color', color)}
+                        className="w-5 h-5 border-gray-300 text-primary focus:ring-primary"
+                      />
+                      <label htmlFor={inputId} className="text-base text-gray-900 capitalize cursor-pointer">{color}</label>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -209,21 +214,22 @@ export default function MobileFilters({
             <div className="px-6 py-4">
               <h3 className="text-sm font-semibold text-gray-500 mb-3">STORAGE</h3>
               <div className="space-y-3">
-                {storageOptions.map((storage) => (
-                  <label
-                    key={storage}
-                    className="flex items-center space-x-3 cursor-pointer"
-                  >
-                    <input
-                      type="radio"
-                      name="storage"
-                      checked={activeStorage === storage}
-                      onChange={() => updateFilter('storage', activeStorage === storage ? null : storage)}
-                      className="w-5 h-5 border-gray-300 text-primary focus:ring-primary"
-                    />
-                    <span className="text-base text-gray-900">{storage}</span>
-                  </label>
-                ))}
+                {storageOptions.map((storage) => {
+                  const inputId = toInputId('mobile-storage', storage);
+                  return (
+                    <div key={storage} className="flex items-center space-x-3">
+                      <input
+                        id={inputId}
+                        type="radio"
+                        name="storage"
+                        checked={activeStorage === storage}
+                        onChange={() => updateFilter('storage', storage)}
+                        className="w-5 h-5 border-gray-300 text-primary focus:ring-primary"
+                      />
+                      <label htmlFor={inputId} className="text-base text-gray-900 cursor-pointer">{storage}</label>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -235,21 +241,22 @@ export default function MobileFilters({
             <div className="px-6 py-4">
               <h3 className="text-sm font-semibold text-gray-500 mb-3">RAM</h3>
               <div className="space-y-3">
-                {ramOptions.map((ram) => (
-                  <label
-                    key={ram}
-                    className="flex items-center space-x-3 cursor-pointer"
-                  >
-                    <input
-                      type="radio"
-                      name="ram"
-                      checked={activeRam === ram}
-                      onChange={() => updateFilter('ram', activeRam === ram ? null : ram)}
-                      className="w-5 h-5 border-gray-300 text-primary focus:ring-primary"
-                    />
-                    <span className="text-base text-gray-900">{ram}</span>
-                  </label>
-                ))}
+                {ramOptions.map((ram) => {
+                  const inputId = toInputId('mobile-ram', ram);
+                  return (
+                    <div key={ram} className="flex items-center space-x-3">
+                      <input
+                        id={inputId}
+                        type="radio"
+                        name="ram"
+                        checked={activeRam === ram}
+                        onChange={() => updateFilter('ram', ram)}
+                        className="w-5 h-5 border-gray-300 text-primary focus:ring-primary"
+                      />
+                      <label htmlFor={inputId} className="text-base text-gray-900 cursor-pointer">{ram}</label>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </div>

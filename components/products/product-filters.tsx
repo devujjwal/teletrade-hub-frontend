@@ -27,6 +27,8 @@ export default function ProductFilters({ categories = [], brands = [], filterOpt
   const colors = filterOptions?.colors || [];
   const storageOptions = filterOptions?.storage || [];
   const ramOptions = filterOptions?.ram || [];
+  const toInputId = (prefix: string, value: string | number) =>
+    `${prefix}-${String(value).toLowerCase().replace(/[^a-z0-9_-]/g, '-')}`;
 
   const updateFilter = (key: string, value: string | null) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -79,27 +81,28 @@ export default function ProductFilters({ categories = [], brands = [], filterOpt
           {categoriesList.length === 0 ? (
             <p className="text-sm text-muted-foreground">No categories available</p>
           ) : (
-            categoriesList.map((category) => (
-            <label
-              key={category.id}
-              className="flex items-center space-x-2 cursor-pointer hover:text-primary transition-colors"
-            >
-              <input
-                type="checkbox"
-                checked={activeCategory === category.slug}
-                onChange={(e) =>
-                  updateFilter('category', e.target.checked ? category.slug : null)
-                }
-                className="rounded border-input text-primary focus:ring-primary"
-              />
-              <span className="text-sm">
-                {category.name}
-                {category.products_count !== undefined && (
-                  <span className="text-muted-foreground ml-1">({category.products_count})</span>
-                )}
-              </span>
-            </label>
-            ))
+            categoriesList.map((category) => {
+              const inputId = toInputId('category', category.id);
+              return (
+                <div key={category.id} className="flex items-center space-x-2 hover:text-primary transition-colors">
+                  <input
+                    id={inputId}
+                    type="checkbox"
+                    checked={activeCategory === category.slug}
+                    onChange={(e) =>
+                      updateFilter('category', e.target.checked ? category.slug : null)
+                    }
+                    className="rounded border-input text-primary focus:ring-primary"
+                  />
+                  <label htmlFor={inputId} className="text-sm cursor-pointer">
+                    {category.name}
+                    {category.products_count !== undefined && (
+                      <span className="text-muted-foreground ml-1">({category.products_count})</span>
+                    )}
+                  </label>
+                </div>
+              );
+            })
           )}
         </div>
       </Card>
@@ -111,27 +114,28 @@ export default function ProductFilters({ categories = [], brands = [], filterOpt
           {brandsList.length === 0 ? (
             <p className="text-sm text-muted-foreground">No brands available</p>
           ) : (
-            brandsList.map((brand) => (
-            <label
-              key={brand.id}
-              className="flex items-center space-x-2 cursor-pointer hover:text-primary transition-colors"
-            >
-              <input
-                type="checkbox"
-                checked={activeBrand === brand.slug}
-                onChange={(e) =>
-                  updateFilter('brand', e.target.checked ? brand.slug : null)
-                }
-                className="rounded border-input text-primary focus:ring-primary"
-              />
-              <span className="text-sm">
-                {brand.name}
-                {brand.products_count !== undefined && (
-                  <span className="text-muted-foreground ml-1">({brand.products_count})</span>
-                )}
-              </span>
-            </label>
-            ))
+            brandsList.map((brand) => {
+              const inputId = toInputId('brand', brand.id);
+              return (
+                <div key={brand.id} className="flex items-center space-x-2 hover:text-primary transition-colors">
+                  <input
+                    id={inputId}
+                    type="checkbox"
+                    checked={activeBrand === brand.slug}
+                    onChange={(e) =>
+                      updateFilter('brand', e.target.checked ? brand.slug : null)
+                    }
+                    className="rounded border-input text-primary focus:ring-primary"
+                  />
+                  <label htmlFor={inputId} className="text-sm cursor-pointer">
+                    {brand.name}
+                    {brand.products_count !== undefined && (
+                      <span className="text-muted-foreground ml-1">({brand.products_count})</span>
+                    )}
+                  </label>
+                </div>
+              );
+            })
           )}
         </div>
       </Card>
@@ -141,22 +145,22 @@ export default function ProductFilters({ categories = [], brands = [], filterOpt
         <Card className="p-4">
           <h3 className="font-semibold mb-3 text-sm">Color</h3>
           <div className="space-y-2 max-h-64 overflow-y-auto">
-            {colors.map((color) => (
-              <label
-                key={color}
-                className="flex items-center space-x-2 cursor-pointer hover:text-primary transition-colors"
-                onClick={() => updateFilter('color', activeColor === color ? null : color)}
-              >
+            {colors.map((color) => {
+              const inputId = toInputId('color', color);
+              return (
+                <div key={color} className="flex items-center space-x-2 hover:text-primary transition-colors">
                 <input
+                  id={inputId}
                   type="radio"
                   name="color"
                   checked={activeColor === color}
-                  onChange={() => {}} // Handled by label onClick
+                  onChange={() => updateFilter('color', color)}
                   className="rounded border-input text-primary focus:ring-primary"
                 />
-                <span className="text-sm capitalize">{color}</span>
-              </label>
-            ))}
+                <label htmlFor={inputId} className="text-sm capitalize cursor-pointer">{color}</label>
+                </div>
+              );
+            })}
           </div>
         </Card>
       )}
@@ -166,22 +170,22 @@ export default function ProductFilters({ categories = [], brands = [], filterOpt
         <Card className="p-4">
           <h3 className="font-semibold mb-3 text-sm">Storage</h3>
           <div className="space-y-2 max-h-64 overflow-y-auto">
-            {storageOptions.map((storage) => (
-              <label
-                key={storage}
-                className="flex items-center space-x-2 cursor-pointer hover:text-primary transition-colors"
-                onClick={() => updateFilter('storage', activeStorage === storage ? null : storage)}
-              >
+            {storageOptions.map((storage) => {
+              const inputId = toInputId('storage', storage);
+              return (
+                <div key={storage} className="flex items-center space-x-2 hover:text-primary transition-colors">
                 <input
+                  id={inputId}
                   type="radio"
                   name="storage"
                   checked={activeStorage === storage}
-                  onChange={() => {}} // Handled by label onClick
+                  onChange={() => updateFilter('storage', storage)}
                   className="rounded border-input text-primary focus:ring-primary"
                 />
-                <span className="text-sm">{storage}</span>
-              </label>
-            ))}
+                <label htmlFor={inputId} className="text-sm cursor-pointer">{storage}</label>
+                </div>
+              );
+            })}
           </div>
         </Card>
       )}
@@ -191,22 +195,22 @@ export default function ProductFilters({ categories = [], brands = [], filterOpt
         <Card className="p-4">
           <h3 className="font-semibold mb-3 text-sm">RAM</h3>
           <div className="space-y-2 max-h-64 overflow-y-auto">
-            {ramOptions.map((ram) => (
-              <label
-                key={ram}
-                className="flex items-center space-x-2 cursor-pointer hover:text-primary transition-colors"
-                onClick={() => updateFilter('ram', activeRam === ram ? null : ram)}
-              >
+            {ramOptions.map((ram) => {
+              const inputId = toInputId('ram', ram);
+              return (
+                <div key={ram} className="flex items-center space-x-2 hover:text-primary transition-colors">
                 <input
+                  id={inputId}
                   type="radio"
                   name="ram"
                   checked={activeRam === ram}
-                  onChange={() => {}} // Handled by label onClick
+                  onChange={() => updateFilter('ram', ram)}
                   className="rounded border-input text-primary focus:ring-primary"
                 />
-                <span className="text-sm">{ram}</span>
-              </label>
-            ))}
+                <label htmlFor={inputId} className="text-sm cursor-pointer">{ram}</label>
+                </div>
+              );
+            })}
           </div>
         </Card>
       )}
