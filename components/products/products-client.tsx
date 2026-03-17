@@ -27,6 +27,8 @@ export default function ProductsClient({ initialProducts, initialMeta }: Product
   const { token, user, _hasHydrated } = useAuthStore();
 
   const searchParamsString = searchParams.toString();
+  const requestKey = `${searchParamsString}|${token ? 'auth' : 'guest'}|${user?.account_type || ''}`;
+  const lastRequestKeyRef = useRef(requestKey);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -61,14 +63,18 @@ export default function ProductsClient({ initialProducts, initialMeta }: Product
 
     if (isInitialMount.current) {
       isInitialMount.current = false;
-      if (_hasHydrated && token && user) {
-        fetchProducts();
-      }
+      lastRequestKeyRef.current = requestKey;
       return;
     }
 
+    // Prevent duplicate fetch on hydration when effective request context is unchanged.
+    if (lastRequestKeyRef.current === requestKey) {
+      return;
+    }
+    lastRequestKeyRef.current = requestKey;
+
     fetchProducts();
-  }, [searchParamsString, searchParams, _hasHydrated, token, user]);
+  }, [searchParamsString, searchParams, _hasHydrated, token, user, requestKey]);
 
   if (isLoading) {
     return <ProductsGridLoader />;
