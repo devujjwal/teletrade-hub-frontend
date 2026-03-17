@@ -18,9 +18,14 @@ export default function AdminSyncPage() {
 
   useEffect(() => {
     loadSyncStatus();
-    const interval = setInterval(loadSyncStatus, 30000); // Refresh every 30 seconds
-    return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    const isInProgress = statusData?.last_sync?.status === 'in_progress';
+    const pollMs = isInProgress ? 5000 : 30000;
+    const interval = setInterval(loadSyncStatus, pollMs);
+    return () => clearInterval(interval);
+  }, [statusData?.last_sync?.status]);
 
   const loadSyncStatus = async () => {
     try {
@@ -62,7 +67,10 @@ export default function AdminSyncPage() {
     products_added: statusData.last_sync.products_added || 0,
     products_updated: statusData.last_sync.products_updated || 0,
     products_disabled: statusData.last_sync.products_disabled || 0,
+    progress: statusData.last_sync.progress || null,
   } : null;
+
+  const progressPercent = lastSync?.progress?.percent ? Number(lastSync.progress.percent) : 0;
 
   // Helper function to safely format date
   const formatDate = (dateString: string | null | undefined) => {
@@ -192,6 +200,28 @@ export default function AdminSyncPage() {
                   </span>
                 )}
               </div>
+
+              {lastSync.status === 'in_progress' && (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-xs text-muted-foreground">
+                    <span>
+                      {lastSync.progress?.phase ? `Phase: ${String(lastSync.progress.phase).replace(/_/g, ' ')}` : 'Sync in progress'}
+                    </span>
+                    <span>{Math.round(progressPercent)}%</span>
+                  </div>
+                  <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
+                    <div
+                      className="h-full bg-info transition-all duration-500 ease-out"
+                      style={{ width: `${Math.max(2, Math.min(100, progressPercent))}%` }}
+                    />
+                  </div>
+                  {lastSync.progress?.total ? (
+                    <p className="text-xs text-muted-foreground">
+                      Processed {lastSync.progress.processed || 0} of {lastSync.progress.total}
+                    </p>
+                  ) : null}
+                </div>
+              )}
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="p-4 bg-muted/50 rounded-lg text-center">
