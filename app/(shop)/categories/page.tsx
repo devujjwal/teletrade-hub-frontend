@@ -66,7 +66,7 @@ export default function CategoriesPage() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {categories.map((category) => (
-          <Link key={category.id} href={`/categories/${category.slug}${lang && lang !== 'en' ? `?lang=${lang}` : ''}`}>
+          <Link prefetch={false} key={category.id} href={`/categories/${category.slug}${lang && lang !== 'en' ? `?lang=${lang}` : ''}`}>
             <Card className="group p-6 hover:shadow-lg transition-all border-border hover:border-primary">
               <div className="flex flex-col items-center text-center">
                 {category.image ? (

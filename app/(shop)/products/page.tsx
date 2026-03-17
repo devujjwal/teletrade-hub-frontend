@@ -7,8 +7,7 @@ import ProductsClient from '@/components/products/products-client';
 import MobileFilterSortBar from '@/components/products/mobile-filter-sort-bar';
 import { Skeleton } from '@/components/ui/skeleton';
 
-export const revalidate = 0; // Disable caching for dynamic filtering
-export const dynamic = 'force-dynamic'; // Force dynamic rendering
+export const revalidate = 120; // Short ISR window; explicit revalidation still refreshes immediately after admin/sync writes
 
 interface ProductsPageProps {
   searchParams: Promise<{

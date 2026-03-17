@@ -158,6 +158,7 @@ export default function HomePageClient({
           {categories.map((category) => (
             <Link
               key={category.id}
+              prefetch={false}
               href={`/categories/${category.slug}${langParam}`}
               className="group p-6 bg-card rounded-xl border border-border hover:border-primary hover:shadow-lg transition-all text-center"
             >
@@ -228,6 +229,7 @@ export default function HomePageClient({
           {brands.map((brand) => (
             <Link
               key={brand.id}
+              prefetch={false}
               href={`/brands/${brand.slug}${langParam}`}
               className="flex-shrink-0 group block"
             >

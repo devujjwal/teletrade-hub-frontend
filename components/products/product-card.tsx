@@ -101,7 +101,7 @@ export default function ProductCard({ product, eagerLoadImage = false }: Product
   return (
     <div className="product-card group relative">
       {/* Image Container */}
-      <Link href={`/products/${product.slug}`} className="block relative overflow-hidden p-4 bg-white dark:bg-muted">
+      <Link prefetch={false} href={`/products/${product.slug}`} className="block relative overflow-hidden p-4 bg-white dark:bg-muted">
         <div className="aspect-square bg-white dark:bg-muted rounded-lg flex items-center justify-center p-4">
           <Image
             src={getProxiedImageUrl(imageUrl)}
@@ -140,7 +140,7 @@ export default function ProductCard({ product, eagerLoadImage = false }: Product
         </div>
 
         {/* Name */}
-        <Link href={`/products/${product.slug}`}>
+        <Link prefetch={false} href={`/products/${product.slug}`}>
           <h3 className="font-semibold text-sm line-clamp-2 mb-2 hover:text-accent transition-colors min-h-[2.5rem]">
             {product.name}
           </h3>

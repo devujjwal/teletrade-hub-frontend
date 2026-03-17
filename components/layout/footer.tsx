@@ -105,6 +105,7 @@ export default function Footer() {
             <ul className="space-y-2">
               <li>
                 <Link
+                  prefetch={false}
                   href={withLanguage('/about')}
                   className="text-primary-foreground/70 hover:text-secondary transition-colors text-sm"
                 >
@@ -113,6 +114,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link
+                  prefetch={false}
                   href={withLanguage('/contact')}
                   className="text-primary-foreground/70 hover:text-secondary transition-colors text-sm"
                 >
@@ -121,6 +123,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link
+                  prefetch={false}
                   href={withLanguage('/how-to-buy')}
                   className="text-primary-foreground/70 hover:text-secondary transition-colors text-sm"
                 >
@@ -136,6 +139,7 @@ export default function Footer() {
             <ul className="space-y-2">
               <li>
                 <Link
+                  prefetch={false}
                   href={withLanguage('/terms')}
                   className="text-primary-foreground/70 hover:text-secondary transition-colors text-sm"
                 >
@@ -144,6 +148,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link
+                  prefetch={false}
                   href={withLanguage('/privacy')}
                   className="text-primary-foreground/70 hover:text-secondary transition-colors text-sm"
                 >
@@ -152,6 +157,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link
+                  prefetch={false}
                   href={withLanguage('/personal-data-processing')}
                   className="text-primary-foreground/70 hover:text-secondary transition-colors text-sm"
                 >
@@ -160,6 +166,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link
+                  prefetch={false}
                   href={withLanguage('/cookies')}
                   className="text-primary-foreground/70 hover:text-secondary transition-colors text-sm"
                 >

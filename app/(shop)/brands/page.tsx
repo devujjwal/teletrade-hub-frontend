@@ -27,7 +27,7 @@ export default async function BrandsPage() {
 
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
         {brands.map((brand) => (
-          <Link key={brand.id} href={`/brands/${brand.slug}`}>
+          <Link prefetch={false} key={brand.id} href={`/brands/${brand.slug}`}>
             <Card className="group p-6 hover:shadow-lg transition-all border-border hover:border-primary text-center">
               <div className="relative w-full h-20 mb-4 flex items-center justify-center">
                 <BrandLogo
@@ -59,4 +59,3 @@ export default async function BrandsPage() {
     </div>
   );
 }
-
