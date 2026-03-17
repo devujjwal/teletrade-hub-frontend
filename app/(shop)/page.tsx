@@ -16,7 +16,9 @@ async function getFeaturedProducts(lang: string = 'en') {
     const response = await productsApi.list({ 
       per_page: 8, 
       lang,
-      is_featured: 1 // Filter to only show featured products
+      is_featured: 1, // Filter to only show featured products
+      include_total: 0,
+      include_filters: 0,
     });
     return Array.isArray(response.data) ? response.data.slice(0, 8) : [];
   } catch (error) {

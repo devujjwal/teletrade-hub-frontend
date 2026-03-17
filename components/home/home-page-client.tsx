@@ -42,7 +42,7 @@ export default function HomePageClient({
 
   useEffect(() => {
     // Fetch total product count for stats
-    productsApi.list({ page: 1, per_page: 1 }).then(response => {
+    productsApi.list({ page: 1, per_page: 1, include_filters: 0 }).then(response => {
       setTotalProducts(response.meta?.total || 100);
     }).catch(() => {
       // Keep default if fetch fails
@@ -63,6 +63,8 @@ export default function HomePageClient({
         per_page: 8,
         lang: language || 'en',
         is_featured: 1,
+        include_total: 0,
+        include_filters: 0,
       })
       .then((response) => {
         setDisplayFeaturedProducts(Array.isArray(response.data) ? response.data.slice(0, 8) : []);

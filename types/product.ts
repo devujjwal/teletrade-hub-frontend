@@ -45,6 +45,9 @@ export interface ProductFilters {
   per_page?: number;
   lang?: string;
   is_featured?: number; // Filter by featured status (1 for featured, 0 for not featured)
+  include_total?: 0 | 1;
+  include_filters?: 0 | 1;
+  lite?: 0 | 1;
 }
 
 export interface FilterOptions {

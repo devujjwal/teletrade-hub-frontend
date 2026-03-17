@@ -4,10 +4,7 @@ import { cache } from 'react';
 import { productsApi } from '@/lib/api/products';
 import ProductGallery from '@/components/products/product-gallery';
 import AddToCartButton from '@/components/products/add-to-cart-button';
-import ProductCard from '@/components/products/product-card';
-import { formatPrice } from '@/lib/utils/format';
-import Badge from '@/components/ui/badge';
-import Card from '@/components/ui/card';
+import RelatedProductsClient from '@/components/products/related-products-client';
 import { Metadata } from 'next';
 import { ChevronRight } from 'lucide-react';
 import ProductPriceSection from '@/components/products/product-price-section';
@@ -40,19 +37,6 @@ const getProduct = cache(async (slug: string, lang?: string) => {
     return null;
   }
 });
-
-async function getRelatedProducts(categoryId: number, excludeId: number, lang?: string) {
-  try {
-    const response = await productsApi.list({
-      category: categoryId.toString(),
-      per_page: 4,
-      lang: lang || 'en',
-    });
-    return response.data.filter((p) => p.id !== excludeId).slice(0, 4);
-  } catch (error) {
-    return [];
-  }
-}
 
 export async function generateMetadata({
   params,
@@ -87,10 +71,6 @@ export default async function ProductPage({ params, searchParams }: ProductPageP
   if (!product) {
     notFound();
   }
-
-  const relatedProducts = product.category_id
-    ? await getRelatedProducts(product.category_id, product.id, resolvedSearchParams.lang)
-    : [];
 
   const originalPrice = Number(product.original_price) || 0;
   const price = Number(product.price) || 0;
@@ -208,16 +188,13 @@ export default async function ProductPage({ params, searchParams }: ProductPageP
       </div>
 
       {/* Related Products */}
-      {relatedProducts.length > 0 && (
-        <section className="mt-16 pt-16 border-t border-border">
-          <h2 className="font-display text-2xl md:text-3xl font-bold mb-8">Related Products</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {relatedProducts.map((relatedProduct) => (
-              <ProductCard key={relatedProduct.id} product={relatedProduct} />
-            ))}
-          </div>
-        </section>
-      )}
+      {product.category_id ? (
+        <RelatedProductsClient
+          categoryId={product.category_id}
+          excludeId={product.id}
+          lang={resolvedSearchParams.lang || 'en'}
+        />
+      ) : null}
     </div>
   );
 }
