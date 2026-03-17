@@ -1,11 +1,9 @@
 import { Suspense } from 'react';
-import { productsApi } from '@/lib/api/products';
-import { categoriesApi } from '@/lib/api/categories';
-import { brandsApi } from '@/lib/api/brands';
-import ProductFilters from '@/components/products/product-filters';
 import ProductsClient from '@/components/products/products-client';
-import MobileFilterSortBar from '@/components/products/mobile-filter-sort-bar';
+import LazyProductFilters from '@/components/products/lazy-product-filters';
+import LazyMobileFilterSortBar from '@/components/products/lazy-mobile-filter-sort-bar';
 import { Skeleton } from '@/components/ui/skeleton';
+import { mapProduct } from '@/lib/utils/mappers';
 
 export const revalidate = 120; // Short ISR window; explicit revalidation still refreshes immediately after admin/sync writes
 
@@ -26,62 +24,62 @@ interface ProductsPageProps {
 }
 
 type ProductsSearchParams = Awaited<ProductsPageProps['searchParams']>;
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.ujjwal.in';
 
 async function getProducts(searchParams: ProductsSearchParams) {
   const page = parseInt(searchParams.page || '1', 10);
   const lang = searchParams.lang || 'en';
-  const filters: any = {
-    page,
-    per_page: 20,
+  const params = new URLSearchParams({
+    page: String(page),
+    limit: '20',
     lang,
-  };
+    include_filters: '0',
+  });
 
-  // Add filters only if they exist
-  if (searchParams.category) filters.category = searchParams.category;
-  if (searchParams.brand) filters.brand = searchParams.brand;
-  if (searchParams.min_price) filters.min_price = parseInt(searchParams.min_price, 10);
-  if (searchParams.max_price) filters.max_price = parseInt(searchParams.max_price, 10);
-  if (searchParams.color) filters.color = searchParams.color;
-  if (searchParams.storage) filters.storage = searchParams.storage;
-  if (searchParams.ram) filters.ram = searchParams.ram;
-  if (searchParams.search) filters.search = searchParams.search;
-  if (searchParams.sort) filters.sort = searchParams.sort;
+  if (searchParams.category) params.set('category', searchParams.category);
+  if (searchParams.brand) params.set('brand', searchParams.brand);
+  if (searchParams.min_price) params.set('min_price', searchParams.min_price);
+  if (searchParams.max_price) params.set('max_price', searchParams.max_price);
+  if (searchParams.color) params.set('color', searchParams.color);
+  if (searchParams.storage) params.set('storage', searchParams.storage);
+  if (searchParams.ram) params.set('ram', searchParams.ram);
+  if (searchParams.search) params.set('search', searchParams.search);
+  if (searchParams.sort) params.set('sort', searchParams.sort);
 
   try {
-    const response = await productsApi.list(filters);
-    return response;
+    const response = await fetch(`${API_BASE_URL}/products?${params.toString()}`, {
+      next: {
+        revalidate,
+        tags: ['products', `products:lang:${lang}`],
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Products fetch failed: ${response.status}`);
+    }
+
+    const payload = await response.json();
+    const products = Array.isArray(payload?.data?.products) ? payload.data.products.map(mapProduct) : [];
+    const pagination = payload?.data?.pagination || {};
+
+    return {
+      data: products,
+      meta: {
+        current_page: pagination.page || page,
+        last_page: pagination.pages || 1,
+        per_page: pagination.limit || 20,
+        total: pagination.total || products.length,
+      },
+    };
   } catch (error) {
-    console.error('Error fetching products:', error);
     return { data: [], meta: { current_page: 1, last_page: 1, per_page: 20, total: 0 } };
-  }
-}
-
-async function getCategories(lang: string = 'en') {
-  try {
-    const response = await categoriesApi.list(lang);
-    return response.data || [];
-  } catch (error) {
-    return [];
-  }
-}
-
-async function getBrands(lang: string = 'en') {
-  try {
-    const response = await brandsApi.list(lang);
-    return response.data || [];
-  } catch (error) {
-    return [];
   }
 }
 
 export default async function ProductsPage({ searchParams }: ProductsPageProps) {
   const resolvedSearchParams = await searchParams;
   const lang = resolvedSearchParams.lang || 'en';
-  const [productsData, categories, brands] = await Promise.all([
-    getProducts(resolvedSearchParams),
-    getCategories(lang),
-    getBrands(lang),
-  ]);
+  const productsData = await getProducts(resolvedSearchParams);
 
   return (
     <>
@@ -93,13 +91,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Filters Sidebar - Hidden on mobile */}
           <aside className="hidden lg:block lg:w-64 flex-shrink-0">
-            <Suspense fallback={<Skeleton className="h-96 w-full" />}>
-              <ProductFilters 
-                categories={categories} 
-                brands={brands} 
-                filterOptions={productsData.filters}
-              />
-            </Suspense>
+            <LazyProductFilters lang={lang} />
           </aside>
 
           {/* Products Grid */}
@@ -115,11 +107,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
       </div>
 
       {/* Mobile Filter/Sort Bar - Only visible on mobile/tablet */}
-      <MobileFilterSortBar
-        categories={categories}
-        brands={brands}
-        filterOptions={productsData.filters}
-      />
+      <LazyMobileFilterSortBar lang={lang} />
     </>
   );
 }

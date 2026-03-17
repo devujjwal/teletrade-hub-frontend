@@ -1,7 +1,6 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { cache } from 'react';
-import { productsApi } from '@/lib/api/products';
 import ProductGallery from '@/components/products/product-gallery';
 import AddToCartButton from '@/components/products/add-to-cart-button';
 import RelatedProductsClient from '@/components/products/related-products-client';
@@ -11,8 +10,10 @@ import ProductPriceSection from '@/components/products/product-price-section';
 import ProductSpecsBadges from '@/components/products/product-specs-badges';
 import ProductSpecifications from '@/components/products/product-specifications';
 import ProductTrustBadges from '@/components/products/product-trust-badges';
+import { mapProduct } from '@/lib/utils/mappers';
 
 export const revalidate = 300; // Revalidate every 5 minutes
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.ujjwal.in';
 
 interface ProductPageProps {
   params: Promise<{
@@ -28,7 +29,27 @@ type ProductRouteParams = Awaited<ProductPageProps['params']>;
 
 const getProduct = cache(async (slug: string, lang?: string) => {
   try {
-    return await productsApi.getBySlug(slug, lang);
+    const params = new URLSearchParams();
+    params.set('lang', lang || 'en');
+
+    const response = await fetch(`${API_BASE_URL}/products/${encodeURIComponent(slug)}?${params.toString()}`, {
+      next: {
+        revalidate,
+        tags: ['products', `product:slug:${slug}`],
+      },
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const payload = await response.json();
+    const rawProduct = payload?.data?.product;
+    if (!rawProduct) {
+      return null;
+    }
+
+    return mapProduct(rawProduct);
   } catch (error) {
     // SECURITY: Only log errors in development to prevent information disclosure
     if (process.env.NODE_ENV === 'development') {
