@@ -98,6 +98,10 @@ apiClient.interceptors.response.use(
         ? (error.response.data as any).message
         : '';
     let errorMessage = 'An error occurred';
+    const backendErrors =
+      error.response?.data && typeof error.response.data === 'object'
+        ? (error.response.data as any).errors
+        : undefined;
     
     if (!isProduction) {
       // In development, show detailed errors
@@ -106,6 +110,8 @@ apiClient.interceptors.response.use(
       // In production, use generic messages based on status code
       if (backendMessage && status !== undefined && status < 500) {
         errorMessage = backendMessage;
+      } else if (backendErrors && status !== undefined && status < 500) {
+        errorMessage = 'Please review the highlighted fields and try again.';
       } else if (status === 401) {
         errorMessage = 'Authentication required';
       } else if (status === 403) {
@@ -122,7 +128,12 @@ apiClient.interceptors.response.use(
     const apiError: ApiError = {
       message: errorMessage,
       status: error.response?.status || 500,
-      errors: isProduction ? undefined : (error.response?.data as any)?.errors, // Hide detailed errors in production
+      errors:
+        status !== undefined && status < 500
+          ? backendErrors
+          : !isProduction
+            ? backendErrors
+            : undefined,
     };
 
     return Promise.reject(apiError);

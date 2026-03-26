@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
-import { useForm } from 'react-hook-form';
+import { FieldPath, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { authApi } from '@/lib/api/auth';
@@ -103,6 +103,7 @@ type FileFieldKey =
   | 'tax_number_certificate_file';
 
 type FileState = Record<FileFieldKey, File | null>;
+type FileErrorState = Partial<Record<FileFieldKey, string>>;
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
 const ALLOWED_MIME_TYPES = ['application/pdf', 'image/jpeg', 'image/png'];
@@ -123,10 +124,14 @@ export default function RegisterForm() {
     vat_certificate_file: null,
     tax_number_certificate_file: null,
   });
+  const [fileErrors, setFileErrors] = useState<FileErrorState>({});
+  const [formErrorSummary, setFormErrorSummary] = useState<string | null>(null);
   const {
     register,
     handleSubmit,
     setValue,
+    setError,
+    clearErrors,
     formState: { errors },
     watch,
   } = useForm<RegisterFormData>({
@@ -153,22 +158,32 @@ export default function RegisterForm() {
   }, [accountType]);
 
   const validateFiles = () => {
+    const nextFileErrors: FileErrorState = {};
+
     for (const field of requiredFileFields) {
       const file = files[field];
       if (!file) {
-        toast.error(`Please upload ${field.replaceAll('_', ' ').replace(' file', '')}.`);
-        return false;
+        nextFileErrors[field] = `Please upload ${fieldLabels[field]}.`;
+        continue;
       }
 
       if (!ALLOWED_MIME_TYPES.includes(file.type)) {
-        toast.error(`${file.name}: invalid file type. Allowed: PDF, JPG, PNG.`);
-        return false;
+        nextFileErrors[field] = `${file.name}: invalid file type. Allowed: PDF, JPG, PNG.`;
+        continue;
       }
 
       if (file.size > MAX_FILE_SIZE) {
-        toast.error(`${file.name}: file too large. Max size is 10MB.`);
-        return false;
+        nextFileErrors[field] = `${file.name}: file too large. Max size is 10MB.`;
       }
+    }
+
+    setFileErrors(nextFileErrors);
+
+    const firstFileError = requiredFileFields.find((field) => nextFileErrors[field]);
+    if (firstFileError) {
+      document.getElementById(firstFileError)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      toast.error(nextFileErrors[firstFileError] as string);
+      return false;
     }
 
     return true;
@@ -177,11 +192,14 @@ export default function RegisterForm() {
   const handleFileChange = (field: FileFieldKey, file: File | null, inputElement?: HTMLInputElement) => {
     if (!file) {
       setFiles((prev) => ({ ...prev, [field]: null }));
+      setFileErrors((prev) => ({ ...prev, [field]: undefined }));
       return;
     }
 
     if (!ALLOWED_MIME_TYPES.includes(file.type)) {
-      toast.error(`${file.name}: invalid file type. Allowed: PDF, JPG, PNG.`);
+      const message = `${file.name}: invalid file type. Allowed: PDF, JPG, PNG.`;
+      setFileErrors((prev) => ({ ...prev, [field]: message }));
+      toast.error(message);
       if (inputElement) {
         inputElement.value = '';
       }
@@ -189,17 +207,88 @@ export default function RegisterForm() {
     }
 
     if (file.size <= 0 || file.size > MAX_FILE_SIZE) {
-      toast.error(`${file.name}: file too large. Max size is 10MB.`);
+      const message = `${file.name}: file too large. Max size is 10MB.`;
+      setFileErrors((prev) => ({ ...prev, [field]: message }));
+      toast.error(message);
       if (inputElement) {
         inputElement.value = '';
       }
       return;
     }
 
+    setFileErrors((prev) => ({ ...prev, [field]: undefined }));
     setFiles((prev) => ({ ...prev, [field]: file }));
   };
 
+  const applyServerErrors = (apiErrors?: Record<string, string[]>) => {
+    if (!apiErrors) {
+      return null;
+    }
+
+    const nextFileErrors: FileErrorState = {};
+    const summaryLines: string[] = [];
+    let firstFieldId: string | null = null;
+
+    Object.entries(apiErrors).forEach(([field, messages]) => {
+      const joinedMessage = Array.isArray(messages) ? messages.join(', ') : String(messages);
+      const fieldLabel = fieldLabels[field] || field.replaceAll('_', ' ');
+
+      if (field === 'retry_after') {
+        const retryAfterSeconds = Number(Array.isArray(messages) ? messages[0] : messages);
+        if (Number.isFinite(retryAfterSeconds) && retryAfterSeconds > 0) {
+          const retryAfterMinutes = Math.ceil(retryAfterSeconds / 60);
+          summaryLines.push(`Too many registration attempts. Please try again in about ${retryAfterMinutes} minute(s).`);
+        } else {
+          summaryLines.push('Too many registration attempts. Please try again later.');
+        }
+        return;
+      }
+
+      if (field === 'general' || field === 'message') {
+        summaryLines.push(joinedMessage);
+        return;
+      }
+
+      if (field in files) {
+        nextFileErrors[field as FileFieldKey] = joinedMessage;
+        summaryLines.push(`${fieldLabel}: ${joinedMessage}`);
+        if (!firstFieldId) {
+          firstFieldId = field;
+        }
+        return;
+      }
+
+      try {
+        setError(field as FieldPath<RegisterFormData>, {
+          type: 'server',
+          message: joinedMessage,
+        });
+        summaryLines.push(`${fieldLabel}: ${joinedMessage}`);
+        if (!firstFieldId) {
+          firstFieldId = field;
+        }
+      } catch {
+        summaryLines.push(`${fieldLabel}: ${joinedMessage}`);
+      }
+    });
+
+    const summary = summaryLines.length ? summaryLines.join(' ') : null;
+
+    setFileErrors((prev) => ({ ...prev, ...nextFileErrors }));
+    setFormErrorSummary(summary);
+
+    if (firstFieldId) {
+      document.getElementById(firstFieldId)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    return summary;
+  };
+
   const onSubmit = async (data: RegisterFormData) => {
+    setFormErrorSummary(null);
+    setFileErrors({});
+    clearErrors();
+
     if (!validateFiles()) return;
 
     setIsLoading(true);
@@ -245,12 +334,11 @@ export default function RegisterForm() {
           'Registration submitted successfully. Your account is pending approval and we will notify you by email once it is verified.'
       );
     } catch (error: any) {
-      if (error.errors) {
-        const errorMessages = Object.entries(error.errors)
-          .map(([, messages]: [string, any]) => (Array.isArray(messages) ? messages.join(', ') : messages))
-          .join('\n');
-        toast.error(errorMessages);
+      const serverErrorSummary = error.errors ? applyServerErrors(error.errors) : null;
+      if (serverErrorSummary) {
+        toast.error(serverErrorSummary);
       } else {
+        setFormErrorSummary(error.message || 'Registration failed. Please try again.');
         toast.error(error.message || 'Registration failed. Please try again.');
       }
     } finally {
@@ -414,6 +502,39 @@ export default function RegisterForm() {
     },
   }[language];
 
+  const fieldLabels = useMemo<Record<string, string>>(
+    () => ({
+      account_type: ui.accountType.replace(' *', ''),
+      first_name: ui.firstName.replace(' *', ''),
+      last_name: ui.lastName.replace(' *', ''),
+      address: ui.address.replace(' *', ''),
+      postal_code: ui.postalCode.replace(' *', ''),
+      city: ui.city.replace(' *', ''),
+      country: ui.country.replace(' *', ''),
+      phone: ui.phone,
+      mobile: ui.mobile.replace(' *', ''),
+      email: ui.email.replace(' *', ''),
+      tax_number: ui.taxNumber.replace(' *', ''),
+      vat_number: ui.vatNumber.replace(' *', ''),
+      delivery_address: ui.deliveryAddressTitle,
+      delivery_postal_code: ui.postalCode.replace(' *', ''),
+      delivery_city: ui.city.replace(' *', ''),
+      delivery_country: ui.country.replace(' *', ''),
+      account_holder: ui.accountHolder.replace(' *', ''),
+      bank_name: ui.bank.replace(' *', ''),
+      iban: ui.iban.replace(' *', ''),
+      bic: ui.bic.replace(' *', ''),
+      password: ui.password.replace(' *', ''),
+      confirmPassword: ui.confirmPassword.replace(' *', ''),
+      id_card_file: ui.idCard.replace(' *', ''),
+      passport_file: ui.passport.replace(' *', ''),
+      business_registration_certificate_file: ui.businessCertificate.replace(' *', ''),
+      vat_certificate_file: ui.vatCertificate.replace(' *', ''),
+      tax_number_certificate_file: ui.taxCertificate.replace(' *', ''),
+    }),
+    [ui]
+  );
+
   if (submittedRegistration) {
     return (
       <Card className="overflow-hidden border-0 bg-[radial-gradient(circle_at_top,_rgba(250,204,21,0.25),_transparent_45%),linear-gradient(135deg,#082f49_0%,#0f172a_52%,#111827_100%)] p-0 text-white shadow-2xl">
@@ -488,6 +609,12 @@ export default function RegisterForm() {
   return (
     <Card className="border-slate-200/80 bg-gradient-to-b from-white to-slate-50/70 p-6 shadow-sm md:p-8">
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+        {formErrorSummary && (
+          <div className="rounded-xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+            {formErrorSummary}
+          </div>
+        )}
+
         <div>
           <label htmlFor="account_type" className="mb-3 block text-sm font-medium">
             {ui.accountType}
@@ -664,11 +791,15 @@ export default function RegisterForm() {
               id="business_registration_certificate_file"
               type="file"
               accept={ACCEPTED_FILE_INPUT}
+              className={fileErrors.business_registration_certificate_file ? 'border-destructive' : ''}
               onChange={(e) =>
                 handleFileChange('business_registration_certificate_file', e.target.files?.[0] || null, e.target)
               }
             />
             <p className="text-xs text-muted-foreground mt-1">{fileLabel}</p>
+            {fileErrors.business_registration_certificate_file && (
+              <p className="text-destructive text-xs mt-1">{fileErrors.business_registration_certificate_file}</p>
+            )}
           </div>
         )}
 
@@ -679,9 +810,11 @@ export default function RegisterForm() {
               id="id_card_file"
               type="file"
               accept={ACCEPTED_FILE_INPUT}
+              className={fileErrors.id_card_file ? 'border-destructive' : ''}
               onChange={(e) => handleFileChange('id_card_file', e.target.files?.[0] || null, e.target)}
             />
             <p className="text-xs text-muted-foreground mt-1">{fileLabel}</p>
+            {fileErrors.id_card_file && <p className="text-destructive text-xs mt-1">{fileErrors.id_card_file}</p>}
           </div>
           <div>
             <label htmlFor="passport_file" className="block text-sm font-medium mb-2">{ui.passport}</label>
@@ -689,9 +822,11 @@ export default function RegisterForm() {
               id="passport_file"
               type="file"
               accept={ACCEPTED_FILE_INPUT}
+              className={fileErrors.passport_file ? 'border-destructive' : ''}
               onChange={(e) => handleFileChange('passport_file', e.target.files?.[0] || null, e.target)}
             />
             <p className="text-xs text-muted-foreground mt-1">{fileLabel}</p>
+            {fileErrors.passport_file && <p className="text-destructive text-xs mt-1">{fileErrors.passport_file}</p>}
           </div>
         </div>
 
@@ -703,9 +838,13 @@ export default function RegisterForm() {
                 id="vat_certificate_file"
                 type="file"
                 accept={ACCEPTED_FILE_INPUT}
+                className={fileErrors.vat_certificate_file ? 'border-destructive' : ''}
                 onChange={(e) => handleFileChange('vat_certificate_file', e.target.files?.[0] || null, e.target)}
               />
               <p className="text-xs text-muted-foreground mt-1">{fileLabel}</p>
+              {fileErrors.vat_certificate_file && (
+                <p className="text-destructive text-xs mt-1">{fileErrors.vat_certificate_file}</p>
+              )}
             </div>
             <div>
               <label htmlFor="tax_number_certificate_file" className="block text-sm font-medium mb-2">{ui.taxCertificate}</label>
@@ -713,11 +852,15 @@ export default function RegisterForm() {
                 id="tax_number_certificate_file"
                 type="file"
                 accept={ACCEPTED_FILE_INPUT}
+                className={fileErrors.tax_number_certificate_file ? 'border-destructive' : ''}
                 onChange={(e) =>
                   handleFileChange('tax_number_certificate_file', e.target.files?.[0] || null, e.target)
                 }
               />
               <p className="text-xs text-muted-foreground mt-1">{fileLabel}</p>
+              {fileErrors.tax_number_certificate_file && (
+                <p className="text-destructive text-xs mt-1">{fileErrors.tax_number_certificate_file}</p>
+              )}
             </div>
           </div>
         )}
