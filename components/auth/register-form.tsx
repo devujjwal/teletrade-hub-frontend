@@ -106,6 +106,7 @@ type FileState = Record<FileFieldKey, File | null>;
 type FileErrorState = Partial<Record<FileFieldKey, string>>;
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
+const MAX_MERCHANT_TOTAL_FILE_SIZE = 50 * 1024 * 1024;
 const ALLOWED_MIME_TYPES = ['application/pdf', 'image/jpeg', 'image/png'];
 const ACCEPTED_FILE_INPUT = '.pdf,.jpg,.jpeg,.png';
 
@@ -159,6 +160,7 @@ export default function RegisterForm() {
 
   const validateFiles = () => {
     const nextFileErrors: FileErrorState = {};
+    let merchantTotalFileSize = 0;
 
     for (const field of requiredFileFields) {
       const file = files[field];
@@ -175,6 +177,13 @@ export default function RegisterForm() {
       if (file.size > MAX_FILE_SIZE) {
         nextFileErrors[field] = `${file.name}: file too large. Max size is 10MB.`;
       }
+
+      merchantTotalFileSize += file.size;
+    }
+
+    if (accountType === 'merchant' && merchantTotalFileSize > MAX_MERCHANT_TOTAL_FILE_SIZE) {
+      nextFileErrors.business_registration_certificate_file =
+        'Total document upload is too large. Please keep all merchant documents within 50MB combined.';
     }
 
     setFileErrors(nextFileErrors);
