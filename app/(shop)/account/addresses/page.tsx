@@ -654,7 +654,6 @@ export default function AddressesPage() {
                     searchPlaceholder={t('addresses.selectCity') || 'Search city'}
                     emptyMessage="No cities available for this selection."
                     noResultsMessage="City not found in our list."
-                    typeToSearchMessage="Type to search the city list."
                     disabled={showStateSelect ? !formData.stateCode : !formData.countryCode}
                     loading={isCitiesLoading}
                     onValueChange={handleCityChange}

@@ -17,15 +17,12 @@ interface SearchableSelectProps {
   searchPlaceholder?: string;
   emptyMessage?: string;
   noResultsMessage?: string;
-  typeToSearchMessage?: string;
   disabled?: boolean;
   loading?: boolean;
   onValueChange: (value: string) => void;
   onManualEntry?: () => void;
   manualEntryLabel?: string;
 }
-
-const LARGE_OPTION_THRESHOLD = 200;
 
 function normalizeSearchValue(value: string) {
   return value
@@ -42,7 +39,6 @@ export default function SearchableSelect({
   searchPlaceholder = 'Search...',
   emptyMessage = 'No options available.',
   noResultsMessage = 'No matching results.',
-  typeToSearchMessage = 'Type to search the available options.',
   disabled = false,
   loading = false,
   onValueChange,
@@ -77,10 +73,6 @@ export default function SearchableSelect({
       return haystack.some((entry) => entry.includes(normalizedQuery));
     });
   }, [deferredQuery, options]);
-
-  const requiresSearch = options.length > LARGE_OPTION_THRESHOLD;
-  const showTypeToSearch = requiresSearch && !normalizeSearchValue(deferredQuery);
-  const visibleOptions = showTypeToSearch ? [] : filteredOptions;
   const closeDropdown = () => {
     setIsOpen(false);
     setQuery('');
@@ -199,25 +191,7 @@ export default function SearchableSelect({
               </div>
             )}
 
-            {!loading && showTypeToSearch && options.length > 0 && (
-              <div className="space-y-2 px-3 py-2 text-sm text-muted-foreground">
-                <p>{typeToSearchMessage}</p>
-                {onManualEntry && (
-                  <button
-                    type="button"
-                    className="font-medium text-primary hover:underline"
-                    onClick={() => {
-                      closeDropdown();
-                      onManualEntry();
-                    }}
-                  >
-                    {manualEntryLabel}
-                  </button>
-                )}
-              </div>
-            )}
-
-            {!loading && !showTypeToSearch && options.length > 0 && visibleOptions.length === 0 && (
+            {!loading && options.length > 0 && filteredOptions.length === 0 && (
               <div className="space-y-2 px-3 py-2 text-sm text-muted-foreground">
                 <p>{noResultsMessage}</p>
                 {onManualEntry && (
@@ -235,7 +209,7 @@ export default function SearchableSelect({
               </div>
             )}
 
-            {!loading && visibleOptions.map((option) => {
+            {!loading && filteredOptions.map((option) => {
               const isSelected = option.value === value;
 
               return (
