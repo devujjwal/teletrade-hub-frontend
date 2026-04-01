@@ -385,9 +385,32 @@ export default function AddressesPage() {
         countryCode: DEFAULT_COUNTRY_CODE,
         is_default: addresses.length === 0,
       });
+      setIsStatesLoading(true);
+      setIsCitiesLoading(false);
       setAvailableStates([]);
       setAvailableCities([]);
       setShowStateSelect(false);
+
+      try {
+        const states = await getStates(DEFAULT_COUNTRY_CODE);
+        setAvailableStates(states);
+        setShowStateSelect(states.length > 0);
+
+        if (states.length === 0) {
+          setIsCitiesLoading(true);
+          const cities = await getCities(DEFAULT_COUNTRY_CODE);
+          setAvailableCities(cities);
+          setUseManualCityInput(cities.length === 0);
+        }
+      } catch (error) {
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Error loading default country data:', error);
+        }
+        setUseManualCityInput(true);
+      } finally {
+        setIsStatesLoading(false);
+        setIsCitiesLoading(false);
+      }
     }
 
     setIsDialogOpen(true);
