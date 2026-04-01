@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "eslint .",
     "type-check": "tsc --noEmit",
-    "download-logos": "node scripts/download-logos.js"
+    "download-logos": "node scripts/download-logos.js",
+    "generate:locations": "node scripts/generate-location-data.mjs",
+    "validate:locations": "node scripts/validate-location-data.mjs"
   },
   "dependencies": {
     "@heroicons/react": "^2.1.0",

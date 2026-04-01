@@ -23,6 +23,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import SearchableSelect from '@/components/ui/searchable-select';
 import { useLanguage } from '@/contexts/language-context';
 import { addressesApi, Address } from '@/lib/api/addresses';
 import { MapPin, Plus, Star } from 'lucide-react';
@@ -30,7 +31,9 @@ import {
   getCountries,
   getStates,
   getCities,
-  hasStates,
+  Country as LocationCountry,
+  State as LocationState,
+  City as LocationCity,
 } from '@/lib/locationData';
 import toast from 'react-hot-toast';
 
@@ -187,58 +190,186 @@ export default function CheckoutForm({ register, errors, watch, setValue, user }
     is_default: false,
   });
 
-  const countries = getCountries();
-  const [availableStates, setAvailableStates] = useState(getStates(DEFAULT_COUNTRY_CODE));
-  const [availableCities, setAvailableCities] = useState<string[]>([]);
-  const [showStateSelect, setShowStateSelect] = useState(hasStates(DEFAULT_COUNTRY_CODE));
+  const [countries, setCountries] = useState<LocationCountry[]>([]);
+  const [availableStates, setAvailableStates] = useState<LocationState[]>([]);
+  const [availableCities, setAvailableCities] = useState<LocationCity[]>([]);
+  const [showStateSelect, setShowStateSelect] = useState(false);
+  const [isCountriesLoading, setIsCountriesLoading] = useState(true);
+  const [isStatesLoading, setIsStatesLoading] = useState(false);
+  const [isCitiesLoading, setIsCitiesLoading] = useState(false);
+  const [useManualStateInput, setUseManualStateInput] = useState(false);
+  const [useManualCityInput, setUseManualCityInput] = useState(false);
 
   useEffect(() => {
-    if (formData.countryCode) {
-      const states = getStates(formData.countryCode);
-      setAvailableStates(states);
-      setShowStateSelect(hasStates(formData.countryCode));
-      
-      if (!hasStates(formData.countryCode)) {
-        setAvailableCities(getCities(formData.countryCode));
-      } else {
-        setAvailableCities([]);
+    let isActive = true;
+
+    const loadCountries = async () => {
+      try {
+        const countryList = await getCountries();
+        if (!isActive) {
+          return;
+        }
+
+        setCountries(countryList);
+        const defaultCountry = countryList.find((country) => country.code === DEFAULT_COUNTRY_CODE);
+
+        setFormData((current) => ({
+          ...current,
+          country: current.country || defaultCountry?.name || 'Germany',
+        }));
+      } catch (error) {
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Error loading countries:', error);
+        }
+      } finally {
+        if (isActive) {
+          setIsCountriesLoading(false);
+        }
       }
+    };
+
+    loadCountries();
+
+    return () => {
+      isActive = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!formData.countryCode) {
+      return undefined;
     }
+
+    let isActive = true;
+
+    const loadCountryData = async () => {
+      setIsStatesLoading(true);
+      setUseManualStateInput(false);
+      setAvailableStates([]);
+      setAvailableCities([]);
+
+      try {
+        const states = await getStates(formData.countryCode);
+        if (!isActive) {
+          return;
+        }
+
+        setAvailableStates(states);
+        setShowStateSelect(states.length > 0);
+
+        if (states.length === 0) {
+          setIsCitiesLoading(true);
+          const cities = await getCities(formData.countryCode);
+          if (!isActive) {
+            return;
+          }
+
+          setAvailableCities(cities);
+          setUseManualCityInput(cities.length === 0);
+        } else {
+          setUseManualCityInput(false);
+        }
+      } catch (error) {
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Error loading states/cities:', error);
+        }
+        if (isActive) {
+          setShowStateSelect(false);
+          setAvailableStates([]);
+          setAvailableCities([]);
+          setUseManualCityInput(true);
+        }
+      } finally {
+        if (isActive) {
+          setIsStatesLoading(false);
+          setIsCitiesLoading(false);
+        }
+      }
+    };
+
+    loadCountryData();
+
+    return () => {
+      isActive = false;
+    };
   }, [formData.countryCode]);
 
   useEffect(() => {
-    if (formData.countryCode && formData.stateCode && hasStates(formData.countryCode)) {
-      setAvailableCities(getCities(formData.countryCode, formData.stateCode));
+    if (!formData.countryCode || !showStateSelect) {
+      return undefined;
     }
-  }, [formData.stateCode, formData.countryCode]);
+
+    if (!formData.stateCode) {
+      setAvailableCities([]);
+      setIsCitiesLoading(false);
+      return undefined;
+    }
+
+    let isActive = true;
+
+    const loadCities = async () => {
+      setIsCitiesLoading(true);
+
+      try {
+        const cities = await getCities(formData.countryCode, formData.stateCode);
+        if (!isActive) {
+          return;
+        }
+
+        setAvailableCities(cities);
+        setUseManualCityInput(cities.length === 0);
+      } catch (error) {
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Error loading cities:', error);
+        }
+        if (isActive) {
+          setAvailableCities([]);
+          setUseManualCityInput(true);
+        }
+      } finally {
+        if (isActive) {
+          setIsCitiesLoading(false);
+        }
+      }
+    };
+
+    loadCities();
+
+    return () => {
+      isActive = false;
+    };
+  }, [formData.stateCode, formData.countryCode, showStateSelect]);
 
   const handleCountryChange = (countryCode: string) => {
     const country = countries.find(c => c.code === countryCode);
-    setFormData({
-      ...formData,
+    setUseManualStateInput(false);
+    setUseManualCityInput(false);
+    setFormData((current) => ({
+      ...current,
       countryCode,
       country: country?.name || '',
       stateCode: '',
       state: '',
       city: '',
-    });
+    }));
   };
 
   const handleStateChange = (stateCode: string) => {
     const state = availableStates.find(s => s.code === stateCode);
-    setFormData({
-      ...formData,
+    setUseManualCityInput(false);
+    setFormData((current) => ({
+      ...current,
       stateCode,
       state: state?.name || '',
       city: '',
-    });
+    }));
   };
 
   const handleCityChange = (city: string) => {
-    setFormData({
-      ...formData,
+    setFormData((current) => ({
+      ...current,
       city,
-    });
+    }));
   };
 
   const handleSaveAddress = async () => {
@@ -266,6 +397,8 @@ export default function CheckoutForm({ register, errors, watch, setValue, user }
 
   const handleOpenDialog = () => {
     const defaultCountry = countries.find(c => c.code === DEFAULT_COUNTRY_CODE);
+    setUseManualStateInput(false);
+    setUseManualCityInput(false);
     setFormData({
       label: '',
       street: '',
@@ -278,8 +411,6 @@ export default function CheckoutForm({ register, errors, watch, setValue, user }
       countryCode: DEFAULT_COUNTRY_CODE,
       is_default: addresses.length === 0,
     });
-    setAvailableStates(getStates(DEFAULT_COUNTRY_CODE));
-    setShowStateSelect(hasStates(DEFAULT_COUNTRY_CODE));
     setAvailableCities([]);
     setIsDialogOpen(true);
   };
@@ -390,60 +521,112 @@ export default function CheckoutForm({ register, errors, watch, setValue, user }
                 
                 <div className="space-y-2">
                   <Label>Country</Label>
-                  <Select value={formData.countryCode} onValueChange={handleCountryChange}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select country" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {countries.map((country) => (
-                        <SelectItem key={country.code} value={country.code}>
-                          {country.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <SearchableSelect
+                    value={formData.countryCode}
+                    options={countries.map((country) => ({
+                      value: country.code,
+                      label: country.name,
+                      keywords: [country.code],
+                    }))}
+                    placeholder="Select country"
+                    searchPlaceholder="Search country"
+                    loading={isCountriesLoading}
+                    onValueChange={handleCountryChange}
+                  />
                 </div>
 
                 {showStateSelect && (
                   <div className="space-y-2">
                     <Label>State/Region</Label>
-                    <Select 
-                      value={formData.stateCode} 
-                      onValueChange={handleStateChange}
-                      disabled={!formData.countryCode}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select state/region" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {availableStates.map((state) => (
-                          <SelectItem key={state.code} value={state.code}>
-                            {state.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    {useManualStateInput ? (
+                      <div className="space-y-2">
+                        <Input
+                          value={formData.state}
+                          placeholder="Enter state/region"
+                          onChange={(event) =>
+                            setFormData((current) => ({
+                              ...current,
+                              state: event.target.value,
+                              stateCode: '',
+                              city: '',
+                            }))
+                          }
+                        />
+                        {availableStates.length > 0 && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            className="h-auto px-0 text-sm"
+                            onClick={() => setUseManualStateInput(false)}
+                          >
+                            Choose from list instead
+                          </Button>
+                        )}
+                      </div>
+                    ) : (
+                      <SearchableSelect
+                        value={formData.stateCode}
+                        options={availableStates.map((state) => ({
+                          value: state.code,
+                          label: state.name,
+                          keywords: [state.code],
+                        }))}
+                        placeholder="Select state/region"
+                        searchPlaceholder="Search state/region"
+                        emptyMessage="No states/regions available for this country."
+                        noResultsMessage="State/region not found in our list."
+                        disabled={!formData.countryCode}
+                        loading={isStatesLoading}
+                        onValueChange={handleStateChange}
+                        onManualEntry={() => setUseManualStateInput(true)}
+                      />
+                    )}
                   </div>
                 )}
 
                 <div className="space-y-2">
                   <Label>City</Label>
-                  <Select 
-                    value={formData.city} 
-                    onValueChange={handleCityChange}
-                    disabled={showStateSelect ? !formData.stateCode : !formData.countryCode}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select city" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {availableCities.map((city) => (
-                        <SelectItem key={city} value={city}>
-                          {city}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  {useManualCityInput ? (
+                    <div className="space-y-2">
+                      <Input
+                        value={formData.city}
+                        placeholder="Enter city"
+                        onChange={(event) =>
+                          setFormData((current) => ({
+                            ...current,
+                            city: event.target.value,
+                          }))
+                        }
+                      />
+                      {availableCities.length > 0 && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          className="h-auto px-0 text-sm"
+                          onClick={() => setUseManualCityInput(false)}
+                        >
+                          Choose from list instead
+                        </Button>
+                      )}
+                    </div>
+                  ) : (
+                    <SearchableSelect
+                      value={formData.city}
+                      options={availableCities.map((city) => ({
+                        value: city.name,
+                        label: city.name,
+                      }))}
+                      placeholder="Select city"
+                      searchPlaceholder="Search city"
+                      emptyMessage="No cities available for this selection."
+                      noResultsMessage="City not found in our list."
+                      typeToSearchMessage="Type to search the city list."
+                      disabled={showStateSelect ? !formData.stateCode : !formData.countryCode}
+                      loading={isCitiesLoading}
+                      onValueChange={handleCityChange}
+                      onManualEntry={() => setUseManualCityInput(true)}
+                    />
+                  )}
                 </div>
 
                 <div className="space-y-2">

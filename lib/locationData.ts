@@ -1,251 +1,160 @@
-// Location data for cascading dropdowns
-export interface LocationData {
-  countries: Country[];
-}
-
 export interface Country {
   code: string;
   name: string;
-  states?: State[];
-  cities?: string[]; // Direct cities if no states
+  hasStates: boolean;
 }
 
 export interface State {
   code: string;
   name: string;
-  cities: string[];
 }
 
-export const locationData: LocationData = {
-  countries: [
-    {
-      code: "DE",
-      name: "Germany",
-      states: [
-        {
-          code: "BE",
-          name: "Berlin",
-          cities: ["Berlin"],
-        },
-        {
-          code: "BY",
-          name: "Bavaria",
-          cities: ["Munich", "Nuremberg", "Augsburg", "Regensburg", "Würzburg"],
-        },
-        {
-          code: "BW",
-          name: "Baden-Württemberg",
-          cities: ["Stuttgart", "Karlsruhe", "Mannheim", "Freiburg", "Heidelberg"],
-        },
-        {
-          code: "HE",
-          name: "Hesse",
-          cities: ["Frankfurt", "Wiesbaden", "Kassel", "Darmstadt", "Offenbach"],
-        },
-        {
-          code: "NW",
-          name: "North Rhine-Westphalia",
-          cities: ["Cologne", "Düsseldorf", "Dortmund", "Essen", "Bonn"],
-        },
-        {
-          code: "HH",
-          name: "Hamburg",
-          cities: ["Hamburg"],
-        },
-        {
-          code: "SN",
-          name: "Saxony",
-          cities: ["Dresden", "Leipzig", "Chemnitz"],
-        },
-      ],
-    },
-    {
-      code: "AT",
-      name: "Austria",
-      states: [
-        {
-          code: "W",
-          name: "Vienna",
-          cities: ["Vienna"],
-        },
-        {
-          code: "S",
-          name: "Salzburg",
-          cities: ["Salzburg", "Hallein"],
-        },
-        {
-          code: "T",
-          name: "Tyrol",
-          cities: ["Innsbruck", "Kufstein"],
-        },
-      ],
-    },
-    {
-      code: "CH",
-      name: "Switzerland",
-      cities: ["Zurich", "Geneva", "Basel", "Bern", "Lausanne"],
-    },
-    {
-      code: "FR",
-      name: "France",
-      states: [
-        {
-          code: "IDF",
-          name: "Île-de-France",
-          cities: ["Paris", "Versailles", "Boulogne-Billancourt"],
-        },
-        {
-          code: "PAC",
-          name: "Provence-Alpes-Côte d'Azur",
-          cities: ["Marseille", "Nice", "Toulon", "Aix-en-Provence"],
-        },
-        {
-          code: "ARA",
-          name: "Auvergne-Rhône-Alpes",
-          cities: ["Lyon", "Grenoble", "Saint-Étienne"],
-        },
-      ],
-    },
-    {
-      code: "IT",
-      name: "Italy",
-      states: [
-        {
-          code: "LOM",
-          name: "Lombardy",
-          cities: ["Milan", "Bergamo", "Brescia"],
-        },
-        {
-          code: "LAZ",
-          name: "Lazio",
-          cities: ["Rome", "Latina"],
-        },
-        {
-          code: "TOS",
-          name: "Tuscany",
-          cities: ["Florence", "Pisa", "Siena"],
-        },
-        {
-          code: "VEN",
-          name: "Veneto",
-          cities: ["Venice", "Verona", "Padua"],
-        },
-      ],
-    },
-    {
-      code: "ES",
-      name: "Spain",
-      states: [
-        {
-          code: "MD",
-          name: "Community of Madrid",
-          cities: ["Madrid", "Alcalá de Henares"],
-        },
-        {
-          code: "CT",
-          name: "Catalonia",
-          cities: ["Barcelona", "Girona", "Tarragona"],
-        },
-        {
-          code: "AN",
-          name: "Andalusia",
-          cities: ["Seville", "Málaga", "Granada", "Córdoba"],
-        },
-        {
-          code: "VC",
-          name: "Valencian Community",
-          cities: ["Valencia", "Alicante"],
-        },
-      ],
-    },
-    {
-      code: "NL",
-      name: "Netherlands",
-      cities: ["Amsterdam", "Rotterdam", "The Hague", "Utrecht", "Eindhoven"],
-    },
-    {
-      code: "BE",
-      name: "Belgium",
-      cities: ["Brussels", "Antwerp", "Ghent", "Bruges", "Liège"],
-    },
-    {
-      code: "PL",
-      name: "Poland",
-      cities: ["Warsaw", "Kraków", "Łódź", "Wrocław", "Poznań", "Gdańsk"],
-    },
-    {
-      code: "CZ",
-      name: "Czech Republic",
-      cities: ["Prague", "Brno", "Ostrava", "Plzeň"],
-    },
-    {
-      code: "SK",
-      name: "Slovakia",
-      cities: ["Bratislava", "Košice", "Prešov", "Žilina", "Nitra"],
-    },
-    {
-      code: "HU",
-      name: "Hungary",
-      cities: ["Budapest", "Debrecen", "Szeged", "Miskolc", "Pécs"],
-    },
-    {
-      code: "GB",
-      name: "United Kingdom",
-      states: [
-        {
-          code: "ENG",
-          name: "England",
-          cities: ["London", "Manchester", "Birmingham", "Liverpool", "Leeds"],
-        },
-        {
-          code: "SCT",
-          name: "Scotland",
-          cities: ["Edinburgh", "Glasgow", "Aberdeen"],
-        },
-        {
-          code: "WLS",
-          name: "Wales",
-          cities: ["Cardiff", "Swansea"],
-        },
-      ],
-    },
-  ],
+export interface City {
+  name: string;
+}
+
+export interface LocationManifest {
+  source: {
+    repository: string;
+    releaseTag: string;
+    license: string;
+    generatedAt: string;
+  };
+  counts: {
+    countries: number;
+    states: number;
+    cities: number;
+  };
+}
+
+const LOCATION_DATA_BASE_PATH = '/location-data';
+const countryCache: {
+  promise: Promise<Country[]> | null;
+  value: Country[] | null;
+} = {
+  promise: null,
+  value: null,
 };
+const stateCache = new Map<string, Promise<State[]>>();
+const cityCache = new Map<string, Promise<City[]>>();
+let manifestPromise: Promise<LocationManifest> | null = null;
 
-export const getCountries = () => locationData.countries;
+function normalizeLookupValue(value: string) {
+  return value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim()
+    .toLowerCase();
+}
 
-export const getStates = (countryCode: string) => {
-  const country = locationData.countries.find((c) => c.code === countryCode);
-  return country?.states || [];
-};
+async function fetchLocationJson<T>(path: string): Promise<T> {
+  const response = await fetch(path, {
+    cache: 'force-cache',
+  });
 
-export const getCities = (countryCode: string, stateCode?: string) => {
-  const country = locationData.countries.find((c) => c.code === countryCode);
-  if (!country) return [];
-  
-  // Country has direct cities (no states)
-  if (country.cities) return country.cities;
-  
-  // Country has states
-  if (country.states && stateCode) {
-    const state = country.states.find((s) => s.code === stateCode);
-    return state?.cities || [];
+  if (response.status === 404) {
+    return [] as T;
   }
-  
-  return [];
-};
 
-export const hasStates = (countryCode: string) => {
-  const country = locationData.countries.find((c) => c.code === countryCode);
-  return Boolean(country?.states && country.states.length > 0);
-};
+  if (!response.ok) {
+    throw new Error(`Failed to load location data from ${path}`);
+  }
 
-export const getCountryByName = (name: string) => {
-  return locationData.countries.find((c) => c.name === name);
-};
+  return response.json() as Promise<T>;
+}
 
-export const getStateByName = (countryCode: string, stateName: string) => {
-  const states = getStates(countryCode);
-  return states.find((s) => s.name === stateName);
-};
+export async function getCountries() {
+  if (countryCache.value) {
+    return countryCache.value;
+  }
 
+  if (!countryCache.promise) {
+    countryCache.promise = fetchLocationJson<Country[]>(
+      `${LOCATION_DATA_BASE_PATH}/countries.json`
+    ).then((countries) => {
+      countryCache.value = countries;
+      return countries;
+    });
+  }
+
+  return countryCache.promise;
+}
+
+export async function getStates(countryCode: string) {
+  const normalizedCountryCode = countryCode.toUpperCase();
+
+  if (!stateCache.has(normalizedCountryCode)) {
+    stateCache.set(
+      normalizedCountryCode,
+      fetchLocationJson<State[]>(
+        `${LOCATION_DATA_BASE_PATH}/states/${normalizedCountryCode}.json`
+      )
+    );
+  }
+
+  return stateCache.get(normalizedCountryCode)!;
+}
+
+export async function getCities(countryCode: string, stateCode?: string) {
+  const normalizedCountryCode = countryCode.toUpperCase();
+  const normalizedStateCode = stateCode?.toUpperCase() || '__root';
+  const cacheKey = `${normalizedCountryCode}:${normalizedStateCode}`;
+
+  if (!cityCache.has(cacheKey)) {
+    const fileName = stateCode ? normalizedStateCode : '__root';
+    cityCache.set(
+      cacheKey,
+      fetchLocationJson<City[]>(
+        `${LOCATION_DATA_BASE_PATH}/cities/${normalizedCountryCode}/${fileName}.json`
+      )
+    );
+  }
+
+  return cityCache.get(cacheKey)!;
+}
+
+export async function hasStates(countryCode: string) {
+  const country = await findCountry(countryCode);
+  return Boolean(country?.hasStates);
+}
+
+export async function findCountry(value: string) {
+  const normalizedValue = normalizeLookupValue(value);
+  const countries = await getCountries();
+
+  return (
+    countries.find((country) => normalizeLookupValue(country.code) === normalizedValue) ||
+    countries.find((country) => normalizeLookupValue(country.name) === normalizedValue) ||
+    null
+  );
+}
+
+export async function findState(countryCode: string, value: string) {
+  const normalizedValue = normalizeLookupValue(value);
+  const states = await getStates(countryCode);
+
+  return (
+    states.find((state) => normalizeLookupValue(state.code) === normalizedValue) ||
+    states.find((state) => normalizeLookupValue(state.name) === normalizedValue) ||
+    null
+  );
+}
+
+export async function findCity(countryCode: string, value: string, stateCode?: string) {
+  const normalizedValue = normalizeLookupValue(value);
+  const cities = await getCities(countryCode, stateCode);
+
+  return (
+    cities.find((city) => normalizeLookupValue(city.name) === normalizedValue) || null
+  );
+}
+
+export async function getLocationManifest() {
+  if (!manifestPromise) {
+    manifestPromise = fetchLocationJson<LocationManifest>(
+      `${LOCATION_DATA_BASE_PATH}/manifest.json`
+    );
+  }
+
+  return manifestPromise;
+}
