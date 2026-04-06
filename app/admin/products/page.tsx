@@ -502,18 +502,30 @@ export default function AdminProductsPage() {
                           )}
                         </TableCell>
                         <TableCell>
-                          {product.is_available === 0 ? (
+                          {(product.available_quantity ?? product.stock_quantity) <= 0 ? (
+                            <div className="space-y-1">
+                              <Badge variant="error" className="text-xs">
+                                Out of Stock
+                              </Badge>
+                              {(product.reserved_quantity ?? 0) > 0 && (
+                                <div className="text-xs text-muted-foreground">
+                                  Reserved: {product.reserved_quantity}
+                                </div>
+                              )}
+                            </div>
+                          ) : product.is_available === 0 ? (
                             <Badge variant="error" className="text-xs">
                               Unavailable
                             </Badge>
-                          ) : product.stock_quantity <= 0 ? (
-                            <Badge variant="error" className="text-xs">
-                              Out of Stock
-                            </Badge>
                           ) : (
                             <div className="space-y-1">
-                              <div className="font-medium">{product.stock_quantity}</div>
-                              {product.stock_quantity <= 5 ? (
+                              <div className="font-medium">{product.available_quantity ?? product.stock_quantity}</div>
+                              {(product.reserved_quantity ?? 0) > 0 && (
+                                <div className="text-xs text-muted-foreground">
+                                  Reserved: {product.reserved_quantity}
+                                </div>
+                              )}
+                              {(product.available_quantity ?? product.stock_quantity) <= 5 ? (
                                 <Badge variant="warning" className="text-xs">
                                   Low Stock
                                 </Badge>

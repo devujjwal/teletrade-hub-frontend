@@ -64,6 +64,18 @@ export function mapProduct(backendProduct: any): Product {
   
   // Remove primary_image from images array if it exists there (to avoid duplicates)
   const uniqueImages = imageUrls.filter((url: string) => url !== primaryImage);
+  const stockQuantity = Number(backendProduct.stock_quantity) || 0;
+  const availableQuantity = backendProduct.available_quantity !== undefined && backendProduct.available_quantity !== null
+    ? Number(backendProduct.available_quantity)
+    : stockQuantity;
+  const reservedQuantity = backendProduct.reserved_quantity !== undefined && backendProduct.reserved_quantity !== null
+    ? Number(backendProduct.reserved_quantity)
+    : 0;
+  const isAvailable = availableQuantity > 0
+    ? 'in_stock'
+    : backendProduct.is_available === 2
+    ? 'pre_order'
+    : 'out_of_stock';
   
   return {
     id: backendProduct.id,
@@ -77,12 +89,10 @@ export function mapProduct(backendProduct: any): Product {
     price: Number(backendProduct.price) || 0,
     base_price: backendProduct.base_price ? Number(backendProduct.base_price) : undefined,
     original_price: backendProduct.original_price ? Number(backendProduct.original_price) : undefined,
-    stock_quantity: backendProduct.stock_quantity || 0,
-    availability: backendProduct.is_available === 1 || backendProduct.is_available === true
-      ? 'in_stock'
-      : backendProduct.is_available === 2
-      ? 'pre_order'
-      : 'out_of_stock',
+    stock_quantity: stockQuantity,
+    available_quantity: availableQuantity,
+    reserved_quantity: reservedQuantity,
+    availability: isAvailable,
     category_id: backendProduct.category_id || 0,
     category_name: backendProduct.category_name,
     category_slug: backendProduct.category_slug,
@@ -141,4 +151,3 @@ export function mapBrand(backendBrand: any): Brand {
     products_count: backendBrand.product_count || backendBrand.products_count || 0,
   };
 }
-

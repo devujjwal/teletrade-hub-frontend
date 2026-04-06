@@ -29,8 +29,9 @@ export default function ProductCard({ product, eagerLoadImage = false }: Product
 
   const price = Number(product.price) || 0;
   const originalPrice = Number(product.original_price) || 0;
+  const liveStock = product.available_quantity ?? product.stock_quantity;
   const isInStock = product.availability === 'in_stock' || product.availability === 'pre_order';
-  const isLowStock = product.stock_quantity > 0 && product.stock_quantity <= 5;
+  const isLowStock = liveStock > 0 && liveStock <= 5;
   const hasDiscount = originalPrice > 0 && originalPrice > price;
   const discountPercent = hasDiscount
     ? Math.round((1 - price / originalPrice) * 100)
@@ -69,7 +70,7 @@ export default function ProductCard({ product, eagerLoadImage = false }: Product
         quantity: 1,
         sku: product.sku,
         slug: product.slug,
-        stock_quantity: product.stock_quantity,
+        stock_quantity: liveStock,
       });
     }
   };
@@ -77,7 +78,7 @@ export default function ProductCard({ product, eagerLoadImage = false }: Product
   const handleIncreaseQuantity = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (cartItem && cartItem.quantity < product.stock_quantity) {
+    if (cartItem && cartItem.quantity < liveStock) {
       updateQuantity(product.id, cartItem.quantity + 1);
     }
   };
@@ -205,7 +206,7 @@ export default function ProductCard({ product, eagerLoadImage = false }: Product
               </span>
               <button
                 onClick={handleIncreaseQuantity}
-                disabled={cartItem && cartItem.quantity >= product.stock_quantity}
+                disabled={cartItem && cartItem.quantity >= liveStock}
                 className="w-10 h-10 flex items-center justify-center hover:bg-primary/10 transition-colors text-primary disabled:opacity-50 disabled:cursor-not-allowed"
                 type="button"
               >

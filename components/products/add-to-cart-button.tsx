@@ -27,13 +27,14 @@ export default function AddToCartButton({ product }: AddToCartButtonProps) {
   // Get current cart item - subscribe to items array for reactivity
   const cartItem = items.find((item) => item.product_id === product.id);
   const currentCartQuantity = cartItem?.quantity || 0;
+  const liveStock = product.available_quantity ?? product.stock_quantity;
   
   // Local quantity state for the selector
   const [quantity, setQuantity] = useState(cartItem?.quantity || 1);
   
   // Calculate available stock
-  const availableStock = product.stock_quantity - currentCartQuantity;
-  const maxQuantity = cartItem ? product.stock_quantity : availableStock;
+  const availableStock = Math.max(0, liveStock - currentCartQuantity);
+  const maxQuantity = cartItem ? liveStock : availableStock;
 
   const handleAddToCart = async () => {
     // Check if user is logged in
@@ -67,7 +68,7 @@ export default function AddToCartButton({ product }: AddToCartButtonProps) {
         quantity,
         sku: product.sku,
         slug: product.slug,
-        stock_quantity: product.stock_quantity,
+        stock_quantity: liveStock,
       });
     }
   };
@@ -116,9 +117,9 @@ export default function AddToCartButton({ product }: AddToCartButtonProps) {
               {availableStock} more available
             </span>
           ) : (
-            product.stock_quantity > 0 && (
+            liveStock > 0 && (
               <span className="text-xs text-muted-foreground">
-                {product.stock_quantity} available
+                {liveStock} available
               </span>
             )
           )}

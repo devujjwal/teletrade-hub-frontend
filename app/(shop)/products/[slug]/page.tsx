@@ -95,6 +95,7 @@ export default async function ProductPage({ params, searchParams }: ProductPageP
 
   const originalPrice = Number(product.original_price) || 0;
   const price = Number(product.price) || 0;
+  const liveStock = product.available_quantity ?? product.stock_quantity;
   const hasDiscount = originalPrice > 0 && originalPrice > price;
   const discountPercent = hasDiscount
     ? Math.round((1 - price / originalPrice) * 100)
@@ -167,11 +168,11 @@ export default async function ProductPage({ params, searchParams }: ProductPageP
           {/* Stock Status */}
           <div>
             {product.availability === 'in_stock' ? (
-              product.stock_quantity <= 5 && product.stock_quantity > 0 ? (
+              liveStock <= 5 && liveStock > 0 ? (
                 <span className="badge-warning">
-                  Only {product.stock_quantity} left in stock
+                  Only {liveStock} left in stock
                 </span>
-              ) : product.stock_quantity > 0 ? (
+              ) : liveStock > 0 ? (
                 <span className="badge-success">In Stock</span>
               ) : (
                 <span className="badge-destructive">Out of Stock</span>

@@ -13,6 +13,8 @@ export interface Product {
   base_price?: number; // Vendor price or cost price
   original_price?: number;
   stock_quantity: number;
+  available_quantity?: number;
+  reserved_quantity?: number;
   availability: 'in_stock' | 'out_of_stock' | 'pre_order';
   category_id: number;
   category_name?: string;
