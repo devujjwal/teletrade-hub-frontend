@@ -130,13 +130,31 @@ export default function AdminVendorReservationsPage() {
       return;
     }
 
+    const reservationId = pendingUnreserveId;
     setIsSubmitting(true);
     try {
-      await adminApi.unreserveVendorReservation(pendingUnreserveId);
-      toast.success(`Reservation ${pendingUnreserveId} removed successfully`);
+      await adminApi.unreserveVendorReservation(reservationId);
+      setReservations((current) =>
+        current.filter((reservation) => getReservationId(reservation) !== reservationId)
+      );
+      setRawResponse((current: any) => {
+        if (!Array.isArray(current?.reservations)) {
+          return current;
+        }
+
+        return {
+          ...current,
+          reservations: current.reservations.filter(
+            (reservation: VendorReservation) => getReservationId(reservation) !== reservationId
+          ),
+        };
+      });
+      toast.success(`Reservation ${reservationId} removed successfully`);
       setPendingUnreserveId(null);
       setSelectedReservation(null);
-      await loadReservations(true);
+      window.setTimeout(() => {
+        loadReservations(true);
+      }, 1500);
     } catch (error: any) {
       toast.error(error.message || 'Failed to remove reservation');
     } finally {
