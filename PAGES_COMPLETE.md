@@ -67,8 +67,18 @@
 2. **Admin Dashboard** (`/admin/dashboard`)
 3. **Admin Orders** (`/admin/orders`)
 4. **Admin Order Detail** (`/admin/orders/[id]`)
-5. **Admin Pricing** (`/admin/pricing`)
-6. **Admin Sync** (`/admin/sync`)
+5. **Admin Users** (`/admin/users`)
+   - Search and filter customer and merchant registrations
+   - Approval controls and password reset actions
+   - Dedicated loading state while the route and data are loading
+   - Distinct Customer and Merchant badges for faster scanning
+6. **Admin Pricing** (`/admin/pricing`)
+7. **Admin Reservations** (`/admin/vendor-reservations`)
+   - View active vendor reservations
+   - Search by reservation ID, SKU, product, or warehouse
+   - Inspect raw vendor payload
+   - Unreserve vendor stock manually from the admin sidebar
+8. **Admin Sync** (`/admin/sync`)
 
 ### Components Created/Updated
 1. **ProductCard** - Matches reference design exactly
@@ -80,6 +90,7 @@
 7. **CartSummary** - Order summary with calculations
 8. **CheckoutForm** - Multi-step form with validation
 9. **OrderSummary** - Checkout order summary
+10. **AdminPageLoader** - Reusable admin data-loading state for table-heavy pages
 
 ### Design System
 - ✅ Complete color palette (Navy Blue, Gold, Green, etc.)
@@ -113,5 +124,4 @@
 9. Add dark mode toggle
 10. Add mobile bottom navigation
 
-All core pages are now complete and match the reference design!
-
+All core customer pages are complete, and the admin panel now includes users, reservation management, and improved loading states for operational workflows.

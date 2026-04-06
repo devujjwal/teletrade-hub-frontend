@@ -17,6 +17,7 @@ import {
   Tags,
   Award,
   Users,
+  PackageCheck,
 } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import Button from '@/components/ui/button';
@@ -35,6 +36,7 @@ const navItems = [
   { label: 'Categories', icon: Tags, path: '/admin/categories' },
   { label: 'Brands', icon: Award, path: '/admin/brands' },
   { label: 'Pricing', icon: DollarSign, path: '/admin/pricing' },
+  { label: 'Reservations', icon: PackageCheck, path: '/admin/vendor-reservations' },
   { label: 'Sync', icon: RefreshCw, path: '/admin/sync' },
   { label: 'Settings', icon: Settings, path: '/admin/settings' },
 ];

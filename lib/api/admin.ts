@@ -212,6 +212,16 @@ export const adminApi = {
     return response.data;
   },
 
+  getVendorReservations: async () => {
+    const response = await apiClient.get<any>('/admin/vendor/reservations');
+    return response.data?.data || response.data;
+  },
+
+  unreserveVendorReservation: async (reservationId: string) => {
+    const response = await apiClient.delete<any>(`/admin/vendor/reservations/${encodeURIComponent(reservationId)}`);
+    return response.data?.data || response.data;
+  },
+
   // Settings
   getSettings: async () => {
     const response = await apiClient.get<any>('/admin/settings');

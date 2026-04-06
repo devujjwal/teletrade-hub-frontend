@@ -6,7 +6,7 @@ A modern, production-ready e-commerce frontend built with Next.js 14, TypeScript
 
 - 🛍️ **E-commerce Functionality**: Product browsing, cart, checkout, and order management
 - 🎨 **Modern UI**: Responsive design with Tailwind CSS
-- 🔐 **Admin Panel**: Complete admin interface for managing orders, products, and pricing
+- 🔐 **Admin Panel**: Manage orders, users, products, pricing, sync jobs, and vendor reservations
 - 🖼️ **Image Proxy**: Secure image proxying to hide vendor URLs
 - 🌍 **Multi-language Support**: Support for 10+ languages
 - ⚡ **Performance**: Optimized with Next.js App Router and ISR
@@ -94,6 +94,12 @@ All API calls go through the centralized API client with:
 - Language parameter handling
 - Error handling and retry logic
 
+### Admin Highlights
+
+- **Users screen** with searchable customer and merchant lists, approval actions, password reset actions, and clearer account-type badges
+- **Vendor reservations screen** for reviewing active TRIEL reservations and manually unreserving stock
+- **Order status management** that supports admin-driven operational flows from the dashboard
+
 ## Building for Production
 
 ```bash
@@ -108,4 +114,3 @@ See `.env.local.example` for all available environment variables.
 ## License
 
 Copyright © Telecommunication Trading e.K.
-

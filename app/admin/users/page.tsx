@@ -30,7 +30,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Copy, KeyRound, RefreshCw, Search } from 'lucide-react';
+import { Copy, KeyRound, Loader2, RefreshCw, Search } from 'lucide-react';
 import { format } from 'date-fns';
 import toast from 'react-hot-toast';
 
@@ -135,6 +135,12 @@ export default function AdminUsersPage() {
   };
 
   const getApprovalStatus = (user: ShopUser) => user.approval_status || (user.is_active ? 'approved' : 'pending');
+  const getAccountTypeLabel = (accountType: ShopUser['account_type']) =>
+    accountType === 'merchant' ? 'Merchant' : 'Customer';
+  const getAccountTypeBadgeClass = (accountType: ShopUser['account_type']) =>
+    accountType === 'merchant'
+      ? 'border border-amber-200 bg-amber-100 text-amber-900'
+      : 'border border-sky-200 bg-sky-100 text-sky-800';
 
   const fullName = (user: ShopUser) => `${user.first_name || ''} ${user.last_name || ''}`.trim() || 'N/A';
   const openPasswordDialog = (user: ShopUser) => {
@@ -294,10 +300,33 @@ export default function AdminUsersPage() {
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <div className="space-y-4">
-              {[...Array(6)].map((_, i) => (
-                <Skeleton key={i} className="h-16 w-full" />
-              ))}
+            <div className="space-y-5">
+              <div className="flex items-center gap-3 rounded-lg border border-border/80 bg-muted/40 px-4 py-3">
+                <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                <div>
+                  <p className="text-sm font-medium text-foreground">Loading users...</p>
+                  <p className="text-xs text-muted-foreground">Fetching customer and merchant registrations.</p>
+                </div>
+              </div>
+              <div className="overflow-hidden rounded-md border">
+                <div className="grid grid-cols-[2fr_1fr_1fr_1fr_1fr_1.6fr] gap-4 border-b bg-muted/30 px-5 py-3">
+                  {['User', 'Type', 'Phone', 'Status', 'Registered', 'Actions'].map((label) => (
+                    <Skeleton key={label} className="h-5 w-20" />
+                  ))}
+                </div>
+                <div className="space-y-0">
+                  {[...Array(5)].map((_, i) => (
+                    <div key={i} className="grid grid-cols-[2fr_1fr_1fr_1fr_1fr_1.6fr] gap-4 border-b px-5 py-4 last:border-b-0">
+                      <Skeleton className="h-10 w-full" />
+                      <Skeleton className="h-7 w-24 rounded-full" />
+                      <Skeleton className="h-7 w-28" />
+                      <Skeleton className="h-7 w-24 rounded-full" />
+                      <Skeleton className="h-7 w-24" />
+                      <Skeleton className="h-9 w-full" />
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           ) : users.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">No users found</div>
@@ -324,8 +353,8 @@ export default function AdminUsersPage() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Badge className={user.account_type === 'merchant' ? 'bg-info/20 text-info border-info/30' : ''}>
-                          {user.account_type}
+                        <Badge className={getAccountTypeBadgeClass(user.account_type)}>
+                          {getAccountTypeLabel(user.account_type)}
                         </Badge>
                       </TableCell>
                       <TableCell>{user.phone || user.mobile || 'N/A'}</TableCell>
@@ -384,7 +413,7 @@ export default function AdminUsersPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
               <div><span className="font-medium">Name:</span> {fullName(selectedUser)}</div>
               <div><span className="font-medium">Email:</span> {selectedUser.email}</div>
-              <div><span className="font-medium">Account type:</span> {selectedUser.account_type}</div>
+              <div><span className="font-medium">Account type:</span> {getAccountTypeLabel(selectedUser.account_type)}</div>
               <div><span className="font-medium">Status:</span> {getApprovalStatus(selectedUser)}</div>
               <div><span className="font-medium">Phone:</span> {selectedUser.phone || 'N/A'}</div>
               <div><span className="font-medium">Mobile:</span> {selectedUser.mobile || 'N/A'}</div>
