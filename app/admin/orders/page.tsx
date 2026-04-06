@@ -32,7 +32,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Search, Eye, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, Eye, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import { formatPrice } from '@/lib/utils/format';
 import { format } from 'date-fns';
 import toast from 'react-hot-toast';
@@ -74,11 +74,13 @@ export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [customerTypeFilter, setCustomerTypeFilter] = useState<string>('all');
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [pendingStatus, setPendingStatus] = useState<string>('');
   const [pagination, setPagination] = useState({
     current_page: 1,
     last_page: 1,
@@ -117,14 +119,34 @@ export default function AdminOrdersPage() {
     loadOrders();
   }, [loadOrders]);
 
-  const handleStatusUpdate = async (orderId: number, newStatus: string) => {
+  useEffect(() => {
+    setPendingStatus(selectedOrder?.status || '');
+  }, [selectedOrder]);
+
+  const closeOrderDialog = () => {
+    if (isUpdatingStatus) {
+      return;
+    }
+
+    setSelectedOrder(null);
+    setPendingStatus('');
+  };
+
+  const handleStatusUpdate = async () => {
+    if (!selectedOrder || !pendingStatus || pendingStatus === selectedOrder.status) {
+      return;
+    }
+
     try {
-      await adminApi.updateOrderStatus(orderId, newStatus);
+      setIsUpdatingStatus(true);
+      await adminApi.updateOrderStatus(selectedOrder.id, pendingStatus);
       toast.success('Order status updated');
-      loadOrders();
-      setSelectedOrder(null);
+      await loadOrders();
+      closeOrderDialog();
     } catch (error: any) {
       toast.error(error.message || 'Failed to update order status');
+    } finally {
+      setIsUpdatingStatus(false);
     }
   };
 
@@ -304,7 +326,7 @@ export default function AdminOrdersPage() {
 
       {/* Order Detail Dialog */}
       {selectedOrder && (
-        <Dialog open={!!selectedOrder} onOpenChange={() => setSelectedOrder(null)}>
+        <Dialog open={!!selectedOrder} onOpenChange={closeOrderDialog}>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
               <DialogTitle>Order #{selectedOrder.order_number}</DialogTitle>
@@ -338,8 +360,9 @@ export default function AdminOrdersPage() {
               <div>
                 <p className="text-sm font-medium mb-2">Change Status</p>
                 <Select
-                  value={selectedOrder.status}
-                  onValueChange={(value) => handleStatusUpdate(selectedOrder.id, value)}
+                  value={pendingStatus}
+                  onValueChange={setPendingStatus}
+                  disabled={isUpdatingStatus}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -352,6 +375,28 @@ export default function AdminOrdersPage() {
                     <SelectItem value="cancelled">Cancelled</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+              <div className="flex justify-end gap-2 pt-2">
+                <Button
+                  variant="outline"
+                  onClick={closeOrderDialog}
+                  disabled={isUpdatingStatus}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleStatusUpdate}
+                  disabled={!pendingStatus || pendingStatus === selectedOrder.status || isUpdatingStatus}
+                >
+                  {isUpdatingStatus ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Updating...
+                    </>
+                  ) : (
+                    'Update Status'
+                  )}
+                </Button>
               </div>
             </div>
           </DialogContent>
