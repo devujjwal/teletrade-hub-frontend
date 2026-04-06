@@ -40,18 +40,34 @@ import AdminLoadingOverlay from '@/components/admin/admin-loading-overlay';
 import AdminPageLoader from '@/components/admin/admin-page-loader';
 
 const statusColors: Record<string, string> = {
-  pending: 'bg-warning/20 text-warning border-warning/30',
-  processing: 'bg-info/20 text-info border-info/30',
-  shipped: 'bg-primary/20 text-primary border-primary/30',
-  delivered: 'bg-success/20 text-success border-success/30',
-  cancelled: 'bg-destructive/20 text-destructive border-destructive/30',
+  pending: 'border border-amber-200 bg-amber-100 text-amber-900',
+  processing: 'border border-sky-200 bg-sky-100 text-sky-800',
+  shipped: 'border border-indigo-200 bg-indigo-100 text-indigo-800',
+  delivered: 'border border-emerald-200 bg-emerald-100 text-emerald-800',
+  cancelled: 'border border-rose-200 bg-rose-100 text-rose-800',
 };
 
 const paymentStatusColors: Record<string, string> = {
-  pending: 'bg-warning/20 text-warning',
-  paid: 'bg-success/20 text-success',
-  failed: 'bg-destructive/20 text-destructive',
-  refunded: 'bg-muted text-muted-foreground',
+  unpaid: 'border border-slate-200 bg-slate-100 text-slate-700',
+  pending: 'border border-amber-200 bg-amber-100 text-amber-900',
+  paid: 'border border-emerald-200 bg-emerald-100 text-emerald-800',
+  failed: 'border border-rose-200 bg-rose-100 text-rose-800',
+  refunded: 'border border-violet-200 bg-violet-100 text-violet-800',
+};
+
+const customerTypeColors: Record<string, string> = {
+  merchant: 'border border-amber-200 bg-amber-100 text-amber-900',
+  customer: 'border border-sky-200 bg-sky-100 text-sky-800',
+};
+
+const toDisplayLabel = (value?: string) => {
+  if (!value) return 'Unknown';
+
+  return value
+    .split('_')
+    .filter(Boolean)
+    .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1))
+    .join(' ');
 };
 
 export default function AdminOrdersPage() {
@@ -215,16 +231,16 @@ export default function AdminOrdersPage() {
                         </TableCell>
                         <TableCell>{format(new Date(order.created_at), 'MMM dd, yyyy')}</TableCell>
                         <TableCell>
-                          <Badge className={order.customer_type === 'merchant' ? 'bg-info/20 text-info border-info/30' : ''}>
-                            {order.customer_type || 'customer'}
+                          <Badge className={customerTypeColors[order.customer_type || 'customer'] || customerTypeColors.customer}>
+                            {toDisplayLabel(order.customer_type || 'customer')}
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          <Badge className={statusColors[order.status] || ''}>{order.status}</Badge>
+                          <Badge className={statusColors[order.status] || ''}>{toDisplayLabel(order.status)}</Badge>
                         </TableCell>
                         <TableCell>
                           <Badge className={paymentStatusColors[order.payment_status] || ''}>
-                            {order.payment_status}
+                            {toDisplayLabel(order.payment_status)}
                           </Badge>
                         </TableCell>
                         <TableCell className="font-semibold">{formatPrice(order.total)}</TableCell>
@@ -309,13 +325,13 @@ export default function AdminOrdersPage() {
                 <div>
                   <p className="text-sm font-medium">Status</p>
                   <Badge className={statusColors[selectedOrder.status] || ''}>
-                    {selectedOrder.status}
+                    {toDisplayLabel(selectedOrder.status)}
                   </Badge>
                 </div>
                 <div>
                   <p className="text-sm font-medium">Payment Status</p>
                   <Badge className={paymentStatusColors[selectedOrder.payment_status] || ''}>
-                    {selectedOrder.payment_status}
+                    {toDisplayLabel(selectedOrder.payment_status)}
                   </Badge>
                 </div>
               </div>
