@@ -30,6 +30,32 @@ interface PublicSettings {
   bank_additional_info: string;
 }
 
+const statusBadgeClasses: Record<string, string> = {
+  pending: 'border border-amber-200 bg-amber-100 text-amber-900',
+  processing: 'border border-sky-200 bg-sky-100 text-sky-800',
+  shipped: 'border border-indigo-200 bg-indigo-100 text-indigo-800',
+  delivered: 'border border-emerald-200 bg-emerald-100 text-emerald-800',
+  cancelled: 'border border-rose-200 bg-rose-100 text-rose-800',
+};
+
+const paymentBadgeClasses: Record<string, string> = {
+  unpaid: 'border border-slate-200 bg-slate-100 text-slate-700',
+  pending: 'border border-amber-200 bg-amber-100 text-amber-900',
+  paid: 'border border-emerald-200 bg-emerald-100 text-emerald-800',
+  failed: 'border border-rose-200 bg-rose-100 text-rose-800',
+  refunded: 'border border-violet-200 bg-violet-100 text-violet-800',
+};
+
+const toDisplayLabel = (value?: string) => {
+  if (!value) return 'Unknown';
+
+  return value
+    .split('_')
+    .filter(Boolean)
+    .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1))
+    .join(' ');
+};
+
 export default function OrderPage() {
   const params = useParams();
   const router = useRouter();
@@ -185,28 +211,11 @@ export default function OrderPage() {
               </p>
             </div>
             <div className="text-right">
-              <Badge
-                variant={
-                  order.status === 'delivered'
-                    ? 'success'
-                    : order.status === 'cancelled'
-                    ? 'error'
-                    : 'info'
-                }
-                className="mb-2"
-              >
-                {order.status}
+              <Badge className={`mb-2 ${statusBadgeClasses[order.status] || statusBadgeClasses.pending}`}>
+                {toDisplayLabel(order.status)}
               </Badge>
-              <Badge
-                variant={
-                  order.payment_status === 'paid'
-                    ? 'success'
-                    : order.payment_status === 'failed'
-                    ? 'error'
-                    : 'warning'
-                }
-              >
-                {order.payment_status}
+              <Badge className={paymentBadgeClasses[order.payment_status] || paymentBadgeClasses.pending}>
+                {toDisplayLabel(order.payment_status)}
               </Badge>
             </div>
           </div>
